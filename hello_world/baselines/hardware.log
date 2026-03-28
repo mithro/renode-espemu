@@ -1,0 +1,70 @@
+Restarting in 6 seconds...
+Restarting in 5 seconds...
+Restarting in 4 seconds...
+Restarting in 3 seconds...
+Restarting in 2 seconds...
+Restarting in 1 seconds...
+Restarting in 0 seconds...
+Restarting now.
+ESP-ROM:esp32c3-api1-20210207
+Build:Feb  7 2021
+rst:0xc (RTC_SW_CPU_RST),boot:0xd (SPI_FAST_FLASH_BOOT)
+Saved PC:0x40380834
+SPIWP:0xee
+mode:DIO, clock div:1
+load:0x3fcd5820,len:0x1574
+load:0x403cc710,len:0xc30
+load:0x403ce710,len:0x2f64
+entry 0x403cc71a
+I (24) boot: ESP-IDF v5.4.1 2nd stage bootloader
+I (24) boot: compile time Mar 28 2026 21:10:21
+I (24) boot: chip revision: v0.4
+I (24) boot: efuse block revision: v1.3
+I (27) boot.esp32c3: SPI Speed      : 80MHz
+I (31) boot.esp32c3: SPI Mode       : DIO
+I (35) boot.esp32c3: SPI Flash Size : 2MB
+I (39) boot: Enabling RNG early entropy source...
+I (43) boot: Partition Table:
+I (46) boot: ## Label            Usage          Type ST Offset   Length
+I (52) boot:  0 nvs              WiFi data        01 02 00009000 00006000
+I (59) boot:  1 phy_init         RF data          01 01 0000f000 00001000
+I (65) boot:  2 factory          factory app      00 00 00010000 00100000
+I (72) boot: End of partition table
+I (75) esp_image: segment 0: paddr=00010020 vaddr=3c020020 size=08c0ch ( 35852) map
+I (88) esp_image: segment 1: paddr=00018c34 vaddr=3fc8ba00 size=0128ch (  4748) load
+I (91) esp_image: segment 2: paddr=00019ec8 vaddr=40380000 size=06150h ( 24912) load
+I (102) esp_image: segment 3: paddr=00020020 vaddr=42000020 size=16770h ( 92016) map
+I (119) esp_image: segment 4: paddr=00036798 vaddr=40386150 size=056ech ( 22252) load
+I (124) esp_image: segment 5: paddr=0003be8c vaddr=50000200 size=0001ch (    28) load
+I (128) boot: Loaded app from partition at offset 0x10000
+I (128) boot: Disabling RNG early entropy source...
+I (144) cpu_start: Unicore app
+I (153) cpu_start: Pro cpu start user code
+I (153) cpu_start: cpu freq: 160000000 Hz
+I (153) app_init: Application information:
+I (153) app_init: Project name:     hello_world
+I (157) app_init: App version:      96d7732
+I (161) app_init: Compile time:     Mar 28 2026 21:10:14
+I (166) app_init: ELF file SHA256:  9c4cadda8...
+I (171) app_init: ESP-IDF:          v5.4.1
+I (174) efuse_init: Min chip rev:     v0.3
+I (178) efuse_init: Max chip rev:     v1.99 
+I (182) efuse_init: Chip rev:         v0.4
+I (186) heap_init: Initializing. RAM available for dynamic allocation:
+I (192) heap_init: At 3FC8DB40 len 000324C0 (201 KiB): RAM
+I (197) heap_init: At 3FCC0000 len 0001C710 (113 KiB): Retention RAM
+I (204) heap_init: At 3FCDC710 len 00002950 (10 KiB): Retention RAM
+I (210) heap_init: At 5000021C len 00001DCC (7 KiB): RTCRAM
+I (216) spi_flash: detected chip: generic
+I (219) spi_flash: flash io: dio
+W (222) spi_flash: Detected size(4096k) larger than the size in the binary image header(2048k). Using the size in the binary image header.
+I (234) sleep_gpio: Configure to isolate all GPIO pins in sleep state
+I (240) sleep_gpio: Enable automatic switching of GPIO sleep configuration
+I (247) main_task: Started on CPU0
+I (247) main_task: Calling app_main()
+Hello world!
+This is esp32c3 chip with 1 CPU core(s), WiFi/BLE, silicon revision v0.4, 2MB external flash
+Minimum free heap size: 329588 bytes
+Restarting in 10 seconds...
+Restarting in 9 seconds...
+Restarting in 8 seconds...
