@@ -4,8 +4,8 @@
 
 | Metric                        | Value     |
 |-------------------------------|-----------|
-| Boot progress score           | 1/5       |
-| Peripherals implemented       | 0/11      |
+| Boot progress score           | 4/5       |
+| Peripherals implemented       | 0/11 (stubs with Python scripts for RTC, TIMG0, SYSTIMER, EXTMEM) |
 | Peripherals passing all tests | 0/0       |
 | Total Robot tests             | 0         |
 | Last update                   | 2026-03-28 |
@@ -71,3 +71,34 @@ Remaining issues (next session):
 
 Boot progress: **1/5** → investigating (CPU runs ~200K instructions before crash)
 Commits: 96d7732, 83ab511, c6f1daf, 0f522f7, f02c1fc, 740f432
+
+### 2026-03-29 00:10 - [Phase 0.5 continued] Boot reaches 4/5
+
+Massive debugging session. Fixes applied iteratively:
+
+1. **Custom CSRs**: Registered ESP32-C3 vendor CSRs (MPCER 0x7E2, PMAADDR 0x800/801, PMACFG0 0x802) via `init:` block
+2. **Timer Group 0**: Python stub returns RTC_CALI_RDY (bit 15) at offset 0x68
+3. **RTC time**: Incrementing counter at offsets 0x10/0x14
+4. **ROM function tables**: 544-byte stub binary with 128 ret-pointers, patched via CPU hook after BSS clear for rom_phyFuns (0x3FCDF5B8) and rom_cache_internal_table_ptr (0x3FCDFFD4)
+5. **Delay skip**: ets_delay_us and esp_rom_delay_us hooked to return immediately (CSR 0x802 cycle counter doesn't increment)
+6. **Memprot skip**: Entire memprot section in call_start_cpu0 skipped via PC redirect (PMS peripheral not implemented)
+7. **App image header**: Raw hello_world.bin loaded at DROM 0x3C020000 so magic byte 0xE9 is valid
+8. **ROM data segment**: Extracted and loaded at 0x3FF00000 (data bus view of ROM), fixing ets_rom_layout struct and pointer
+9. **EXTMEM cache**: Returns ICACHE_ENABLE (bit 0) and sync/preload done bits
+10. **SYSTIMER**: Latch-based counter with stable reads for consistency check
+11. **Assert skip**: __assert_func hooked to log and return
+12. **IROM hook discovery**: CPU hooks on flash addresses (0x42xxxxxx) DO NOT WORK in Renode -- must hook IRAM call sites instead
+
+Boot messages captured via esp_rom_printf hook:
+- "Unicore app", "Pro cpu start user code", "Application information:"
+- "Project name: %s", "App version: %s", "ESP-IDF: %s"
+- "Chip rev: v%d.%d", "Initializing. RAM available for dynamic allocation:"
+- Memory region listings
+
+Current blocker: **Interrupt Matrix** (0x600C2000)
+- MIE=0, MIP=0, MSTATUS.MIE=0: firmware uses ESP32-C3 CLIC interrupt controller
+- Standard RISC-V mie/mip not used by ESP-IDF on ESP32-C3
+- Without interrupt matrix, FreeRTOS tick never fires
+- main_task (→ app_main → "Hello world!") never scheduled
+
+Boot progress: **4/5** (all init done, FreeRTOS scheduler running, main_task waiting for tick)
