@@ -143,11 +143,9 @@ stub_gpio: Python.PythonPeripheral @ sysbus 0x60004000
     script: "request.Value = 0x0"
 
 // RTC Controller at 0x60008000
-// Offset 0x38 = RTC_CNTL_RESET_STATE_REG: return POWERON_RESET (1) for CPU0
-stub_rtc: Python.PythonPeripheral @ sysbus 0x60008000
-    size: 0x800
-    initable: true
-    filename: "/home/tim/github/mithro/renode-espemu/platforms/scripts/stub_rtc.py"
+// RTC Controller at 0x60008000
+// C# peripheral: reset state, RTC time, clock config, STORE registers, brownout
+rtc: Miscellaneous.ESP32C3_RTC @ sysbus 0x60008000
 
 // eFuse at 0x60008800
 // C# peripheral: read-only OTP storage with MAC, chip revision, etc.
