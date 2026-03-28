@@ -12,5 +12,16 @@ if request.IsRead:
     elif request.Offset == 0x14:
         # RTC_CNTL_TIME_HIGH0_REG: high 32 bits of RTC time
         request.Value = (rtc_time_counter >> 32) & 0xFFFF
+    elif request.Offset == 0x4C:
+        # RTC_CNTL_BROWN_OUT_REG: bit 31=brownout_det, bit 30=brownout_ena
+        # Set bit 30 (enable) but NOT bit 31 (no brownout detected)
+        # Also set bits for threshold etc to reasonable defaults
+        request.Value = 0x40000000
+    elif request.Offset == 0x7C:
+        # RTC_CNTL_INT_ST_REG: no interrupts pending
+        request.Value = 0x0
+    elif request.Offset == 0x74:
+        # RTC_CNTL_INT_RAW_REG: no raw interrupts
+        request.Value = 0x0
     else:
         request.Value = 0x0
