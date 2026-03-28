@@ -102,3 +102,27 @@ Current blocker: **Interrupt Matrix** (0x600C2000)
 - main_task (→ app_main → "Hello world!") never scheduled
 
 Boot progress: **4/5** (all init done, FreeRTOS scheduler running, main_task waiting for tick)
+
+### 2026-03-29 00:45 - QEMU Interrupt Matrix Architecture Analysis
+
+Analysed QEMU's `esp32c3_intmatrix.c` to understand interrupt delivery:
+
+**Architecture:**
+1. Peripheral fires IRQ → GPIO input to interrupt matrix
+2. Matrix looks up `irq_map[source]` → CPU interrupt line
+3. Checks `irq_prio[line] >= irq_thres` AND CPU can accept
+4. If yes: `qemu_irq_pulse(out_irqs[line])` → CPU takes interrupt
+5. If no: sets `irq_pending` bit, fires later when threshold changes or MIE re-enabled
+
+**Key QEMU connections:**
+- `systimer.alarm[i]` → `intmatrix.gpio_in[ETS_SYSTIMER_TARGET0 + i]`
+- `system.from_cpu_int[i]` → `intmatrix.gpio_in[ETS_FROM_CPU_INTR0 + i]`
+- `intmatrix.gpio_out[line]` → `cpu.irq[line]`
+
+**Conclusion:** Python stubs CANNOT implement this. Need a C# peripheral with:
+- GPIO inputs (from systimer, SYSTEM crosscore)
+- GPIO outputs (to CPU interrupt lines)
+- Mapping, priority, threshold, pending state management
+- MIE-enabled callback to fire pending interrupts
+
+Next step: Write `ESP32C3_InterruptMatrix.cs` C# peripheral for Renode.
