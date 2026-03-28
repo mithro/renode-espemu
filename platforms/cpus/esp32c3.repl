@@ -297,10 +297,11 @@ stub_sensitive: Python.PythonPeripheral @ sysbus 0x600C1000
     script: "request.Value = 0x0"
 
 // Interrupt Matrix at 0x600C2000
+// Tracks peripheral-to-CPU interrupt mappings and enable state
 stub_intmatrix: Python.PythonPeripheral @ sysbus 0x600C2000
     size: 0x1000
     initable: true
-    script: "request.Value = 0x0"
+    filename: "/home/tim/github/mithro/renode-espemu/platforms/scripts/stub_intmatrix.py"
 
 // External Memory (cache control) at 0x600C4000
 // Returns cache done/ready status bits for suspend/sync operations
