@@ -65,202 +65,202 @@ uart0: UART.LiteX_UART @ sysbus 0x60000000
 stub_spi1: Python.PythonPeripheral @ sysbus 0x60002000
     size: 0x1000
     initable: true
-    script: "request.value = 0x0"
+    script: "request.Value = 0x0"
 
 // SPI0 at 0x60003000
 stub_spi0: Python.PythonPeripheral @ sysbus 0x60003000
     size: 0x1000
     initable: true
-    script: "request.value = 0x0"
+    script: "request.Value = 0x0"
 
 // GPIO at 0x60004000
 stub_gpio: Python.PythonPeripheral @ sysbus 0x60004000
     size: 0x1000
     initable: true
-    script: "request.value = 0x0"
+    script: "request.Value = 0x0"
 
 // RTC Controller at 0x60008000
 stub_rtc: Python.PythonPeripheral @ sysbus 0x60008000
     size: 0x800
     initable: true
-    script: "request.value = 0x0"
+    script: "request.Value = 0x0"
 
 // eFuse at 0x60008800
 stub_efuse: Python.PythonPeripheral @ sysbus 0x60008800
     size: 0x800
     initable: true
-    script: "request.value = 0x0"
+    script: "request.Value = 0x0"
 
 // IO MUX at 0x60009000
 stub_io_mux: Python.PythonPeripheral @ sysbus 0x60009000
     size: 0x1000
     initable: true
-    script: "request.value = 0x0"
+    script: "request.Value = 0x0"
 
 // UART1 at 0x60010000
 stub_uart1: Python.PythonPeripheral @ sysbus 0x60010000
     size: 0x1000
     initable: true
-    script: "request.value = 0x0"
+    script: "request.Value = 0x0"
 
 // I2C at 0x60013000
 stub_i2c: Python.PythonPeripheral @ sysbus 0x60013000
     size: 0x1000
     initable: true
-    script: "request.value = 0x0"
+    script: "request.Value = 0x0"
 
 // UHCI0 at 0x60014000
 stub_uhci0: Python.PythonPeripheral @ sysbus 0x60014000
     size: 0x1000
     initable: true
-    script: "request.value = 0x0"
+    script: "request.Value = 0x0"
 
 // RMT at 0x60016000
 stub_rmt: Python.PythonPeripheral @ sysbus 0x60016000
     size: 0x1000
     initable: true
-    script: "request.value = 0x0"
+    script: "request.Value = 0x0"
 
 // LEDC at 0x60019000
 stub_ledc: Python.PythonPeripheral @ sysbus 0x60019000
     size: 0x1000
     initable: true
-    script: "request.value = 0x0"
+    script: "request.Value = 0x0"
 
 // Timer Group 0 at 0x6001F000
 stub_timg0: Python.PythonPeripheral @ sysbus 0x6001F000
     size: 0x1000
     initable: true
-    script: "request.value = 0x0"
+    script: "request.Value = 0x0"
 
 // Timer Group 1 at 0x60020000
 stub_timg1: Python.PythonPeripheral @ sysbus 0x60020000
     size: 0x1000
     initable: true
-    script: "request.value = 0x0"
+    script: "request.Value = 0x0"
 
 // System Timer at 0x60023000
 stub_systimer: Python.PythonPeripheral @ sysbus 0x60023000
     size: 0x1000
     initable: true
-    script: "request.value = 0x0"
+    script: "request.Value = 0x0"
 
 // SPI2 (GP-SPI) at 0x60024000
 stub_spi2: Python.PythonPeripheral @ sysbus 0x60024000
     size: 0x1000
     initable: true
-    script: "request.value = 0x0"
+    script: "request.Value = 0x0"
 
 // SYSCON at 0x60026000
 stub_syscon: Python.PythonPeripheral @ sysbus 0x60026000
     size: 0x1000
     initable: true
-    script: "request.value = 0x0"
+    script: "request.Value = 0x0"
 
 // TWAI at 0x6002B000
 stub_twai: Python.PythonPeripheral @ sysbus 0x6002B000
     size: 0x1000
     initable: true
-    script: "request.value = 0x0"
+    script: "request.Value = 0x0"
 
 // I2S at 0x6002D000
 stub_i2s: Python.PythonPeripheral @ sysbus 0x6002D000
     size: 0x1000
     initable: true
-    script: "request.value = 0x0"
+    script: "request.Value = 0x0"
 
 // AES at 0x6003A000
 stub_aes: Python.PythonPeripheral @ sysbus 0x6003A000
     size: 0x1000
     initable: true
-    script: "request.value = 0x0"
+    script: "request.Value = 0x0"
 
 // SHA at 0x6003B000
 stub_sha: Python.PythonPeripheral @ sysbus 0x6003B000
     size: 0x1000
     initable: true
-    script: "request.value = 0x0"
+    script: "request.Value = 0x0"
 
 // RSA at 0x6003C000
 stub_rsa: Python.PythonPeripheral @ sysbus 0x6003C000
     size: 0x1000
     initable: true
-    script: "request.value = 0x0"
+    script: "request.Value = 0x0"
 
 // Digital Signature at 0x6003D000
 stub_ds: Python.PythonPeripheral @ sysbus 0x6003D000
     size: 0x1000
     initable: true
-    script: "request.value = 0x0"
+    script: "request.Value = 0x0"
 
 // HMAC at 0x6003E000
 stub_hmac: Python.PythonPeripheral @ sysbus 0x6003E000
     size: 0x1000
     initable: true
-    script: "request.value = 0x0"
+    script: "request.Value = 0x0"
 
 // GDMA at 0x6003F000
 stub_gdma: Python.PythonPeripheral @ sysbus 0x6003F000
     size: 0x1000
     initable: true
-    script: "request.value = 0x0"
+    script: "request.Value = 0x0"
 
 // APB SAR ADC at 0x60040000
 stub_adc: Python.PythonPeripheral @ sysbus 0x60040000
     size: 0x1000
     initable: true
-    script: "request.value = 0x0"
+    script: "request.Value = 0x0"
 
 // USB Serial/JTAG at 0x60043000
 stub_usb: Python.PythonPeripheral @ sysbus 0x60043000
     size: 0x1000
     initable: true
-    script: "request.value = 0x0"
+    script: "request.Value = 0x0"
 
 // System registers (SYSTEM) at 0x600C0000
 stub_system: Python.PythonPeripheral @ sysbus 0x600C0000
     size: 0x1000
     initable: true
-    script: "request.value = 0x0"
+    script: "request.Value = 0x0"
 
 // Sensitive registers at 0x600C1000
 stub_sensitive: Python.PythonPeripheral @ sysbus 0x600C1000
     size: 0x1000
     initable: true
-    script: "request.value = 0x0"
+    script: "request.Value = 0x0"
 
 // Interrupt Matrix at 0x600C2000
 stub_intmatrix: Python.PythonPeripheral @ sysbus 0x600C2000
     size: 0x1000
     initable: true
-    script: "request.value = 0x0"
+    script: "request.Value = 0x0"
 
 // External Memory (cache control) at 0x600C4000
 stub_extmem: Python.PythonPeripheral @ sysbus 0x600C4000
     size: 0x1000
     initable: true
-    script: "request.value = 0x0"
+    script: "request.Value = 0x0"
 
 // MMU Table at 0x600C5000
 stub_mmu: Python.PythonPeripheral @ sysbus 0x600C5000
     size: 0x1000
     initable: true
-    script: "request.value = 0x0"
+    script: "request.Value = 0x0"
 
 // XTS-AES at 0x600CC000
 stub_xts_aes: Python.PythonPeripheral @ sysbus 0x600CC000
     size: 0x1000
     initable: true
-    script: "request.value = 0x0"
+    script: "request.Value = 0x0"
 
 // Assist Debug at 0x600CE000
 stub_assist_debug: Python.PythonPeripheral @ sysbus 0x600CE000
     size: 0x1000
     initable: true
-    script: "request.value = 0x0"
+    script: "request.Value = 0x0"
 
 // World Controller at 0x600D0000
 stub_wcl: Python.PythonPeripheral @ sysbus 0x600D0000
     size: 0x1000
     initable: true
-    script: "request.value = 0x0"
+    script: "request.Value = 0x0"

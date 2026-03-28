@@ -33,7 +33,7 @@ mach create "esp32c3"
 machine LoadPlatformDescription @{repl_path}
 logFile @{log_path}
 logLevel -1
-sysbus LoadBinary @{firmware_path} 0x0
+sysbus LoadELF @{firmware_path}
 showAnalyzer uart0
 start
 sleep {timeout_secs}
@@ -119,8 +119,8 @@ def main():
     parser.add_argument("--timeout", type=int, default=10, help="Emulation time in seconds")
     parser.add_argument(
         "--firmware",
-        default="hello_world/firmware/merged_flash.bin",
-        help="Path to firmware binary",
+        default="hello_world/firmware/hello_world.elf",
+        help="Path to firmware ELF or binary",
     )
     parser.add_argument(
         "--platform",
