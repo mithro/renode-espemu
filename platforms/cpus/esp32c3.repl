@@ -11,6 +11,12 @@ cpu: CPU.RiscV32 @ sysbus
     cpuType: "rv32imc_zicsr_zifencei"
     privilegedArchitecture: PrivilegedArchitecture.Priv1_10
     timeProvider: clint
+    init:
+        RegisterCustomCSR "MPCER" 0x7E2 Machine
+        RegisterCustomCSR "MPCMR" 0x7E3 Machine
+        RegisterCustomCSR "PMAADDR0" 0x800 Machine
+        RegisterCustomCSR "PMAADDR1" 0x801 Machine
+        RegisterCustomCSR "PMACFG0" 0x802 Machine
 
 // CLINT (Core Local Interruptor) for timer interrupts
 clint: IRQControllers.CoreLevelInterruptor @ sysbus 0x60801000
@@ -87,6 +93,37 @@ stub_spi0: Python.PythonPeripheral @ sysbus 0x60003000
     initable: true
     script: "request.Value = 0x0"
 
+// FE2 (RF Frontend 2) at 0x60005000
+stub_fe2: Python.PythonPeripheral @ sysbus 0x60005000
+    size: 0x1000
+    initable: true
+    script: "request.Value = 0x0"
+
+// FE (RF Frontend) at 0x60006000
+stub_fe: Python.PythonPeripheral @ sysbus 0x60006000
+    size: 0x1000
+    initable: true
+    script: "request.Value = 0x0"
+
+// RTC I2C at 0x6000E000
+stub_rtc_i2c: Python.PythonPeripheral @ sysbus 0x6000E000
+    size: 0x1000
+    initable: true
+    script: "request.Value = 0x0"
+
+// NRX at 0x6001C000
+stub_nrx: Python.PythonPeripheral @ sysbus 0x6001C000
+    size: 0x2000
+    initable: true
+    script: "request.Value = 0x0"
+
+// BB (Baseband) at 0x6001D000 - already covered by NRX range above if overlapping
+// Adding explicit stub for safety
+stub_bb: Python.PythonPeripheral @ sysbus 0x6001E000
+    size: 0x1000
+    initable: true
+    script: "request.Value = 0x0"
+
 // GPIO at 0x60004000
 stub_gpio: Python.PythonPeripheral @ sysbus 0x60004000
     size: 0x1000
@@ -143,10 +180,12 @@ stub_ledc: Python.PythonPeripheral @ sysbus 0x60019000
     script: "request.Value = 0x0"
 
 // Timer Group 0 at 0x6001F000
+// Offset 0x68 = TIMG_RTCCALICFG_REG: bit 15 = RTC_CALI_RDY (calibration done)
+// Offset 0x6C = TIMG_RTCCALICFG1_REG: calibration result value
 stub_timg0: Python.PythonPeripheral @ sysbus 0x6001F000
     size: 0x1000
     initable: true
-    script: "request.Value = 0x0"
+    filename: "/home/tim/github/mithro/renode-espemu/platforms/scripts/stub_timg0.py"
 
 // Timer Group 1 at 0x60020000
 stub_timg1: Python.PythonPeripheral @ sysbus 0x60020000
