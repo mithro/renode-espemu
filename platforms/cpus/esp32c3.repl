@@ -18,10 +18,11 @@ cpu: CPU.RiscV32 @ sysbus
         RegisterCustomCSR "PMAADDR1" 0x801 Machine
         RegisterCustomCSR "PMACFG0" 0x802 Machine
 
-// CLINT (Core Local Interruptor) for timer interrupts
+// CLINT (Core Local Interruptor) for time provider only.
+// Interrupt connections removed to prevent spurious interrupts during early boot.
+// TODO: Re-enable interrupts when the interrupt matrix is properly implemented.
 clint: IRQControllers.CoreLevelInterruptor @ sysbus 0x60801000
     frequency: 16000000
-    [0, 1] -> cpu@[3, 7]
 
 // === WORKAROUND MEMORY ===
 
