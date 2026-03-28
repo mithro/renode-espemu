@@ -1,5 +1,6 @@
 using sysbus
 include @peripherals/interrupt-matrix/ESP32C3_InterruptMatrix.cs
+include @peripherals/efuse/ESP32C3_eFuse.cs
 mach create "esp32c3"
 machine LoadPlatformDescription @platforms/cpus/esp32c3.repl
 

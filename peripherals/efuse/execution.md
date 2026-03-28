@@ -3,11 +3,11 @@
 ## Status
 | Phase              | Status      | Date       |
 |--------------------|-------------|------------|
-| Planning           | in progress | 2026-03-29 |
-| Test firmware      | not started |            |
-| Hardware baseline  | not started |            |
+| Planning           | complete    | 2026-03-29 |
+| Test firmware      | complete    | 2026-03-29 |
+| Hardware baseline  | blocked     | rpi4-esp unreachable |
 | QEMU baseline      | not started |            |
-| Renode impl        | not started |            |
+| Renode impl        | complete    | 2026-03-29 |
 | Robot test         | not started |            |
 | Code review        | not started |            |
 | Merged             | not started |            |
@@ -15,9 +15,9 @@
 ## Verification Levels
 | Level | Check                        | Status | Evidence |
 |-------|------------------------------|--------|----------|
-| L1    | C# compiles                  |        |          |
-| L2    | Renode loads without crash    |        |          |
-| L3    | Boot progress >= previous     |        |          |
+| L1    | C# compiles                  | PASS   | Renode loads ESP32C3_eFuse.cs without error |
+| L2    | Renode loads without crash    | PASS   | hello_world boots with eFuse peripheral |
+| L3    | Boot progress >= previous     | PASS   | 5/5 maintained, chip rev now v0.3 (was v0.0) |
 | L4    | UART matches hardware baseline|        |          |
 | L5    | Register trace matches QEMU   |        |          |
 
