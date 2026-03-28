@@ -1,0 +1,142 @@
+using sysbus
+include @peripherals/interrupt-matrix/ESP32C3_InterruptMatrix.cs
+mach create "esp32c3"
+machine LoadPlatformDescription @platforms/cpus/esp32c3.repl
+
+sysbus LoadELF @/home/tim/esp/esp-rom-elfs/esp32c3_rev3_rom.elf
+sysbus LoadELF @hello_world/firmware/hello_world.elf
+sysbus LoadBinary @hello_world/firmware/flash_header_128k.bin 0x3C000000
+sysbus LoadBinary @hello_world/firmware/hello_world.bin 0x3C020000
+sysbus LoadBinary @platforms/rom_data_segment.bin 0x3FF00000
+cpu SP 0x3FCE0000
+sysbus LoadBinary @platforms/rom_func_stubs.bin 0x50001D00
+
+# Patch rom function tables after BSS clear
+cpu AddHook 0x40380338 "machine.SystemBus.WriteDoubleWord(0x3FCDF5B8, 0x50001D00); machine.SystemBus.WriteDoubleWord(0x3FCDFFD4, 0x50001D00)"
+
+# Patch init_flash to return ESP_OK immediately (li a0,0; ret)
+sysbus WriteWord 0x42000526 0x4501
+sysbus WriteWord 0x42000528 0x8082
+
+# Skip delay functions (cycle counter doesn't increment)
+set skip_func
+"""
+cpu.PC = cpu.GetRegister(1).RawValue
+"""
+cpu AddHook 0x400462CC $skip_func
+cpu AddHook 0x40000050 $skip_func
+
+# Skip brownout ISR
+cpu AddHook 0x403805EE $skip_func
+
+# Skip memprot section
+set skip_memprot
+"""
+from Antmicro.Renode.Peripherals.CPU import RegisterValue
+cpu.PC = RegisterValue.Create(0x403804E4, 32)
+"""
+cpu AddHook 0x403804B2 $skip_memprot
+
+# Fix mcause at _interrupt_handler entry (0x403801DC).
+# Standard RISC-V sets mcause=0x8000000B for MEIP, but ESP32-C3 firmware
+# expects mcause to contain the CPU interrupt line number (e.g., 3 or 4).
+# Read CPU_INT_EIP_STATUS to find the actual pending line and override mcause.
+# Fix mcause at _interrupt_handler entry. Read PendingMcause from the
+# C# interrupt matrix and write it to the csrr mcause instruction at 0x4038022A.
+# The firmware reads mcause at 0x4038022A: csrr s1, mcause
+# We hook 0x4038022E (instruction AFTER csrr) and override s1 (register 9).
+set fix_mcause
+"""
+intmatrix = machine['sysbus.intmatrix']
+pending = intmatrix.PendingMcause
+if pending != 0:
+    from Antmicro.Renode.Peripherals.CPU import RegisterValue
+    cpu.SetRegister(9, RegisterValue.Create(pending, 32))
+"""
+cpu AddHook 0x4038022E $fix_mcause
+
+# Capture esp_rom_printf output
+set printf_hook
+"""
+fmt_ptr = cpu.GetRegister(10).RawValue & 0xFFFFFFFF
+msg = ""
+if fmt_ptr > 0x3C000000 and fmt_ptr < 0x42800000:
+    for i in range(120):
+        b = machine.SystemBus.ReadByte(fmt_ptr + i)
+        if b == 0: break
+        if b >= 32 and b < 127: msg += chr(b)
+        elif b == 10: msg += "\\n"
+    if msg:
+        self.Log(LogLevel.Warning, "PRINT: " + msg)
+"""
+cpu AddHook 0x40000040 $printf_hook
+
+# Boot through all init (1 second should be enough)
+start
+sleep 1
+pause
+
+# Firmware has completed init. Fire interrupts to wake scheduler.
+# Source 37 = SYSTIMER_TARGET0 → CPU int line (configured by firmware)
+# Source 50 = FROM_CPU_INTR0 → CPU int line (configured by firmware)
+# Enable MEIE (bit 11) in MIE and MIE (bit 3) in MSTATUS
+# Set SYSTIMER INT_RAW bit 0 (TARGET0 alarm) before firing source 37,
+# so the ISR sees alarm status in SYSTIMER_INT_ST_REG.
+
+# Tick 1: systimer alarm + cross-core interrupt
+cpu MIE 0x800
+cpu MSTATUS 0x1808
+sysbus WriteDoubleWord 0x60023068 0x1
+sysbus.intmatrix OnGPIO 37 true
+sysbus.intmatrix OnGPIO 50 true
+start
+sleep 0.1
+pause
+sysbus.intmatrix OnGPIO 37 false
+sysbus.intmatrix OnGPIO 50 false
+
+# Tick 2: systimer alarm
+cpu MIE 0x800
+sysbus WriteDoubleWord 0x60023068 0x1
+sysbus.intmatrix OnGPIO 37 true
+start
+sleep 0.1
+pause
+sysbus.intmatrix OnGPIO 37 false
+
+# Tick 3: cross-core interrupt
+cpu MIE 0x800
+sysbus.intmatrix OnGPIO 50 true
+start
+sleep 0.1
+pause
+sysbus.intmatrix OnGPIO 50 false
+
+# Tick 4: systimer alarm
+cpu MIE 0x800
+sysbus WriteDoubleWord 0x60023068 0x1
+sysbus.intmatrix OnGPIO 37 true
+start
+sleep 0.1
+pause
+sysbus.intmatrix OnGPIO 37 false
+
+# Tick 5: cross-core interrupt
+cpu MIE 0x800
+sysbus.intmatrix OnGPIO 50 true
+start
+sleep 0.5
+pause
+sysbus.intmatrix OnGPIO 50 false
+
+# Tick 6+: both, longer run
+cpu MIE 0x800
+sysbus WriteDoubleWord 0x60023068 0x1
+sysbus.intmatrix OnGPIO 37 true
+sysbus.intmatrix OnGPIO 50 true
+start
+sleep 2
+pause
+
+cpu PC
+quit

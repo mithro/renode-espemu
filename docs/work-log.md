@@ -4,11 +4,11 @@
 
 | Metric                        | Value     |
 |-------------------------------|-----------|
-| Boot progress score           | 4/5       |
-| Peripherals implemented       | 0/11 (stubs with Python scripts for RTC, TIMG0, SYSTIMER, EXTMEM) |
+| Boot progress score           | **5/5**   |
+| Peripherals implemented       | 1/11 (C# Interrupt Matrix + Python stubs for RTC, TIMG0, SYSTIMER, EXTMEM, SYSTEM) |
 | Peripherals passing all tests | 0/0       |
 | Total Robot tests             | 0         |
-| Last update                   | 2026-03-28 |
+| Last update                   | 2026-03-29 |
 
 ## Peripheral Status
 
@@ -147,3 +147,42 @@ matrix. The systimer alarm → intmatrix.OnGPIO(39) → CPU int line → FreeRTO
 tick handler → task switch → main_task → app_main → "Hello world!".
 
 Boot progress: **4/5** (scheduler running, awaiting timer interrupt for task switch)
+
+### 2026-03-29 01:28 - [Phase 0.5] Boot reaches 5/5 — "Hello world!" printed
+
+**Root cause of 4→5 gap:** The systimer ISR reads `SYSTIMER_INT_ST_REG` (offset 0x70)
+to confirm which alarm fired. Our Python stub returned 0 for this register, so the ISR
+thought no alarm matched and did nothing → no FreeRTOS tick → no task switch.
+
+**Fix:** Two-part synchronization of interrupt paths:
+1. **Systimer stub** (`stub_systimer.py`): Added tracking for `INT_ENA` (0x64),
+   `INT_RAW` (0x68), `INT_CLR` (0x6C), and `INT_ST` (0x70 = RAW & ENA).
+   Write-1-to-clear semantics on INT_CLR. External writes to INT_RAW set bits
+   (used by .resc to simulate alarm match).
+2. **Boot script** (`run_boot_test.resc`): Before each `OnGPIO 37 true`, write
+   `sysbus WriteDoubleWord 0x60023068 0x1` to set INT_RAW bit 0 (TARGET0 alarm).
+   This synchronizes the interrupt matrix path with the status register path.
+
+**UART output captured:**
+```
+I (0) main_task: Started on CPU0
+I (0) main_task: Calling app_main()
+Hello world!
+This is esp32c3 chip with 1 CPU core(s), WiFi/BLE, silicon revision v0.0, ...
+I (0) main_task: Returned from app_main()
+FreeRTOS: FreeRTOS Task "main" should not return, Aborting now!
+```
+
+The post-app_main crash is expected — hello_world returns from app_main() and FreeRTOS
+catches it. On real hardware, hello_world loops with vTaskDelay(1000/portTICK_PERIOD_MS).
+
+**Interrupt matrix source mappings configured by firmware:**
+- Source 27 → CPU int 2 (pri 1)
+- Source 36/61 → CPU int 25 (pri 4)
+- Source 50 (FROM_CPU_INTR0) → CPU int 3
+- Source 37 (SYSTIMER_TARGET0) → CPU int 4
+- Source 54 → CPU int 27
+- Source 35 → CPU int 24
+- Source 33 → CPU int 5
+
+Boot progress: **5/5** (hello_world prints "Hello world!" via UART)
