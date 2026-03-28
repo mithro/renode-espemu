@@ -259,14 +259,21 @@ Espressif Systems produces several families of WiFi/Bluetooth-capable SoCs. The 
 - **Secure Boot:** V2
 - **Status:** Active (designed for Thread/Zigbee border routers and end devices)
 
-### ESP32-H4 (Announced)
+### ESP32-H4 (New)
 
-- **CPU:** RISC-V dual-core
-- **WiFi:** None (connectivity co-processor expected)
-- **Bluetooth:** BLE
-- **IEEE 802.15.4:** Yes (Thread, Zigbee)
-- **Notes:** Next-gen ultra-low-power dual-core SoC for long battery life and HMI applications
-- **Status:** Announced / Pre-release
+- **CPU:** RISC-V dual-core with DSP extensions @ up to 96 MHz
+- **Cores:** 2
+- **SRAM:** 384 KiB
+- **ROM:** 128 KiB
+- **PSRAM:** External support; 2 MiB in-package option
+- **WiFi:** None
+- **Bluetooth:** BLE 5.4 (certified Bluetooth 6.0), LE Audio (BIS/CIS), Connection Subrating, PAwR, Direction Finding (AoA/AoD)
+- **IEEE 802.15.4:** Yes (Zigbee 3.0, Thread 1.4)
+- **GPIO:** 40 pins
+- **Peripherals:** SPI, I2C, I2S, UART, **CAN FD** (not just CAN 2.0), LED PWM, ADC, DMA, USB-OTG, MCPWM, touch sensor (15 capacitive channels), temperature sensor
+- **Other:** Integrated DC-DC converter for ultra-low-power. Supports LE Audio and Matter-over-Thread. Significant upgrade over ESP32-H2 with dual-core, more GPIO, USB OTG, touch sensor, and CAN FD.
+- **Package:** 6 mm x 6 mm (QFN)
+- **Status:** New / Sampling (modules ESP32-H4-WROOM-1 available)
 
 ### ESP32-H21 (Announced)
 
@@ -318,7 +325,7 @@ Espressif Systems produces several families of WiFi/Bluetooth-capable SoCs. The 
 | **SRAM** | 80 KiB | 520 KiB | 320 KiB | 512 KiB | 272 KiB | 400 KiB | 384 KiB | 512 KiB | 320 KiB | 256 KiB | 768 KiB |
 | **WiFi** | b/g/n | b/g/n | b/g/n | b/g/n | b/g/n | b/g/n | b/g/n/ac/ax | b/g/n/ax | b/g/n/ax | -- | -- |
 | **Bluetooth** | -- | 4.2+BR/EDR | -- | 5.0 LE | 5.0 LE | 5.0 LE | 5.0 LE | 5.3 LE | 6.0 LE | 5.3 LE | -- |
-| **802.15.4** | -- | -- | -- | -- | -- | -- | -- | Yes | -- | Yes | -- |
+| **802.15.4** | -- | -- | -- | -- | -- | -- | Yes | Yes | -- | Yes | -- |
 | **GPIO** | 16 | 34 | 43 | 45 | 20 | 22 | ~30 | 30 | 30 | 26 | 50 |
 | **UART** | 2 | 3 | 2 | 3 | 2 | 2 | 3 | 3 | -- | 2 | 2 |
 | **SPI** | 2 | 4 | 4 | 4 | 2 | 3 | 3 | 3 | -- | 2 | 3 |
@@ -350,7 +357,7 @@ Legend: "Full" crypto = AES + SHA + RSA + HMAC + Digital Signature + XTS-AES + R
 | ESP32-S3 | 802.11 b/g/n | 2.4 GHz | 5.0 LE | -- | Via WiFi or BLE |
 | ESP32-C2 | 802.11 b/g/n | 2.4 GHz | 5.0 LE | -- | Via WiFi or BLE |
 | ESP32-C3 | 802.11 b/g/n | 2.4 GHz | 5.0 LE | -- | Via WiFi or BLE |
-| ESP32-C5 | 802.11 b/g/n/ac/ax | **2.4+5 GHz** | 5.0 LE | -- | Via WiFi or BLE |
+| ESP32-C5 | 802.11 b/g/n/ac/ax | **2.4+5 GHz** | 5.0 LE | **Yes** | **WiFi + Thread** |
 | ESP32-C6 | 802.11 b/g/n/ax | 2.4 GHz | 5.3 LE | **Yes** | **WiFi + Thread** |
 | ESP32-C61 | 802.11 b/g/n/ax | 2.4 GHz | 6.0 LE | -- | Via WiFi or BLE |
 | ESP32-H2 | -- | -- | 5.3 LE | **Yes** | **Thread only** |
@@ -428,7 +435,10 @@ As of early 2026, Renode's ESP32 support is **extremely minimal**. The Renode te
   - `src/Emulator/Cores/Xtensa/XtensaRegisters.cs` - Register definitions
   - `src/Emulator/Cores/renode/arch/xtensa/renode_xtensa_callbacks.c` - Native callbacks
 - Platform file: `platforms/cpus/xtensa-sample-controller.repl` - A **generic** Xtensa sample controller, **NOT** an ESP32 platform
-- The sample controller has only: memory regions + Xtensa CPU + SemihostingUart
+- The Xtensa.cs CPU class (6.4 KB) supports: semihosting UART, 3 internal comparing timers, GPIO interrupt handling, and simcall operations (exit, read, write, open, close, lseek)
+- The `cpuType` is `"sample_controller"` -- a generic Xtensa config. ESP32 would need type `"esp32"` (LX6), ESP32-S2/S3 would need LX7 variants. These **do not exist**.
+- The only Xtensa test (`xtensa.robot`) has 2 cases: a manual opcode division test and a Zephyr hello\_world that checks for `"Hello World! qemu_xtensa"` output
+- The sample controller platform has only: memory regions + Xtensa CPU + SemihostingUart
 - **No ESP32-specific Xtensa configuration** (register windows, interrupts, memory map, etc.) has been implemented
 - **Gap:** Xtensa is configurable per licensee. The ESP32's specific Xtensa configuration (interrupt matrix, memory protection, register windows overlay, etc.) would need to be carefully implemented to match the ESP32 hardware. The LX7 used in ESP32-S2/S3 is a different configuration again.
 
@@ -436,15 +446,18 @@ As of early 2026, Renode's ESP32 support is **extremely minimal**. The Renode te
 
 - **Status: Good (architecture), Missing (ESP-specific peripherals)**
 - Renode has **excellent general RISC-V support** with many RISC-V platforms already working (SiFive, LiteX, etc.)
-- Supports RV32/RV64, I/M/A/F/D/C extensions
-- The RISC-V CPU core itself should work for ESP32-C3/C6/H2 etc. with minimal adaptation
-- **Gap:** While the CPU core would likely work, none of the ESP32 peripheral models exist, so a RISC-V ESP32-C3 platform cannot boot ESP-IDF firmware
+- Supports RV32/RV64, with extensive ISA extensions: **I, E, M, A, F, D, C, S, U, V, B, G** plus standard extensions **Zba, Zbb, Zbc, Zbs** (bit manipulation), **Zicsr, Zifencei**, **Zfh/Zvfh** (half-precision float), **Zve32x/f, Zve64x/f/d** (vector subsets), **Zcb, Zcmp, Zcmt** (code-size reduction), **Zacas** (atomic CAS), and more
+- ESP32-C3 needs RV32IMC -- **fully covered** by Renode
+- ESP32-C6/H2 need RV32IMAC -- **fully covered** by Renode
+- ESP32-P4 needs RV32IMAFC -- **fully covered** by Renode
+- Specialized cores available in Renode: VexRiscv, Ibex, PicoRV32, CV32E40P, Minerva, VeeR EL2, Ri5cy
+- **Gap:** While the CPU core works, none of the ESP32 peripheral models exist, so a RISC-V ESP32-C3 platform cannot boot ESP-IDF firmware
 
 ### ESP-Specific Peripheral Support in Renode
 
 | Peripheral | Renode Status | Source File |
 |---|---|---|
-| **UART** | **Implemented** | `ESP32_UART.cs` |
+| **UART** | **Implemented** (v1.16.0, Aug 2025; co-authored by Sean "xobs" Cross) | `ESP32_UART.cs` |
 | GPIO | Not implemented | -- |
 | SPI / SPI Flash | Not implemented | -- |
 | I2C | Not implemented | -- |
@@ -602,6 +615,25 @@ The Espressif QEMU fork contains extensive ESP-specific source code:
 - `hw/nvram/esp32c3_efuse.c`
 - `hw/timer/esp32c3_timg.c`, `hw/timer/esp32c3_systimer.c`
 - `hw/net/can/esp32c3_twai.c`
+
+### ESP-IDF Integration
+
+Espressif's QEMU fork is tightly integrated with ESP-IDF:
+
+- **`idf.py qemu monitor`** and **`idf.py qemu gdb`** commands are built into ESP-IDF
+- Pre-built QEMU binaries installable via `idf_tools.py install qemu-xtensa qemu-riscv32`
+- **pytest-embedded-qemu** plugin enables automated testing of ESP-IDF apps in QEMU
+- ESP-IDF CI pipelines use QEMU for running test apps with sdkconfig.ci configurations
+
+### Known QEMU Limitations and Open Issues
+
+- **I2C only implemented for ESP32** (not ESP32-S3 or ESP32-C3)
+- **No ULP coprocessor emulation** on any target
+- SD/MMC not working on ESP32-S3 (issue #139)
+- eFuse coding scheme support incomplete (issue #143)
+- No TCG plugins support (issue #134)
+- Windows DLL dependency issues (issue #146)
+- The OpenCores Ethernet workaround, while functional for TCP/IP, means WiFi-specific APIs (scanning, AP mode, mesh networking) cannot be tested
 
 ---
 
