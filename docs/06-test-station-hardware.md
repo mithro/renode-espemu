@@ -1,7 +1,12 @@
-# rpi4-esp Test Station: Hardware vs Emulation Capability Mapping
+# Test Station Hardware: rpi4-esp Board Inventory
 
-**Date:** 2026-03-28
-**Purpose:** Map the physical ESP/Nordic hardware on the `rpi4-esp` test station to the emulation capabilities documented in the companion reports, identifying what can be emulated today and what gaps remain.
+Physical ESP/Nordic hardware on the rpi4-esp test station, per-board emulation capabilities, and recommended additions.
+
+> **See also:**
+> - [Development Methodology](04-development-methodology.md) — how to use this hardware for emulation validation
+> - [Emulation Platform Status](02-emulation-platform-status.md) — what each emulator supports
+> - [Full test station documentation](../../local/rpi4-esp.md) — network config, USB topology, udev rules, power management
+> - [Document Index](README.md)
 
 ---
 
@@ -99,53 +104,10 @@ A practical near-term scenario: emulate the ESP32-C6's 802.15.4 radio in Renode,
 
 `─────────────────────────────────────────────────`
 
----
-
-## 3. Wireless Testing Scenarios
-
-The rpi4-esp station has a unique capability: a dedicated WiFi adapter (RTL8188CUS on `wlanE`) that can act as either an AP or client for the ESP boards. This creates several hardware-validated test scenarios:
-
-### Scenario 1: ESP32-C3 WiFi Client → wlanE AP
-
-```
-[ESP32-C3] --WiFi--> [wlanE (hostapd AP)] --eth→ [network]
-```
-
-- **Physical:** ESP32-C3 connects to `esp-test` AP on wlanE, sends UDP/TCP packets
-- **Emulation gap:** No emulator has real WiFi. QEMU uses virtual Ethernet. Renode has nothing.
-- **Emulation approach:** In Renode, replace WiFi with virtual Ethernet (like QEMU). Test TCP/IP stack, not WiFi-specific APIs.
-
-### Scenario 2: ESP32 Soft-AP → wlanE Client
-
-```
-[wlanE (client)] --WiFi--> [ESP32 DevKit (soft-AP "ESP_1144E8")]
-```
-
-- **Physical:** RTL8188CUS connects to ESP32's soft-AP network
-- **Emulation gap:** Soft-AP mode requires WiFi MAC emulation. esp32-open-mac has achieved this (AP mode works), but no emulator supports it.
-
-### Scenario 3: ESP32-C3 BLE → nRF52840 BLE
-
-```
-[ESP32-C3 (BLE peripheral)] <--BLE--> [nRF52840 (BLE central)]
-```
-
-- **Physical:** ESP32-C3 advertises BLE service, nRF52840 connects to it
-- **Emulation gap:** Renode has nRF52840 BLE but not ESP32 BLE
-- **Emulation approach:** Implement ESP32 BLE controller as VHCI endpoint, connect via Renode's BLEMedium to nRF52840_Radio model. This is the most tractable multi-chip wireless scenario.
-
-### Scenario 4: ESP32-C6/H2 Thread ↔ nRF52840 Thread (Future)
-
-```
-[ESP32-C6 (Thread router)] <--802.15.4--> [nRF52840 (Thread end device)]
-```
-
-- **Not yet on rpi4-esp** (no ESP32-C6/H2 board), but adding one would enable:
-- **Emulation opportunity:** ESP32-C6's 802.15.4 radio is fully documented. Combined with Renode's existing nRF52840 802.15.4 support and `IEEE802_15_4Medium`, this is the **most immediately achievable** multi-chip wireless emulation scenario.
 
 ---
 
-## 4. Recommended Test Station Additions
+## 3. Recommended Test Station Additions
 
 Based on the emulation research, these additions to the rpi4-esp station would maximize its value for emulation validation:
 
@@ -156,54 +118,10 @@ Based on the emulation research, these additions to the rpi4-esp station would m
 | Medium | ESP32-S3 dev board | Most popular for AI/HMI; QEMU has full support; Xtensa LX7 |
 | Low | ESP32-P4 dev board | Newest, highest performance; no wireless (needs companion chip) |
 
----
-
-## 5. Emulation Development Workflow Using rpi4-esp
-
-The test station enables a **hardware-in-the-loop validation workflow** for emulation development:
-
-```
-┌─────────────────────────────────────────────────┐
-│                Development Machine               │
-│  ┌───────────┐    ┌────────────────────────┐    │
-│  │  Renode   │    │  ESP-IDF Build System   │    │
-│  │ Emulator  │    │  (builds firmware.bin)  │    │
-│  └─────┬─────┘    └───────────┬────────────┘    │
-│        │                      │                  │
-│   Run in Renode          Upload via SSH           │
-│   Compare output         to rpi4-esp              │
-│        │                      │                  │
-└────────┼──────────────────────┼──────────────────┘
-         │                      │
-         ▼                      ▼
-┌─────────────┐    ┌─────────────────────────────────┐
-│  Emulated   │    │         rpi4-esp (RPi4)          │
-│  ESP32-C3   │    │  ┌─────────┐  ┌──────────────┐  │
-│  (Renode)   │    │  │ esptool │→ │  ESP32-C3    │  │
-│             │    │  │  flash  │  │  (physical)  │  │
-│ UART output │    │  └─────────┘  └──────┬───────┘  │
-│      ↓      │    │                      │          │
-│  [compare]  │◄───│──── UART output ─────┘          │
-│             │    │                                  │
-└─────────────┘    └──────────────────────────────────┘
-```
-
-Steps:
-1. Build ESP-IDF firmware for ESP32-C3
-2. Flash to physical ESP32-C3 on rpi4-esp via `esptool --port /dev/ttyESP32C3`
-3. Capture UART output from physical board
-4. Run same firmware binary in Renode ESP32-C3 emulation
-5. Compare UART outputs -- differences reveal emulation gaps
-6. Fix emulation, repeat
-
-This workflow is particularly powerful because:
-- The ESP32-C3 has USB-JTAG, enabling **real-time register inspection** on hardware to validate emulator register behavior
-- Multiple boards on the same station allow testing inter-chip communication scenarios
-- Remote SSH access means this can be integrated into CI/CD pipelines
 
 ---
 
-## 6. Summary: What Can Be Emulated Today
+## 4. Summary: What Can Be Emulated Today
 
 | Board on rpi4-esp | Can run in Renode today? | Can run in QEMU today? | Can run in Wokwi today? |
 |---|---|---|---|

@@ -1,24 +1,12 @@
-# ESP32 WiFi/BLE Hardware: Documentation and Reverse Engineering Status
+# Wireless Hardware: Documentation and Reverse Engineering Status
 
-**Date:** 2026-03-28
-**Purpose:** Catalogue all existing documentation, reverse engineering efforts, and register-level information for ESP32 wireless hardware (WiFi, Bluetooth/BLE, IEEE 802.15.4) to inform emulation development.
+WiFi, Bluetooth/BLE, and IEEE 802.15.4 hardware internals — what's documented, what's been reverse-engineered, and what remains opaque.
 
----
-
-## Table of Contents
-
-1. [Executive Summary](#1-executive-summary)
-2. [WiFi Hardware Architecture](#2-wifi-hardware-architecture)
-3. [The esp32-open-mac Project](#3-the-esp32-open-mac-project)
-4. [Espressif Official Documentation (WiFi/BT)](#4-espressif-official-documentation-wifibt)
-5. [ESP-IDF Binary Blob Structure](#5-esp-idf-binary-blob-structure)
-6. [Known WiFi Register Map](#6-known-wifi-register-map)
-7. [BLE Controller Interface](#7-ble-controller-interface)
-8. [IEEE 802.15.4 Radio (Thread/Zigbee)](#8-ieee-802154-radio-threadzigbee)
-9. [Other Relevant Projects](#9-other-relevant-projects)
-10. [Security Research and CVEs](#10-security-research-and-cves)
-11. [Implications for Emulation](#11-implications-for-emulation)
-12. [Key Resources Index](#12-key-resources-index)
+> **See also:**
+> - [ESP Hardware Reference](01-esp-hardware-reference.md) — which chips have which wireless capabilities
+> - [Emulation Platform Status](02-emulation-platform-status.md) — what emulators support today
+> - [Gap Analysis and Roadmap](05-gap-analysis-and-roadmap.md) — emulation strategies by wireless technology
+> - [Document Index](README.md)
 
 ---
 
@@ -33,7 +21,7 @@ The openness of ESP32 wireless hardware documentation varies **dramatically** by
 | **Bluetooth/BLE controller** | **Opaque** -- binary blob with VHCI interface | Espressif (closed source) |
 | **RF PHY calibration** | **Opaque** -- binary blob | Espressif (closed source) |
 
-The critical finding is that **IEEE 802.15.4 is the lowest-hanging fruit** for emulation -- Espressif publishes complete register-level documentation. WiFi is being actively reverse-engineered by the esp32-open-mac project, which has achieved functional TX/RX/association. BLE remains the most opaque.
+The critical finding is that **IEEE 802.15.4 is the lowest-hanging fruit** for emulation -- Espressif publishes complete register-level documentation. WiFi is being actively reverse-engineered by the esp32-open-mac project, which has achieved functional TX/RX/association. BLE remains the most opaque. See [Gap Analysis and Roadmap](05-gap-analysis-and-roadmap.md) for emulation strategies by wireless technology.
 
 ---
 
@@ -662,59 +650,6 @@ In March 2025, researchers from Tarlogic Security (presented at RootedCON 2025) 
 | Matheus Garbelini | ASSET Research Group | WiFi security | CVE-2019-12586/87/88 |
 | Olof Astrand | Independent | Ghidra tooling | Blog series on BT/WiFi RE with Ghidra (2025-2026) |
 
----
-
-## 11. Implications for Emulation
-
-### Strategy by Wireless Technology
-
-#### WiFi Emulation Strategies (in order of feasibility)
-
-| Strategy | Complexity | Fidelity | Approach |
-|---|---|---|---|
-| **Virtual Ethernet** | Low | Low | Replace WiFi with fake Ethernet MAC (QEMU's approach). TCP/IP works, WiFi APIs don't. |
-| **API-level interception** | Medium | Medium | Hook `esp_wifi_*()` API functions in the emulator. Simulate scanning, association, etc. |
-| **OS adapter interception** | Medium | Medium-High | Hook the `wifi_os_adapter` callback table. The blob calls these for OS services. |
-| **Register-level emulation** | High | High | Use esp32-open-mac's register knowledge to model the WiFi hardware. Most faithful but most effort. |
-| **Hybrid** | Medium-High | High | Use esp32-open-mac's open-source WiFi driver instead of the blob, modeling only the hardware primitives it uses. |
-
-**Recommended:** Start with Virtual Ethernet (quick win), then pursue the **Hybrid** approach -- using esp32-open-mac's open WiFi stack means the emulator only needs to model the hardware primitives (DMA, interrupts, filters) that the open stack uses, rather than reverse-engineering the entire register space that the proprietary blob accesses.
-
-#### BLE Emulation Strategy
-
-| Strategy | Complexity | Fidelity |
-|---|---|---|
-| **VHCI interception** | Medium | High |
-| **Register-level emulation** | Very High | Very High |
-
-**Recommended:** VHCI interception. Implement a virtual BLE controller that speaks standard HCI. The host stack (NimBLE/Bluedroid) communicates via VHCI, so intercepting at this level gives high fidelity without reverse engineering the radio hardware. Combined with Renode's existing `BLEMedium`, this could enable multi-node BLE simulation.
-
-#### IEEE 802.15.4 Emulation Strategy
-
-| Strategy | Complexity | Fidelity |
-|---|---|---|
-| **Register-level emulation** | Medium | Very High |
-
-**Recommended:** Direct register-level emulation. The hardware is fully documented in ESP-IDF. The register definitions in `ieee802154_reg.h` / `ieee802154_struct.h` can be directly translated into an emulator peripheral model. Combined with Renode's existing `IEEE802_15_4Medium`, this enables full Thread/Zigbee simulation.
-
-### Priority Order for Emulation Development
-
-1. **IEEE 802.15.4** -- Fully documented, Renode has medium simulation, highest ROI
-2. **BLE via VHCI** -- Clean interface, Renode has BLE medium, no RE needed
-3. **WiFi via Virtual Ethernet** -- Quick win for TCP/IP connectivity
-4. **WiFi via hybrid (esp32-open-mac)** -- Higher fidelity, depends on open-mac project maturity
-
-### Key Collaboration Opportunities
-
-1. **esp32-open-mac project:** Their reverse-engineered register knowledge is directly applicable. Their modified QEMU fork logs register accesses that define what an emulator needs to model. NLnet/NGI0 funded.
-
-2. **Tarlogic ESP32-Bluetooth-Reversing:** Their SVD patches at [TarlogicSecurity/esp-pacs](https://github.com/TarlogicSecurity/esp-pacs) provide machine-readable BT register definitions. Could be used to build a register-level BT peripheral model as an alternative to VHCI interception.
-
-3. **Espressif's IEEE 802.15.4 source:** The complete register-level HAL can be used as a specification for emulator development.
-
-4. **Renode's wireless infrastructure:** `BLEMedium` and `IEEE802_15_4Medium` provide the multi-node simulation backbone.
-
-5. **esp-rs/esp-ieee802154:** Open-source Rust 802.15.4 driver ([github.com/esp-rs/esp-ieee802154](https://github.com/esp-rs/esp-ieee802154)) with raw frame TX/RX -- useful as additional test/reference code.
 
 ---
 

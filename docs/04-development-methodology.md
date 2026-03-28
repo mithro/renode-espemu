@@ -1,19 +1,13 @@
-# JTAG Debugging, Execution Tracing, and Coverage-Guided Emulation Development
+# Development Methodology: JTAG, Tracing, and Coverage-Guided Emulation
 
-**Date:** 2026-03-28
-**Purpose:** Document how the rpi4-esp test station's JTAG capabilities can be used for hardware/emulation comparison, and how AFL-style coverage-guided approaches can progressively improve Renode's ESP32 peripheral emulation.
+How to use the rpi4-esp test station for hardware/emulation comparison, and how AFL-style approaches can progressively improve Renode's ESP32 peripheral emulation.
 
----
-
-## Table of Contents
-
-1. [JTAG Capabilities on rpi4-esp Hardware](#1-jtag-capabilities-on-rpi4-esp-hardware)
-2. [Execution Tracing on Real Hardware](#2-execution-tracing-on-real-hardware)
-3. [Renode Execution Tracing and Instrumentation](#3-renode-execution-tracing-and-instrumentation)
-4. [Hardware vs Emulation Comparison Workflow](#4-hardware-vs-emulation-comparison-workflow)
-5. [Coverage-Guided Emulation Development (AFL Approach)](#5-coverage-guided-emulation-development-afl-approach)
-6. [Related Academic Frameworks](#6-related-academic-frameworks)
-7. [Practical Implementation Plan](#7-practical-implementation-plan)
+> **See also:**
+> - [Test Station Hardware](06-test-station-hardware.md) — board inventory and per-board emulation status
+> - [Emulation Platform Status](02-emulation-platform-status.md) — Renode's current capabilities
+> - [Gap Analysis and Roadmap](05-gap-analysis-and-roadmap.md) — phased implementation plan
+> - [Wireless Hardware Documentation](03-wireless-hardware-documentation.md) — register maps for peripheral modelling
+> - [Document Index](README.md)
 
 ---
 
@@ -21,7 +15,7 @@
 
 ### ESP32-C3 Board -- Best JTAG Target (No External Hardware Needed)
 
-The ESP32-C3 on the test station has **built-in USB-JTAG/serial** via its USB interface. This is the most convenient debug target:
+The ESP32-C3 on the [rpi4-esp test station](06-test-station-hardware.md) has **built-in USB-JTAG/serial** via its USB interface. This is the most convenient debug target:
 
 | Capability | Status |
 |---|---|
@@ -459,71 +453,97 @@ Once a peripheral's access pattern and expected responses are understood:
 - **Approach:** Automatically identifies peripheral register types (control, status, data) from firmware access patterns. Creates minimal models.
 - **Relevance:** The register classification heuristics could help prioritise which ESP32 registers need full models vs simple stubs.
 
+
 ---
 
-## 7. Practical Implementation Plan
+## 7. Wireless Testing Scenarios
 
-### Phase 1: Establish the Comparison Infrastructure (Week 1-2)
+The rpi4-esp station has a unique capability: a dedicated WiFi adapter (RTL8188CUS on `wlanE`) that can act as either an AP or client for the ESP boards. This creates several hardware-validated test scenarios:
 
-**On rpi4-esp:**
-1. Install ESP-IDF on the RPi4 (or cross-compile on a dev machine and flash remotely)
-2. Set up OpenOCD for ESP32-C3: `openocd -f board/esp32c3-builtin.cfg`
-3. Build and flash `hello_world` to ESP32-C3
-4. Capture UART output as baseline
-5. Set up app-level tracing with gcov for code coverage on real hardware
+### Scenario 1: ESP32-C3 WiFi Client → wlanE AP
 
-**In Renode:**
-1. Create a minimal ESP32-C3 platform file (.repl) with:
-   - RV32IMC CPU
-   - Memory map from ESP-IDF `reg_base.h`
-   - ESP32_UART (already exists)
-   - Python catch-all peripherals for all other ranges
-2. Load the same `hello_world` binary
-3. Enable full peripheral access logging
-4. Compare UART output and identify first divergence point
+```
+[ESP32-C3] --WiFi--> [wlanE (hostapd AP)] --eth→ [network]
+```
 
-### Phase 2: Iterative Register Modelling (Week 3-6)
+- **Physical:** ESP32-C3 connects to `esp-test` AP on wlanE, sends UDP/TCP packets
+- **Emulation gap:** No emulator has real WiFi. QEMU uses virtual Ethernet. Renode has nothing.
+- **Emulation approach:** In Renode, replace WiFi with virtual Ethernet (like QEMU). Test TCP/IP stack, not WiFi-specific APIs.
 
-For each divergence:
-1. Identify the register address firmware is stuck on
-2. Check ESP-IDF source for what value is expected (often a "ready" bit)
-3. Update the Python stub to return the correct value
-4. Verify against real hardware using JTAG watchpoint on that address
-5. Repeat until `hello_world` boots and prints to UART in Renode
+### Scenario 2: ESP32 Soft-AP → wlanE Client
 
-Expected order of register modelling needed (based on ESP-IDF boot flow):
-1. **eFuse** (MAC address, chip revision) -- read during early boot
-2. **RTC/clock control** -- PLL lock, CPU frequency setting
-3. **Cache/MMU** -- Flash memory mapping for XIP
-4. **System registers** -- Peripheral clock gating, reset control
-5. **Timer groups** -- FreeRTOS tick timer
-6. **Interrupt matrix** -- RISC-V PLIC/CLIC configuration
+```
+[wlanE (client)] --WiFi--> [ESP32 DevKit (soft-AP "ESP_1144E8")]
+```
 
-### Phase 3: Coverage-Guided Expansion (Week 7+)
+- **Physical:** RTL8188CUS connects to ESP32's soft-AP network
+- **Emulation gap:** Soft-AP mode requires WiFi MAC emulation. esp32-open-mac has achieved this (AP mode works), but no emulator supports it.
 
-1. Move from `hello_world` to `wifi_station` example
-2. The WiFi init path will hit many more registers
-3. Use the Fuzzware-style approach: fuzz register responses, keep values that advance boot progress
-4. Cross-reference against esp32-open-mac QEMU trace logs for correct values
-5. Graduate frequently-accessed registers to proper C# models
+### Scenario 3: ESP32-C3 BLE → nRF52840 BLE
 
-### Phase 4: Automated Comparison CI
+```
+[ESP32-C3 (BLE peripheral)] <--BLE--> [nRF52840 (BLE central)]
+```
 
-Set up automated testing:
-1. Build ESP-IDF example
-2. Flash to ESP32-C3 on rpi4-esp, capture output
-3. Run in Renode, capture output
-4. Diff comparison
-5. Report new unhandled accesses and divergence points
+- **Physical:** ESP32-C3 advertises BLE service, nRF52840 connects to it
+- **Emulation gap:** Renode has nRF52840 BLE but not ESP32 BLE
+- **Emulation approach:** Implement ESP32 BLE controller as VHCI endpoint, connect via Renode's BLEMedium to nRF52840_Radio model. This is the most tractable multi-chip wireless scenario.
 
-### Hardware Needed
+### Scenario 4: ESP32-C6/H2 Thread ↔ nRF52840 Thread (Future)
 
-| Item | Purpose | Priority | Est. Cost |
-|---|---|---|---|
-| **ESP-Prog** | JTAG for ESP32 DevKit + CAM-MB | High | ~$15 |
-| **ESP32-C6 dev board** | 802.15.4 testing + Thread validation | High | ~$10 |
-| **ESP32-H2 dev board** | Pure 802.15.4 + BLE device | Medium | ~$10 |
-| **ESP32-S3 dev board** | QEMU-supported Xtensa target | Low | ~$10 |
+```
+[ESP32-C6 (Thread router)] <--802.15.4--> [nRF52840 (Thread end device)]
+```
+
+- **Not yet on rpi4-esp** (no ESP32-C6/H2 board), but adding one would enable:
+- **Emulation opportunity:** ESP32-C6's 802.15.4 radio is fully documented. Combined with Renode's existing nRF52840 802.15.4 support and `IEEE802_15_4Medium`, this is the **most immediately achievable** multi-chip wireless emulation scenario.
+
+
+---
+
+## 8. Emulation Development Workflow Using rpi4-esp
+
+The test station enables a **hardware-in-the-loop validation workflow** for emulation development:
+
+```
+┌─────────────────────────────────────────────────┐
+│                Development Machine               │
+│  ┌───────────┐    ┌────────────────────────┐    │
+│  │  Renode   │    │  ESP-IDF Build System   │    │
+│  │ Emulator  │    │  (builds firmware.bin)  │    │
+│  └─────┬─────┘    └───────────┬────────────┘    │
+│        │                      │                  │
+│   Run in Renode          Upload via SSH           │
+│   Compare output         to rpi4-esp              │
+│        │                      │                  │
+└────────┼──────────────────────┼──────────────────┘
+         │                      │
+         ▼                      ▼
+┌─────────────┐    ┌─────────────────────────────────┐
+│  Emulated   │    │         rpi4-esp (RPi4)          │
+│  ESP32-C3   │    │  ┌─────────┐  ┌──────────────┐  │
+│  (Renode)   │    │  │ esptool │→ │  ESP32-C3    │  │
+│             │    │  │  flash  │  │  (physical)  │  │
+│ UART output │    │  └─────────┘  └──────┬───────┘  │
+│      ↓      │    │                      │          │
+│  [compare]  │◄───│──── UART output ─────┘          │
+│             │    │                                  │
+└─────────────┘    └──────────────────────────────────┘
+```
+
+Steps:
+1. Build ESP-IDF firmware for ESP32-C3
+2. Flash to physical ESP32-C3 on rpi4-esp via `esptool --port /dev/ttyESP32C3`
+3. Capture UART output from physical board
+4. Run same firmware binary in Renode ESP32-C3 emulation
+5. Compare UART outputs -- differences reveal emulation gaps
+6. Fix emulation, repeat
+
+This workflow is particularly powerful because:
+- The ESP32-C3 has USB-JTAG, enabling **real-time register inspection** on hardware to validate emulator register behavior
+- Multiple boards on the same station allow testing inter-chip communication scenarios
+- Remote SSH access means this can be integrated into CI/CD pipelines
+
 
 ---
 
