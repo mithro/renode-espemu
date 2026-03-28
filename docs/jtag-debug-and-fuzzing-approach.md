@@ -70,7 +70,14 @@ The ESP32 (Xtensa) has additional debug capabilities not available on RISC-V:
 | **Dual-core debug** | Yes -- can halt/step each core independently |
 | **OpenOCD config** | `board/esp32-wrover-kit-1.8v.cfg` (with adapter) |
 
-**TRAX** is particularly relevant: it's an Xtensa-specific on-chip trace buffer that can record instruction execution flow without halting the CPU. This allows capturing execution traces of the WiFi blob running at full speed.
+**TRAX** is particularly relevant: it's an Xtensa-specific on-chip trace buffer that can record instruction execution flow without halting the CPU. Key details:
+- Records branch decisions and uninferable PC discontinuities (interrupts, exceptions, indirect jumps)
+- Circular buffer -- limited size, records until PC reaches a specific address or externally stopped
+- **Decoding tools:** [jcmvbkbc/trax-tools](https://github.com/jcmvbkbc/trax-tools) -- `trax-decode` converts binary dumps into control transfer sequences, `trax-trace.sh` produces full disassembly of executed instructions
+- ESP-IDF's `esp_app_trace` library uses TRAX to stream trace data over JTAG to OpenOCD
+- This allows capturing execution traces of the WiFi blob running at full speed
+
+**Important:** The ESP32-C3 (RISC-V) does **NOT** have TRAX or any hardware instruction trace (no E-Trace or N-Trace). Full PC tracing on ESP32-C3 is only possible in Renode (emulation), not on real hardware. This makes the two platforms complementary: use TRAX on ESP32 Xtensa for blob tracing, use Renode for complete ESP32-C3 traces.
 
 ### nRF52840 Dongle -- SWD (Not JTAG)
 
@@ -151,39 +158,59 @@ For comparing hardware vs emulation, we need to know which memory-mapped registe
 
 Renode has extensive built-in instrumentation that's directly useful for emulation validation:
 
-### Peripheral Access Logging
+### Peripheral Access Logging (`LogPeripheralAccess`)
 
 ```
-# Log all accesses to a specific peripheral at NOISY level
-(machine-0) logLevel -1 sysbus.uart
+# Log all accesses to a specific peripheral
+sysbus LogPeripheralAccess sysbus.uart
 
-# Log to file for analysis
-(machine-0) logFile @trace.log
+# Log ALL peripheral accesses (global)
+sysbus LogPeripheralAccess true
 ```
 
-Renode logs every register read/write to modelled peripherals, including:
-- Register offset
-- Read vs write
-- Value read/written
-- Timestamp
-
-### Unhandled Access Logging
-
-When firmware accesses a register address that has no peripheral model, Renode logs it as an "unhandled access". This is **the key signal** for the AFL-style approach:
+Output includes: access type (Read/Write), address, register name, value, **active CPU name and current PC**. The PC is critical -- it tells you exactly which firmware instruction triggered each register access.
 
 ```
-# Hush excessive unhandled access warnings (or keep them for analysis)
-(machine-0) logLevel 2 sysbus  # WARNING level = still logs unhandled
+# Also log to file for offline analysis
+logFile @trace.log
 ```
 
-Each unhandled access tells you: "firmware tried to access address X, and no peripheral model responded." This is the emulation gap signal.
+### Unhandled Access Behaviour
 
-### Execution Tracing
+When firmware accesses a register address with no peripheral model, Renode:
+- **Reads:** Logs a WARNING and **returns 0x0**: `ReadDoubleWord from non existing peripheral at 0x400D0118, returning 0x0`
+- **Writes:** Logs a WARNING: `WriteDoubleWord to non existing peripheral at 0x400D0114, value 0xFFFFFFFF`
+- Firmware **keeps running** (doesn't crash) -- this is the key for progressive development
+- Use `sysbus SilenceRange <0x80000 0x1000>` to suppress warnings for known-unimportant ranges
 
-From the Renode docs TOC, execution tracing capabilities include:
-- **Execution tracing in Renode** -- Record full instruction execution trace
-- **Execution metrics, profiling and opcode counting** -- Performance analysis
-- **Generating a coverage report** -- Code coverage from emulated execution
+Each unhandled access tells you: "firmware tried to access address X from PC Y, and no peripheral responded." This is the emulation gap signal.
+
+### Execution Tracing (Full Instruction Trace)
+
+Renode has a complete `ExecutionTracing` system:
+
+```
+# Enable per-instruction PC tracing
+cpu MaximumBlockSize 1
+cpu CreateExecutionTracing "tracer" @trace.log PC
+
+# Options: PC, Opcode, PCAndOpcode, Disassembly, TraceBasedModel
+# Also track all memory load/store addresses:
+tracer TrackMemoryAccesses
+```
+
+- **PC mode:** Saves every program counter value
+- **PCAndOpcode mode:** PC + instruction opcode
+- **Disassembly mode:** Full human-readable disassembly via LLVM
+- **TraceBasedModel:** Google's trace-based performance simulation format
+- Output can be binary (`isBinary=True`) and compressed (`compress=True`)
+
+### Coverage Reports (LCOV Format)
+
+Renode's Execution Tracer can produce **LCOV-format coverage reports** compatible with standard tools like `lcov`/`genhtml`. This enables:
+- Visualising which code paths the firmware actually executed
+- Comparing coverage between real hardware (via gcov) and emulation
+- Measuring progress as peripheral models are added
 
 ### Python Peripherals (Dynamic Register Stubs)
 
@@ -197,26 +224,61 @@ stub_wifi: Python.PythonPeripheral @ sysbus 0x60033000
     script: "request.value = 0x0"  # Default: return 0 for all reads
 ```
 
-This can be extended to:
-- Log every access to the WiFi register range
-- Return configurable values per register
-- Record the access sequence for comparison with real hardware
+Stateful peripherals are also possible (e.g., a flip-flop for polling loops):
+
+```python
+# flipflop.py -- toggles a status bit on each read
+if request.isInit:
+    lastVal = 0
+else:
+    lastVal = 1 - lastVal
+    request.value = lastVal * 0xFFFFFFFF
+```
+
+The `request` object provides: `value`, `offset`, `type` (READ/WRITE), `isInit`.
+
+### System Bus Hooks (Read/Write Interception)
+
+Renode provides direct read/write interception on the system bus:
+
+```
+# Hook after any peripheral read
+sysbus SetHookAfterPeripheralRead peripheral "python_script"
+
+# Hook before any peripheral write
+sysbus SetHookBeforePeripheralWrite peripheral "python_script"
+```
+
+Hook variables include: `self` (peripheral), `sysbus`, `machine`, `value`, `offset`. These can record all MMIO transactions for replay or comparison.
 
 ### Python Hooks
 
-Renode's Python hooks provide additional instrumentation:
+| Hook Type | API | Use Case |
+|---|---|---|
+| **System bus hooks** | `SetHookAfterPeripheralRead/Write` | Intercept/record all register access |
+| **CPU hooks** | `cpu AddHook address "script"` | Break at specific PCs |
+| **Watchpoint hooks** | Trigger on specific address patterns | Data-dependent breakpoints |
+| **UART hooks** | React to specific output lines | Detect boot milestones |
+| **Packet interception** | Intercept network TX/RX | Validate networking behaviour |
 
-| Hook Type | Use Case |
-|---|---|
-| **System bus hooks** | Trigger Python on any memory read/write (specific address or range) |
-| **CPU hooks** | Execute Python on each instruction or at specific PCs |
-| **Watchpoint hooks** | Trigger on specific address access patterns |
-| **UART hooks** | React to specific UART output patterns |
-| **Packet interception** | Intercept network packet transmission/reception |
+### State Save/Restore (Snapshot Support)
+
+Renode supports full machine state snapshots via `Save`/`Load` commands. This enables:
+- **Fork-server pattern** for fuzzing (snapshot before peripheral access, try value, restore)
+- Checkpoint/rollback for systematic exploration
+- Saving a known-good boot state to skip slow init during development
 
 ### GDB Integration
 
-Renode exposes a GDB server, allowing the same GDB scripts used on real hardware to work on emulated firmware. This enables direct comparison workflows.
+Renode exposes a GDB server (`machine StartGdbServer port`), allowing the same GDB scripts used on real hardware to work on emulated firmware. This enables direct comparison workflows.
+
+### pyrenode3 (Full Python 3 Control)
+
+[pyrenode3](https://github.com/antmicro/pyrenode3) provides native CLR bindings -- a Python 3 wrapper around all of Renode. This is the most promising integration point for building a fuzzing harness:
+- Programmatic machine creation and configuration
+- Execution stepping and state inspection
+- Memory and register reads/writes
+- Peripheral registration at runtime
 
 ---
 
