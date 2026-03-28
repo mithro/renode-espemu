@@ -1,0 +1,525 @@
+# JTAG Debugging, Execution Tracing, and Coverage-Guided Emulation Development
+
+**Date:** 2026-03-28
+**Purpose:** Document how the rpi4-esp test station's JTAG capabilities can be used for hardware/emulation comparison, and how AFL-style coverage-guided approaches can progressively improve Renode's ESP32 peripheral emulation.
+
+---
+
+## Table of Contents
+
+1. [JTAG Capabilities on rpi4-esp Hardware](#1-jtag-capabilities-on-rpi4-esp-hardware)
+2. [Execution Tracing on Real Hardware](#2-execution-tracing-on-real-hardware)
+3. [Renode Execution Tracing and Instrumentation](#3-renode-execution-tracing-and-instrumentation)
+4. [Hardware vs Emulation Comparison Workflow](#4-hardware-vs-emulation-comparison-workflow)
+5. [Coverage-Guided Emulation Development (AFL Approach)](#5-coverage-guided-emulation-development-afl-approach)
+6. [Related Academic Frameworks](#6-related-academic-frameworks)
+7. [Practical Implementation Plan](#7-practical-implementation-plan)
+
+---
+
+## 1. JTAG Capabilities on rpi4-esp Hardware
+
+### ESP32-C3 Board -- Best JTAG Target (No External Hardware Needed)
+
+The ESP32-C3 on the test station has **built-in USB-JTAG/serial** via its USB interface. This is the most convenient debug target:
+
+| Capability | Status |
+|---|---|
+| **JTAG connection** | Built-in via USB (Interface 2 = vendor-specific JTAG) |
+| **OpenOCD config** | `board/esp32c3-builtin.cfg` |
+| **No external hardware** | Direct USB connection to `/dev/ttyESP32C3` |
+| **Hardware breakpoints** | 8 (RISC-V trigger module) |
+| **Hardware watchpoints** | 8 (data access triggers) |
+| **Single-stepping** | Yes (instruction and source-level) |
+| **GDB integration** | Full (via OpenOCD GDB server) |
+| **Flash programming** | Via OpenOCD (`program_esp`) |
+| **FreeRTOS awareness** | Yes (thread enumeration, stack inspection) |
+| **Application tracing** | Yes (via JTAG, UART, or USB simultaneously) |
+| **SystemView** | Yes (SEGGER real-time OS analysis) |
+| **Code coverage (gcov)** | Yes (via JTAG + esp_gcov component) |
+| **Semihosting** | Yes (file I/O, printf via debug channel) |
+
+To start debugging the ESP32-C3 from rpi4-esp:
+
+```bash
+# On rpi4-esp:
+# Terminal 1: Start OpenOCD
+openocd -f board/esp32c3-builtin.cfg
+
+# Terminal 2: Connect GDB
+riscv32-esp-elf-gdb -ex "target remote :3333" build/app.elf
+```
+
+### ESP32-CAM-MB and ESP32 DevKit -- External JTAG Required
+
+The two ESP32 (Xtensa LX6) boards need external JTAG hardware:
+
+| Board | JTAG Interface | Additional Hardware Needed |
+|---|---|---|
+| ESP32-CAM-MB (D0WD-V3) | GPIO12 (TDI), GPIO13 (TCK), GPIO14 (TMS), GPIO15 (TDO) | ESP-Prog or FT2232H adapter |
+| ESP32 DevKit (D0WDQ6) | Same GPIO pins | ESP-Prog or FT2232H adapter |
+
+**Important caveat:** On the ESP32-CAM-MB, GPIO12-15 are likely shared with the camera or SD card interface, making JTAG potentially conflicting with camera operation.
+
+The ESP32 (Xtensa) has additional debug capabilities not available on RISC-V:
+
+| Capability | Status |
+|---|---|
+| **TRAX trace memory** | Yes -- dedicated on-chip trace buffer for instruction flow recording |
+| **Hardware breakpoints** | 2 instruction + 2 data (fewer than ESP32-C3's RISC-V) |
+| **Dual-core debug** | Yes -- can halt/step each core independently |
+| **OpenOCD config** | `board/esp32-wrover-kit-1.8v.cfg` (with adapter) |
+
+**TRAX** is particularly relevant: it's an Xtensa-specific on-chip trace buffer that can record instruction execution flow without halting the CPU. This allows capturing execution traces of the WiFi blob running at full speed.
+
+### nRF52840 Dongle -- SWD (Not JTAG)
+
+The nRF52840 uses ARM SWD (Serial Wire Debug), not JTAG. It has:
+- 6 hardware breakpoints, 4 watchpoints
+- ETM (Embedded Trace Macrocell) for instruction tracing (requires external trace probe)
+- No SWD pins easily accessible on the PCA10059 dongle form factor
+
+### Recommended Hardware Addition
+
+To enable JTAG on the ESP32 boards, add an **ESP-Prog** board (~$10-15):
+- Provides FT2232H-based JTAG interface
+- Direct connection to ESP32's JTAG pins
+- Also provides a USB-UART bridge
+- OpenOCD config: `board/esp-prog.cfg`
+- Powers from USB, level-shifted for 3.3V
+
+---
+
+## 2. Execution Tracing on Real Hardware
+
+### ESP-IDF Application Level Tracing
+
+ESP-IDF provides a comprehensive tracing library that works via JTAG, UART, or USB:
+
+**Modes:**
+- **Post-mortem:** Trace data written to a circular buffer. Host reads after crash/halt. Low overhead.
+- **Streaming:** Real-time data transfer to host via JTAG. Host consumes data continuously.
+
+**Capabilities:**
+1. **Custom application data:** Send arbitrary data (variable values, state snapshots) from firmware to host with minimal overhead
+2. **Lightweight logging:** Printf-style logging over JTAG (faster than UART, no pin conflicts)
+3. **SEGGER SystemView:** Real-time OS task/ISR/event visualization
+4. **Gcov coverage:** Source code coverage analysis via JTAG
+
+### Capturing MMIO Traces on Real Hardware
+
+For comparing hardware vs emulation, we need to know which memory-mapped registers the firmware accesses. Several approaches:
+
+**Approach A: OpenOCD watchpoints (slow, precise)**
+- Set data watchpoints on specific register address ranges
+- OpenOCD halts CPU on each access, logs address + value + direction
+- Very slow (CPU halts on every hit), but gives exact data
+- Limited by hardware watchpoint count (8 on ESP32-C3)
+
+**Approach B: TRAX trace (ESP32 Xtensa only, fast)**
+- TRAX records instruction flow into on-chip trace RAM
+- Can reconstruct which memory accesses occurred by matching instruction trace to disassembly
+- Non-invasive (no CPU halts), but limited trace RAM size
+- Not available on ESP32-C3 (RISC-V has no TRAX)
+
+**Approach C: esp32-open-mac QEMU fork (comprehensive)**
+- The [esp32-open-mac/qemu](https://github.com/esp32-open-mac/qemu) fork instruments QEMU to log ALL peripheral register accesses
+- Run the same firmware in instrumented QEMU, capture complete MMIO trace
+- This gives the full register access sequence without hardware limitations
+- Can then compare this QEMU trace against Renode's peripheral access log
+
+**Approach D: GDB scripting (flexible, medium speed)**
+- Use GDB connected via JTAG to set conditional breakpoints on register access functions
+- Log access patterns via GDB Python scripting
+- More flexible than watchpoints but still slows execution
+
+### What Can Be Traced on the ESP32-C3
+
+| Trace Type | Mechanism | Speed Impact | Completeness |
+|---|---|---|---|
+| UART output | Serial monitor | None | Application output only |
+| App-level trace data | esp_app_trace via JTAG | Low (~1-2%) | Custom data points |
+| SystemView (RTOS) | SEGGER via JTAG/UART | Low | Task/ISR/event timeline |
+| Source coverage (gcov) | esp_gcov via JTAG | Low-Medium | Line/branch coverage |
+| PC trace (instruction flow) | Not available on RV32 | N/A | N/A (no TRAX on RISC-V) |
+| Register watchpoints | OpenOCD triggers | High (halts on hit) | 8 addresses at a time |
+| Full MMIO trace | esp32-open-mac QEMU fork | N/A (runs in QEMU) | Complete |
+
+---
+
+## 3. Renode Execution Tracing and Instrumentation
+
+Renode has extensive built-in instrumentation that's directly useful for emulation validation:
+
+### Peripheral Access Logging
+
+```
+# Log all accesses to a specific peripheral at NOISY level
+(machine-0) logLevel -1 sysbus.uart
+
+# Log to file for analysis
+(machine-0) logFile @trace.log
+```
+
+Renode logs every register read/write to modelled peripherals, including:
+- Register offset
+- Read vs write
+- Value read/written
+- Timestamp
+
+### Unhandled Access Logging
+
+When firmware accesses a register address that has no peripheral model, Renode logs it as an "unhandled access". This is **the key signal** for the AFL-style approach:
+
+```
+# Hush excessive unhandled access warnings (or keep them for analysis)
+(machine-0) logLevel 2 sysbus  # WARNING level = still logs unhandled
+```
+
+Each unhandled access tells you: "firmware tried to access address X, and no peripheral model responded." This is the emulation gap signal.
+
+### Execution Tracing
+
+From the Renode docs TOC, execution tracing capabilities include:
+- **Execution tracing in Renode** -- Record full instruction execution trace
+- **Execution metrics, profiling and opcode counting** -- Performance analysis
+- **Generating a coverage report** -- Code coverage from emulated execution
+
+### Python Peripherals (Dynamic Register Stubs)
+
+Renode supports writing peripherals in Python, enabling dynamic register responses:
+
+```python
+# In .repl platform file:
+stub_wifi: Python.PythonPeripheral @ sysbus 0x60033000
+    size: 0x3000
+    initable: true
+    script: "request.value = 0x0"  # Default: return 0 for all reads
+```
+
+This can be extended to:
+- Log every access to the WiFi register range
+- Return configurable values per register
+- Record the access sequence for comparison with real hardware
+
+### Python Hooks
+
+Renode's Python hooks provide additional instrumentation:
+
+| Hook Type | Use Case |
+|---|---|
+| **System bus hooks** | Trigger Python on any memory read/write (specific address or range) |
+| **CPU hooks** | Execute Python on each instruction or at specific PCs |
+| **Watchpoint hooks** | Trigger on specific address access patterns |
+| **UART hooks** | React to specific UART output patterns |
+| **Packet interception** | Intercept network packet transmission/reception |
+
+### GDB Integration
+
+Renode exposes a GDB server, allowing the same GDB scripts used on real hardware to work on emulated firmware. This enables direct comparison workflows.
+
+---
+
+## 4. Hardware vs Emulation Comparison Workflow
+
+### The Core Loop
+
+```
+┌──────────────────────────────────────────────────────────┐
+│                    Build firmware.bin                      │
+│              (ESP-IDF for ESP32-C3)                       │
+└──────────────┬───────────────────────────┬───────────────┘
+               │                           │
+               ▼                           ▼
+┌──────────────────────┐    ┌──────────────────────────────┐
+│   Real Hardware       │    │   Renode Emulation            │
+│   (rpi4-esp)          │    │                              │
+│                       │    │ ESP32-C3 platform (.repl)    │
+│ 1. Flash via esptool  │    │ + stub peripherals           │
+│ 2. Monitor UART       │    │                              │
+│ 3. Trace via JTAG     │    │ 1. Load same firmware.bin    │
+│ 4. Capture MMIO       │    │ 2. Monitor UART              │
+│    (OpenOCD/QEMU)     │    │ 3. Log peripheral accesses   │
+│                       │    │ 4. Log unhandled accesses    │
+└──────────┬────────────┘    └──────────────┬───────────────┘
+           │                                │
+           ▼                                ▼
+┌──────────────────────────────────────────────────────────┐
+│                    Compare Results                         │
+│                                                           │
+│ • UART output matches?                                    │
+│ • Same peripheral accesses in same order?                 │
+│ • Unhandled accesses → new peripherals to model           │
+│ • Divergence point → incorrect register return value      │
+└──────────────────────────────────────────────────────────┘
+```
+
+### Step-by-Step Process
+
+1. **Start simple:** Use ESP-IDF `hello_world` example. It only needs UART + basic boot.
+2. **Flash to real ESP32-C3** on rpi4-esp. Capture UART output.
+3. **Run in Renode** with ESP32_UART + stub peripherals. Compare UART output.
+4. **Identify first divergence:** Renode will likely fail during boot when it hits unmodelled system registers (RTC, clock, eFuse).
+5. **Add stub for that register:** Use Renode Python peripheral to return a plausible value.
+6. **Repeat:** Each iteration gets further into the boot process.
+7. **Graduate stubs to real models:** Once a peripheral's access pattern is understood, implement a proper C# model.
+
+---
+
+## 5. Coverage-Guided Emulation Development (AFL Approach)
+
+### The Concept
+
+Traditional AFL works by: (1) instrumenting a target for code coverage, (2) mutating inputs, (3) keeping inputs that increase coverage. We adapt this for emulation development:
+
+**Instead of mutating inputs, we mutate peripheral register responses.** Instead of maximizing code coverage in a target, we maximize how far the firmware gets through its initialization and main loop.
+
+### The Feedback Loop
+
+```
+┌─────────────────────────────────────┐
+│     Firmware binary (ESP-IDF)        │
+└──────────────┬──────────────────────┘
+               │
+               ▼
+┌─────────────────────────────────────┐
+│     Renode with stub peripherals     │
+│                                     │
+│  All unmodelled registers return    │
+│  values from a "response table"     │
+│                                     │
+│  Instrumentation:                   │
+│  • PC trace (code coverage)         │
+│  • Peripheral access log            │
+│  • UART output capture              │
+│  • Crash/hang detection             │
+└──────────────┬──────────────────────┘
+               │
+               ▼
+┌─────────────────────────────────────┐
+│     Coverage Analysis                │
+│                                     │
+│  Did we get further than before?    │
+│  New code paths reached?            │
+│  UART output progress?              │
+│  Boot stage advanced?               │
+└──────────────┬──────────────────────┘
+               │
+        ┌──────┴──────┐
+        │ Yes         │ No
+        ▼             ▼
+   Keep this       Discard/try
+   register        different
+   response        value
+```
+
+### Implementation with Renode
+
+#### Phase 1: Passive Recording
+
+Use Renode's Python peripheral to create a "catch-all" peripheral at each unmodelled register range:
+
+```python
+# catch_all_peripheral.py
+# Attached to WiFi register range, timer range, etc.
+#
+# On read: log address, return 0 (or configurable value)
+# On write: log address + value, ignore
+
+access_log = []
+
+if request.isRead:
+    access_log.append(('R', request.offset, 0))
+    request.value = 0
+else:
+    access_log.append(('W', request.offset, request.value))
+```
+
+Run firmware, collect the access log. This tells you exactly which registers firmware touches and in what order.
+
+#### Phase 2: Response Table Fuzzing
+
+Create a "response table" mapping register addresses to return values. Start with all-zeros. Then systematically try different values:
+
+1. **From real hardware:** Use JTAG watchpoints or QEMU traces to capture what the real hardware returns for each register
+2. **From ESP-IDF source:** Read the HAL driver code to understand expected register values (e.g., clock ready bits, status flags)
+3. **From datasheets:** Timer count values, eFuse data, etc.
+4. **By fuzzing:** For registers where the expected value is unknown, try common patterns (0x0, 0x1, 0xFFFFFFFF, specific bit patterns) and keep values that let firmware progress further
+
+#### Phase 3: Graduate to Proper Models
+
+Once a peripheral's access pattern and expected responses are understood:
+1. Write a proper C# peripheral model in Renode
+2. Implement the register state machine (not just static responses)
+3. Test against the access log from real hardware
+4. Validate by running the same firmware and comparing UART output
+
+### Comparison with Fuzzware
+
+[Fuzzware](https://github.com/fuzzware-fuzzer/fuzzware) (365 stars, USENIX Security 2022) uses a closely related approach:
+- Runs firmware in an emulator (based on Unicorn/QEMU)
+- Automatically generates peripheral models by fuzzing register responses
+- Uses coverage feedback to find register values that maximise firmware execution
+- Achieved state-of-the-art results in firmware fuzzing
+
+**Key difference for our use case:** Fuzzware aims to find bugs (fuzzing for crashes). We aim to build faithful emulation (fuzzing for correctness). But the mechanism is identical: try register values → measure how far firmware gets → keep values that help.
+
+**Potential approach:** Adapt Fuzzware's MMIO modelling technique for use with Renode instead of Unicorn, targeting ESP32 firmware specifically.
+
+---
+
+## 6. Related Academic Frameworks
+
+### avatar² (569 stars)
+
+- **URL:** https://github.com/avatartwo/avatar2
+- **Approach:** Hardware-in-the-loop. Forwards peripheral accesses from emulator (QEMU/Panda/Unicorn) to real hardware via JTAG/SWD.
+- **Relevance:** Could forward unmodelled ESP32 register accesses from Renode to the real ESP32-C3 on rpi4-esp via JTAG. The emulator handles CPU + known peripherals; unknown accesses are forwarded to real hardware.
+- **Limitation:** Slow (each forwarded access requires JTAG round-trip). But excellent for identifying correct register responses to build Renode models from.
+- **ESP32 compatibility:** avatar² supports OpenOCD as a target backend. The ESP32-C3's built-in JTAG is OpenOCD-compatible.
+
+### Fuzzware (365 stars)
+
+- **URL:** https://github.com/fuzzware-fuzzer/fuzzware
+- **Paper:** "Fuzzware: Using Precise MMIO Modeling for Effective Firmware Fuzzing" (USENIX Security 2022)
+- **Approach:** Automatically determines correct peripheral responses using coverage-guided fuzzing. Categorises MMIO accesses into patterns (set, passthrough, constant, etc.) and generates minimal models.
+- **Relevance:** The MMIO modelling technique is directly applicable. Could be adapted to generate Renode peripheral stubs automatically.
+
+### HALucinator
+
+- **Approach:** Replaces HAL library functions in firmware with high-level handlers that emulate the effect without modelling hardware registers.
+- **Relevance:** For ESP-IDF firmware, could intercept `esp_wifi_*()`, `esp_bt_*()` API calls in Renode and provide simulated responses without modelling the underlying hardware.
+- **Limitation:** Tight coupling to specific ESP-IDF versions. Breaks when the HAL changes.
+
+### P2IM (Processor-Peripheral Interface Model)
+
+- **Paper:** "P2IM: Scalable and Hardware-independent Firmware Testing via Automatic Peripheral Interface Modeling" (USENIX Security 2020)
+- **Approach:** Automatically identifies peripheral register types (control, status, data) from firmware access patterns. Creates minimal models.
+- **Relevance:** The register classification heuristics could help prioritise which ESP32 registers need full models vs simple stubs.
+
+---
+
+## 7. Practical Implementation Plan
+
+### Phase 1: Establish the Comparison Infrastructure (Week 1-2)
+
+**On rpi4-esp:**
+1. Install ESP-IDF on the RPi4 (or cross-compile on a dev machine and flash remotely)
+2. Set up OpenOCD for ESP32-C3: `openocd -f board/esp32c3-builtin.cfg`
+3. Build and flash `hello_world` to ESP32-C3
+4. Capture UART output as baseline
+5. Set up app-level tracing with gcov for code coverage on real hardware
+
+**In Renode:**
+1. Create a minimal ESP32-C3 platform file (.repl) with:
+   - RV32IMC CPU
+   - Memory map from ESP-IDF `reg_base.h`
+   - ESP32_UART (already exists)
+   - Python catch-all peripherals for all other ranges
+2. Load the same `hello_world` binary
+3. Enable full peripheral access logging
+4. Compare UART output and identify first divergence point
+
+### Phase 2: Iterative Register Modelling (Week 3-6)
+
+For each divergence:
+1. Identify the register address firmware is stuck on
+2. Check ESP-IDF source for what value is expected (often a "ready" bit)
+3. Update the Python stub to return the correct value
+4. Verify against real hardware using JTAG watchpoint on that address
+5. Repeat until `hello_world` boots and prints to UART in Renode
+
+Expected order of register modelling needed (based on ESP-IDF boot flow):
+1. **eFuse** (MAC address, chip revision) -- read during early boot
+2. **RTC/clock control** -- PLL lock, CPU frequency setting
+3. **Cache/MMU** -- Flash memory mapping for XIP
+4. **System registers** -- Peripheral clock gating, reset control
+5. **Timer groups** -- FreeRTOS tick timer
+6. **Interrupt matrix** -- RISC-V PLIC/CLIC configuration
+
+### Phase 3: Coverage-Guided Expansion (Week 7+)
+
+1. Move from `hello_world` to `wifi_station` example
+2. The WiFi init path will hit many more registers
+3. Use the Fuzzware-style approach: fuzz register responses, keep values that advance boot progress
+4. Cross-reference against esp32-open-mac QEMU trace logs for correct values
+5. Graduate frequently-accessed registers to proper C# models
+
+### Phase 4: Automated Comparison CI
+
+Set up automated testing:
+1. Build ESP-IDF example
+2. Flash to ESP32-C3 on rpi4-esp, capture output
+3. Run in Renode, capture output
+4. Diff comparison
+5. Report new unhandled accesses and divergence points
+
+### Hardware Needed
+
+| Item | Purpose | Priority | Est. Cost |
+|---|---|---|---|
+| **ESP-Prog** | JTAG for ESP32 DevKit + CAM-MB | High | ~$15 |
+| **ESP32-C6 dev board** | 802.15.4 testing + Thread validation | High | ~$10 |
+| **ESP32-H2 dev board** | Pure 802.15.4 + BLE device | Medium | ~$10 |
+| **ESP32-S3 dev board** | QEMU-supported Xtensa target | Low | ~$10 |
+
+---
+
+## Appendix: Quick Reference Commands
+
+### ESP32-C3 JTAG on rpi4-esp
+
+```bash
+# Start OpenOCD (ESP32-C3 built-in USB-JTAG)
+openocd -f board/esp32c3-builtin.cfg
+
+# Connect GDB
+riscv32-esp-elf-gdb -ex "target remote :3333" build/app.elf
+
+# Set hardware breakpoint
+(gdb) hbreak *0x60033000  # Break on WiFi register access
+
+# Single step
+(gdb) stepi
+
+# Read register at address
+(gdb) x/w 0x60033000
+
+# Flash via OpenOCD
+openocd -f board/esp32c3-builtin.cfg -c "program_esp firmware.bin 0x10000 verify exit"
+```
+
+### Renode Peripheral Access Logging
+
+```
+# In .resc script:
+logLevel -1 sysbus           # Log ALL bus accesses at NOISY level
+logFile @esp32c3_trace.log   # Save to file
+
+# Or per-peripheral:
+logLevel -1 sysbus.uart
+logLevel -1 sysbus.stub_wifi
+
+# Create catch-all for unmodelled range:
+machine LoadPlatformDescriptionFromString "stub: Python.PythonPeripheral @ sysbus 0x60033000 { size: 0x3000; initable: true; script: \"request.value = 0\" }"
+```
+
+### ESP-IDF App Tracing
+
+```bash
+# Enable in menuconfig:
+# Component config > Application Level Tracing > Data Destination = JTAG
+
+# Build with tracing enabled
+idf.py build
+
+# Collect trace data via OpenOCD:
+openocd -f board/esp32c3-builtin.cfg
+# In another terminal:
+esp_app_trace_tool.py read_trace trace.bin /dev/null
+
+# Code coverage:
+# Enable CONFIG_APPTRACE_GCOV_ENABLE
+# Collect after test run:
+esp_app_trace_tool.py gcov_dump build/app.elf
+```
