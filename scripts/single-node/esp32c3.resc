@@ -1,0 +1,6 @@
+using sysbus
+
+mach create "esp32c3"
+machine LoadPlatformDescription @platforms/cpus/esp32c3.repl
+
+showAnalyzer uart0
