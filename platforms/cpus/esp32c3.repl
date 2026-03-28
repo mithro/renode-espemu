@@ -17,6 +17,17 @@ clint: IRQControllers.CoreLevelInterruptor @ sysbus 0x60801000
     frequency: 16000000
     [0, 1] -> cpu@[3, 7]
 
+// === WORKAROUND MEMORY ===
+
+// Null-pointer dereference guard: ROM code (rom_i2c_writeReg_Mask) reads
+// through a function table pointer (rom_phyFuns at 0x3FCDF5B8) that is
+// uninitialised (zero) in emulation. This causes reads from low addresses
+// (0x0-0x1FFF) and eventual jump to PC=0x0. Mapping a small region here
+// prevents CPU abort and lets the firmware continue past these calls.
+// TODO: Replace with proper rom_phyFuns initialisation when PHY stubs are added.
+null_guard: Memory.MappedMemory @ sysbus 0x0
+    size: 0x2000
+
 // === MEMORY REGIONS ===
 
 // Internal SRAM (used as both IRAM and DRAM)
@@ -80,10 +91,11 @@ stub_gpio: Python.PythonPeripheral @ sysbus 0x60004000
     script: "request.Value = 0x0"
 
 // RTC Controller at 0x60008000
+// Offset 0x38 = RTC_CNTL_RESET_STATE_REG: return POWERON_RESET (1) for CPU0
 stub_rtc: Python.PythonPeripheral @ sysbus 0x60008000
     size: 0x800
     initable: true
-    script: "request.Value = 0x0"
+    filename: "platforms/scripts/stub_rtc.py"
 
 // eFuse at 0x60008800
 stub_efuse: Python.PythonPeripheral @ sysbus 0x60008800
