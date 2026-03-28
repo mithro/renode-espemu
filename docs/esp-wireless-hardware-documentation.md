@@ -348,40 +348,84 @@ The host communicates with the controller via a Virtual HCI (Host Controller Int
 [BLE Radio Hardware]  (undocumented)
 ```
 
-Key ESP-IDF functions:
-- `esp_bt_controller_init()` -- Initialize the BLE controller
-- `esp_vhci_host_register_callback()` -- Register host-to-controller callbacks
-- `esp_vhci_host_send_packet()` -- Send HCI packet from host to controller
-- `esp_vhci_host_check_send_avail()` -- Check if controller can accept packets
+Key ESP-IDF functions (defined in `components/bt/include/esp32/include/esp_bt.h`):
+- `esp_bt_controller_init(esp_bt_controller_config_t *cfg)` -- Initialize the BLE controller blob
+- `esp_bt_controller_enable(esp_bt_mode_t mode)` -- Enable in BLE-only, BR/EDR-only, or dual mode
+- `esp_vhci_host_register_callback(const esp_vhci_host_callback_t *callback)` -- Register host callbacks
+- `esp_vhci_host_send_packet(uint8_t *data, uint16_t len)` -- Send HCI packet to controller
+- `esp_vhci_host_check_send_avail()` -- Flow control check before sending
+
+The VHCI callback structure:
+
+```c
+typedef struct esp_vhci_host_callback {
+    void (*notify_host_send_available)(void);           // Controller ready to receive
+    int (*notify_host_recv)(uint8_t *data, uint16_t len); // Controller has data for host
+} esp_vhci_host_callback_t;
+```
+
+The controller blob (`bt.c`, 2133 lines of open-source glue) calls numerous `extern` functions from the binary: `btdm_controller_init()`, `btdm_controller_enable()`, `btdm_osi_funcs_register()`, `btdm_rf_bb_init_phase2()`, `ble_txpwr_set/get()`, `btdm_lpclk_select_src()`, sleep management functions, etc.
+
+### Zephyr BLE on ESP32
+
+Zephyr uses the **identical VHCI interface** via `drivers/bluetooth/hci/hci_esp32.c` (869 lines):
+- Calls `esp_bt_controller_init()` and `esp_bt_controller_enable()` from the blob
+- Registers the same VHCI callbacks
+- `bt_esp32_send()` calls `esp_vhci_host_send_packet()`
+- Supports ESP32, ESP32-S3, ESP32-C3
+
+Both ESP-IDF and Zephyr use the same VHCI intercept point, confirming it as the canonical abstraction boundary.
+
+### HCI Protocol Details
+
+The controller speaks **standard Bluetooth HCI** plus vendor-specific commands:
+- Standard HCI command/event/ACL packets flow through VHCI
+- ESP-IDF includes an `controller_hci_uart_esp32` example where the ESP32 acts as controller-only, exposing HCI over UART to an external host -- this shows the **exact HCI traffic patterns** an emulator needs to support
+- Vendor-specific HCI commands exist in the 0xFC00 range (see Security section below)
+
+### WiFi/BT Coexistence
+
+The ESP32 shares a **single 2.4 GHz RF module** between WiFi, BT Classic, and BLE. Coexistence uses **software time-division multiplexing**:
+- A coexistence period is divided into 3 time slices: WiFi, BT, BLE
+- Each module gets higher priority during its own slice
+- Dynamic priority allows preemption (e.g., BLE advertising events can preempt WiFi)
+- The arbiter is primarily software-managed (not direct hardware register arbitration)
+- Configured via `CONFIG_ESP_COEX_SW_COEXIST_ENABLE`
 
 ### Emulation Implications
 
-The VHCI interface is **standard Bluetooth HCI** (Host Controller Interface), meaning:
+The VHCI interface is **standard Bluetooth HCI**, meaning:
 - The host stack (NimBLE/Bluedroid) sends standard HCI commands, ACL data, and SCO data
 - The controller responds with standard HCI events and data
 - **An emulator could implement a virtual BLE controller that speaks HCI** without needing to model the actual BLE radio hardware
 - This would allow the host stack to function normally while the emulator provides simulated BLE peers
+- An emulator would: (1) stub `btdm_controller_init/enable` to return success, (2) implement a virtual HCI responder, (3) feed HCI events back through `notify_host_recv`
 
 This is a significantly more tractable approach than trying to reverse-engineer the BLE radio registers.
+
+### NimBLE Open-Source Controller (Not Available for ESP32)
+
+Apache NimBLE includes a **full open-source BLE controller** (Link Layer + HCI) at `nimble/controller/`, with hardware drivers for Nordic nRF51/52/5340, Dialog CMAC, and a **native simulation driver**. However, **no ESP32 driver exists** -- the controller needs direct radio hardware register access, and ESP32's radio registers are undocumented. The native simulation driver could serve as a reference for emulator implementation.
 
 ### What IS Open Source (BLE)
 
 - NimBLE host stack: fully open source (Apache 2.0)
 - Bluedroid host stack: open source (in ESP-IDF)
-- VHCI transport layer: open source
+- VHCI transport layer: open source (`bt.c`, 2133 lines)
 - BLE Mesh: open source
+- Zephyr HCI driver: open source (`hci_esp32.c`, 869 lines)
 
 ### What is NOT Open Source (BLE)
 
-- BLE link layer controller
-- BLE PHY driver
+- BLE link layer controller (`libbtdm_app.a` / `libbt.a`)
+- BLE PHY driver (`libphy.a`)
 - BLE baseband registers
 - Bluetooth Classic controller (ESP32 only)
-- Coexistence arbiter (WiFi/BT radio sharing)
+- Coexistence arbiter internals
 
 ### No Known BLE Reverse Engineering
 
-Unlike WiFi, there is **no known public reverse engineering effort** targeting the ESP32 BLE controller hardware. The esp32-open-mac project lists Bluetooth as a future goal but has not started work on it.
+Unlike WiFi, there is **no known public reverse engineering effort** targeting the ESP32 BLE controller hardware. The esp32-open-mac project lists Bluetooth as a future goal but has not started work on it. The Tarlogic Security research (see section 10) revealed some vendor-specific HCI commands but did not document the radio hardware itself.
 
 ---
 
@@ -411,24 +455,79 @@ The `ieee802154_reg.h` files contain **complete register-level documentation**, 
 - Read/write permissions
 - Reset values
 
+Key registers at `IEEE802154_REG_BASE + offset`:
+
+| Offset | Register | Description |
+|---|---|---|
+| 0x0000 | COMMAND | Opcode for operations (see command table below) |
+| 0x0004 | CTRL_CFG | Promiscuous mode, auto-ACK, PAN coordinator, frame filtering, coex |
+| 0x0008-0x0044 | Multi-PAN tables | 4 PAN interfaces, each with short addr, PAN ID, extended addr |
+| 0x0048 | CHANNEL | Frequency/channel selection |
+| 0x004C | TX_POWER | Transmit power level |
+| 0x0050 | ED_SCAN_DURATION | Energy detection scan duration |
+| 0x0054 | ED_SCAN_CFG | CCA mode, ED threshold, RSSI |
+| 0x0058 | IFS | LIFS/SIFS interframe spacing |
+| 0x005C | ACK_TIMEOUT | ACK wait timeout |
+| 0x0060 | EVENT_EN | 13 event type enables |
+| 0x0064 | EVENT_STATUS | Event status flags |
+| 0x0068 | RX_ABORT_INTR_CTRL | RX abort interrupt control |
+| 0x0070 | COEX_PTI | Coexistence priority/type indicator |
+| 0x0078 | TX_ABORT_EVENT_EN | TX abort event enables |
+| 0x0080 | RX_STATUS | rx_state, filter_fail_reason, rx_abort_reason, preamble/SFD match |
+| 0x0084 | TX_STATUS | tx_state, tx_abort_reason |
+
+Hardware command opcodes (from `ieee802154_common_ll.h`):
+
+| Command | Opcode | Description |
+|---|---|---|
+| TX_START | 0x41 | Begin transmission |
+| RX_START | 0x42 | Begin reception |
+| CCA_TX_START | 0x43 | Clear channel assessment, then transmit |
+| ED_START | 0x44 | Energy detection scan |
+| STOP | 0x45 | Stop current operation |
+| (+ timer/test commands) | 0x46+ | Timer and test mode operations |
+
 The `ieee802154_struct.h` files provide C struct overlays that make register access straightforward.
 
 The `ieee802154_ll.h` files show exactly how the driver configures the radio: setting channel, TX power, PAN ID, addresses, enabling/disabling features, handling interrupts, etc.
 
+### Driver Architecture (Three Layers, All Open Source)
+
+The 802.15.4 stack has three fully open-source layers:
+
+1. **Driver layer** (`components/ieee802154/driver/`): 9 C files implementing the ISR-driven state machine (states: IDLE, TX, RX, RX_ACK, TX_ACK, CCA, ED), buffer management, CCA logic, PIB (PAN Information Base), security, and timers.
+
+2. **HAL layer** (`components/esp_hal_ieee802154/`): Per-chip inline functions for register access. Functions like `ieee802154_ll_set_cmd()`, `ieee802154_ll_set_rx_addr()`, `ieee802154_ll_set_tx_addr()`, `ieee802154_ll_set_freq()`, `ieee802154_ll_set_power()` give **complete visibility** into every register interaction.
+
+3. **SoC register definitions** (`components/soc/*/register/soc/`): Bitfield-level register maps and C struct overlays.
+
+**The only binary blob dependency** is `esp_phy` (RF PHY calibration library, shared with WiFi/BT). This affects analog RF performance, not protocol correctness -- it can be stubbed for functional emulation.
+
 ### OpenThread Integration
 
-[OpenThread](https://openthread.io/) runs on ESP32-C6/H2 using this open-source radio driver:
-- `esp-idf/components/openthread/` -- OpenThread integration
-- The Radio Abstraction Layer (RAL) is fully open source
-- Provides a clean, documented interface for radio operations
+[OpenThread](https://openthread.io/) runs on ESP32-C6/H2 using the open-source radio driver. The platform adaptation (`components/openthread/src/port/esp_openthread_radio.c`) calls `esp_ieee802154_*` functions directly:
+- `esp_ieee802154_enable()` / `esp_ieee802154_disable()`
+- `esp_ieee802154_set_promiscuous()`, `esp_ieee802154_set_rx_when_idle()`
+- Callbacks: `otPlatRadioTxDone()`, `otPlatRadioReceiveDone()` driven by events
+- Error mapping: `ESP_IEEE802154_TX_ERR_CCA_BUSY` → `OT_ERROR_CHANNEL_ACCESS_FAILURE`
+
+The Thread border router (`espressif/esp-thread-br`) uses the same stack.
+
+### Zigbee: Radio Open, Protocol Stack Closed
+
+- **Radio driver:** Uses the same open-source `components/ieee802154/` driver
+- **Zigbee stack (ZBOSS):** Binary blobs. The `esp-zigbee-sdk` ships prebuilt `.a` libraries (`libesp_zb_api.{zczr,ed,gpd}.a`, `libzboss_port.{native,remote}.a`) per chip target
+- For emulation purposes, the radio layer is what matters, and it's fully open
 
 ### Emulation Implications
 
 Because the 802.15.4 radio is fully documented at the register level:
-1. An emulator can implement a faithful hardware model directly from the register definitions
-2. The open-source HAL driver serves as a test oracle
-3. Combined with Renode's existing `IEEE802_15_4Medium`, this enables **full Thread/Zigbee simulation** for ESP32-C6 and ESP32-H2
-4. This is the single most tractable wireless emulation target for ESP32
+1. An emulator can implement a faithful hardware model directly from the register definitions -- the command interface is only 8 opcodes
+2. The open-source HAL driver and full driver state machine serve as both specification and test oracle
+3. DMA buffer addresses for TX/RX are set via documented registers
+4. Frame format is standard IEEE 802.15.4 with well-defined semantics
+5. Combined with Renode's existing `IEEE802_15_4Medium`, this enables **full Thread/Zigbee simulation** for ESP32-C6 and ESP32-H2
+6. This is the single most tractable wireless emulation target for ESP32
 
 ---
 
@@ -481,12 +580,13 @@ Security researchers have analyzed ESP32 wireless internals, sometimes revealing
 3. **WiFi deauth/injection:** Research into frame injection on ESP32 (enabled by promiscuous mode) has documented some WiFi hardware behavior
 4. **[38C3 talk (2024-12-27)](https://esp32-open-mac.be/posts/0009-talk-at-38c3/):** "Liberating Wi-Fi on the ESP32" -- Comprehensive presentation on WiFi hardware reverse engineering
 
-### ESP32 Bluetooth Backdoor (2025)
+### ESP32 Bluetooth Undocumented HCI Commands (2025)
 
-In early 2025, security researchers from Tarlogic Security disclosed undocumented HCI commands in the ESP32 Bluetooth controller that could be used for memory read/write operations on the chip. While Espressif characterized these as debug commands rather than a backdoor, this research:
-- Confirmed the existence of vendor-specific HCI commands
-- Showed that the BLE controller has direct memory access capabilities
-- Demonstrated that HCI-level analysis can reveal controller internals
+In March 2025, researchers from Tarlogic Security (presented at RootedCON 2025) disclosed undocumented vendor-specific HCI commands in the ESP32 Bluetooth controller:
+- **Write Memory** (opcode 0xFC02) and other debug commands in the 0xFC00 vendor-specific range
+- These commands allow memory read/write operations on the chip
+- Espressif clarified these are debugging features, not remotely exploitable -- they require physical access or HCI-UART configuration
+- **Emulation relevance:** Confirms that the BLE controller's HCI command set includes vendor-specific extensions. An emulator implementing a virtual BLE controller should handle (or safely stub) vendor-specific commands in the 0xFC00 range
 
 ---
 
