@@ -2,14 +2,3 @@ using sysbus
 
 mach create "esp32c3"
 machine LoadPlatformDescription @platforms/cpus/esp32c3.repl
-
-showAnalyzer uart0
-
-# Write RISC-V "ret" (c.jr ra = 0x8082) at address 0x0 so that
-# NULL function pointer calls through uninitialised rom_phyFuns
-# simply return instead of causing illegal instruction exceptions.
-# Also fill a few more ret instructions for indirect calls with small offsets.
-sysbus WriteWord 0x0 0x8082
-sysbus WriteWord 0x2 0x8082
-sysbus WriteWord 0x4 0x8082
-sysbus WriteWord 0x6 0x8082
