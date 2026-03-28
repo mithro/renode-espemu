@@ -34,11 +34,11 @@ This subsystem is **critical** for ESP32 operation because nearly all applicatio
 
 ### Memory Map (cache-related regions)
 
-| Address Range              | Size   | Description                        |
-|----------------------------|--------|------------------------------------|
-| 0x3F40_0000 - 0x3F7F_FFFF | 4 MB   | External flash data (via cache)    |
-| 0x3F80_0000 - 0x3FBF_FFFF | 4 MB   | External PSRAM data (via cache)    |
-| 0x400C_0000 - 0x40BF_FFFF | ~11 MB | External flash instructions (XIP)  |
+| Address Range             | Size   | Description                       |
+| ------------------------- | ------ | --------------------------------- |
+| 0x3F40_0000 - 0x3F7F_FFFF | 4 MB   | External flash data (via cache)   |
+| 0x3F80_0000 - 0x3FBF_FFFF | 4 MB   | External PSRAM data (via cache)   |
+| 0x400C_0000 - 0x40BF_FFFF | ~11 MB | External flash instructions (XIP) |
 
 ## TRM Chapter Reference
 
@@ -57,36 +57,36 @@ Cache and MMU registers are accessed through the DPORT register block (base 0x3F
 
 ### Cache Control Registers
 
-| Register                       | Offset  | Description                                         |
-|--------------------------------|---------|-----------------------------------------------------|
-| DPORT_PRO_CACHE_CTRL_REG       | 0x040   | PRO CPU cache enable, mode, size config             |
-| DPORT_PRO_CACHE_CTRL1_REG      | 0x044   | PRO CPU cache mask (which address ranges cached)    |
-| DPORT_APP_CACHE_CTRL_REG       | 0x058   | APP CPU cache enable, mode, size config             |
-| DPORT_APP_CACHE_CTRL1_REG      | 0x05C   | APP CPU cache mask                                  |
-| DPORT_PRO_CACHE_LOCK_0_ADDR_REG| 0x048  | PRO CPU cache lock region 0 address                 |
-| DPORT_PRO_CACHE_LOCK_1_ADDR_REG| 0x04C  | PRO CPU cache lock region 1 address                 |
-| DPORT_PRO_CACHE_LOCK_2_ADDR_REG| 0x050  | PRO CPU cache lock region 2 address                 |
-| DPORT_PRO_CACHE_LOCK_3_ADDR_REG| 0x054  | PRO CPU cache lock region 3 address                 |
-| DPORT_APP_CACHE_LOCK_0_ADDR_REG| 0x060  | APP CPU cache lock region 0 address                 |
+| Register                        | Offset | Description                                      |
+| ------------------------------- | ------ | ------------------------------------------------ |
+| DPORT_PRO_CACHE_CTRL_REG        | 0x040  | PRO CPU cache enable, mode, size config          |
+| DPORT_PRO_CACHE_CTRL1_REG       | 0x044  | PRO CPU cache mask (which address ranges cached) |
+| DPORT_APP_CACHE_CTRL_REG        | 0x058  | APP CPU cache enable, mode, size config          |
+| DPORT_APP_CACHE_CTRL1_REG       | 0x05C  | APP CPU cache mask                               |
+| DPORT_PRO_CACHE_LOCK_0_ADDR_REG | 0x048  | PRO CPU cache lock region 0 address              |
+| DPORT_PRO_CACHE_LOCK_1_ADDR_REG | 0x04C  | PRO CPU cache lock region 1 address              |
+| DPORT_PRO_CACHE_LOCK_2_ADDR_REG | 0x050  | PRO CPU cache lock region 2 address              |
+| DPORT_PRO_CACHE_LOCK_3_ADDR_REG | 0x054  | PRO CPU cache lock region 3 address              |
+| DPORT_APP_CACHE_LOCK_0_ADDR_REG | 0x060  | APP CPU cache lock region 0 address              |
 
 ### MMU Table Registers
 
-| Register / Region                         | Address Range         | Description                  |
-|-------------------------------------------|-----------------------|------------------------------|
-| PRO CPU Flash Instruction MMU Table       | 0x3FF10000 - 0x3FF100FF | 64 entries x 4 bytes       |
-| APP CPU Flash Instruction MMU Table       | 0x3FF12000 - 0x3FF120FF | 64 entries x 4 bytes       |
-| Flash Data MMU Table                      | 0x3FF14000 - 0x3FF140FF | 64 entries x 4 bytes       |
-| PSRAM Data MMU Table (PRO)                | 0x3FF16000 - 0x3FF160FF | 64 entries x 4 bytes       |
+| Register / Region                   | Address Range           | Description          |
+| ----------------------------------- | ----------------------- | -------------------- |
+| PRO CPU Flash Instruction MMU Table | 0x3FF10000 - 0x3FF100FF | 64 entries x 4 bytes |
+| APP CPU Flash Instruction MMU Table | 0x3FF12000 - 0x3FF120FF | 64 entries x 4 bytes |
+| Flash Data MMU Table                | 0x3FF14000 - 0x3FF140FF | 64 entries x 4 bytes |
+| PSRAM Data MMU Table (PRO)          | 0x3FF16000 - 0x3FF160FF | 64 entries x 4 bytes |
 
 ### Cache Status and Control
 
-| Register                       | Offset  | Description                                         |
-|--------------------------------|---------|-----------------------------------------------------|
-| DPORT_CACHE_IA_INT_EN_REG      | 0x1A0   | Cache illegal access interrupt enable               |
-| DPORT_CACHE_IA_INT_REG         | 0x1A4   | Cache illegal access interrupt status               |
-| DPORT_PRO_DCACHE_DBUG0_REG     | 0x398   | PRO CPU data cache debug register 0                 |
-| DPORT_PRO_DCACHE_DBUG1_REG     | 0x39C   | PRO CPU data cache debug register 1                 |
-| DPORT_APP_DCACHE_DBUG0_REG     | 0x3B8   | APP CPU data cache debug register 0                 |
+| Register                   | Offset | Description                           |
+| -------------------------- | ------ | ------------------------------------- |
+| DPORT_CACHE_IA_INT_EN_REG  | 0x1A0  | Cache illegal access interrupt enable |
+| DPORT_CACHE_IA_INT_REG     | 0x1A4  | Cache illegal access interrupt status |
+| DPORT_PRO_DCACHE_DBUG0_REG | 0x398  | PRO CPU data cache debug register 0   |
+| DPORT_PRO_DCACHE_DBUG1_REG | 0x39C  | PRO CPU data cache debug register 1   |
+| DPORT_APP_DCACHE_DBUG0_REG | 0x3B8  | APP CPU data cache debug register 0   |
 
 ## Source Code References
 
@@ -166,18 +166,18 @@ The cache/MMU is one of the most complex subsystems to implement correctly. The 
 
 **Overall Complexity: VERY HIGH**
 
-| Aspect                        | Difficulty | Notes                                                |
-|-------------------------------|------------|------------------------------------------------------|
-| MMU table management          | Medium     | Array of entries with simple format                  |
-| Address translation           | High       | Must intercept all accesses to mapped regions        |
-| Flash image integration       | Medium     | Read from flash image at translated offset           |
-| PSRAM integration             | Medium     | Read-write backing store with MMU translation        |
-| Cache simulation              | Low-Medium | Can be simplified/omitted for functional emulation   |
-| Dual-CPU independence         | High       | Separate tables and controls per CPU core            |
-| Boot sequence dependency      | Critical   | Must work correctly for ANY firmware to boot         |
-| Flash encryption interaction  | High       | Encrypted flash needs transparent decryption layer   |
-| Renode integration            | High       | Requires custom address translation hooks            |
-| Testing                       | High       | Hard to test in isolation; needs full boot flow      |
+| Aspect                       | Difficulty | Notes                                              |
+| ---------------------------- | ---------- | -------------------------------------------------- |
+| MMU table management         | Medium     | Array of entries with simple format                |
+| Address translation          | High       | Must intercept all accesses to mapped regions      |
+| Flash image integration      | Medium     | Read from flash image at translated offset         |
+| PSRAM integration            | Medium     | Read-write backing store with MMU translation      |
+| Cache simulation             | Low-Medium | Can be simplified/omitted for functional emulation |
+| Dual-CPU independence        | High       | Separate tables and controls per CPU core          |
+| Boot sequence dependency     | Critical   | Must work correctly for ANY firmware to boot       |
+| Flash encryption interaction | High       | Encrypted flash needs transparent decryption layer |
+| Renode integration           | High       | Requires custom address translation hooks          |
+| Testing                      | High       | Hard to test in isolation; needs full boot flow    |
 
 **Estimated effort**: 4-6 weeks for a functional implementation that supports boot and XIP.
 

@@ -54,58 +54,58 @@ The TWAI registers are based on the SJA1000 Pelican mode register map. Register 
 
 ### Core Registers (base 0x3FF6B000)
 
-| Register            | Offset | Reset Mode                  | Operating Mode               |
-|---------------------|--------|-----------------------------|------------------------------|
-| MODE_REG            | 0x000  | Mode control (reset, listen-only, self-test, acceptance filter mode) | Same |
-| CMD_REG             | 0x004  | N/A                         | Command (TX request, abort TX, release RX buffer, clear overrun, self-reception request) |
-| STATUS_REG          | 0x008  | Status                      | Status (RX buffer, TX buffer, error, bus-off, etc.) |
-| INT_RAW_REG         | 0x00C  | N/A                         | Interrupt status (read-clear in SJA1000; ESP32 has raw + enable) |
-| INT_ENA_REG         | 0x010  | Interrupt enable            | Interrupt enable             |
-| BUS_TIMING_0_REG    | 0x018  | Bus timing 0 (BRP, SJW)    | Read-only                    |
-| BUS_TIMING_1_REG    | 0x01C  | Bus timing 1 (TSEG1, TSEG2, SAM) | Read-only              |
-| ARB_LOST_CAP_REG    | 0x02C  | N/A                         | Arbitration lost capture     |
-| ERR_CODE_CAP_REG    | 0x030  | N/A                         | Error code capture           |
-| ERR_WARNING_LIMIT_REG| 0x034 | Error warning limit (default 96) | Read-only               |
-| RX_ERR_CNT_REG      | 0x038  | RX error counter (R/W)     | RX error counter (read-only) |
-| TX_ERR_CNT_REG      | 0x03C  | TX error counter (R/W)     | TX error counter (read-only) |
+| Register              | Offset | Reset Mode                                                           | Operating Mode                                                                           |
+| --------------------- | ------ | -------------------------------------------------------------------- | ---------------------------------------------------------------------------------------- |
+| MODE_REG              | 0x000  | Mode control (reset, listen-only, self-test, acceptance filter mode) | Same                                                                                     |
+| CMD_REG               | 0x004  | N/A                                                                  | Command (TX request, abort TX, release RX buffer, clear overrun, self-reception request) |
+| STATUS_REG            | 0x008  | Status                                                               | Status (RX buffer, TX buffer, error, bus-off, etc.)                                      |
+| INT_RAW_REG           | 0x00C  | N/A                                                                  | Interrupt status (read-clear in SJA1000; ESP32 has raw + enable)                         |
+| INT_ENA_REG           | 0x010  | Interrupt enable                                                     | Interrupt enable                                                                         |
+| BUS_TIMING_0_REG      | 0x018  | Bus timing 0 (BRP, SJW)                                              | Read-only                                                                                |
+| BUS_TIMING_1_REG      | 0x01C  | Bus timing 1 (TSEG1, TSEG2, SAM)                                     | Read-only                                                                                |
+| ARB_LOST_CAP_REG      | 0x02C  | N/A                                                                  | Arbitration lost capture                                                                 |
+| ERR_CODE_CAP_REG      | 0x030  | N/A                                                                  | Error code capture                                                                       |
+| ERR_WARNING_LIMIT_REG | 0x034  | Error warning limit (default 96)                                     | Read-only                                                                                |
+| RX_ERR_CNT_REG        | 0x038  | RX error counter (R/W)                                               | RX error counter (read-only)                                                             |
+| TX_ERR_CNT_REG        | 0x03C  | TX error counter (R/W)                                               | TX error counter (read-only)                                                             |
 
 ### Acceptance Filter Registers (writable only in Reset Mode)
 
-| Register                  | Offset | Description                                |
-|---------------------------|--------|--------------------------------------------|
-| ACCEPTANCE_CODE_0_REG     | 0x040  | Acceptance code byte 0                     |
-| ACCEPTANCE_CODE_1_REG     | 0x044  | Acceptance code byte 1                     |
-| ACCEPTANCE_CODE_2_REG     | 0x048  | Acceptance code byte 2                     |
-| ACCEPTANCE_CODE_3_REG     | 0x04C  | Acceptance code byte 3                     |
-| ACCEPTANCE_MASK_0_REG     | 0x050  | Acceptance mask byte 0 (1=don't care)      |
-| ACCEPTANCE_MASK_1_REG     | 0x054  | Acceptance mask byte 1                     |
-| ACCEPTANCE_MASK_2_REG     | 0x058  | Acceptance mask byte 2                     |
-| ACCEPTANCE_MASK_3_REG     | 0x05C  | Acceptance mask byte 3                     |
+| Register              | Offset | Description                           |
+| --------------------- | ------ | ------------------------------------- |
+| ACCEPTANCE_CODE_0_REG | 0x040  | Acceptance code byte 0                |
+| ACCEPTANCE_CODE_1_REG | 0x044  | Acceptance code byte 1                |
+| ACCEPTANCE_CODE_2_REG | 0x048  | Acceptance code byte 2                |
+| ACCEPTANCE_CODE_3_REG | 0x04C  | Acceptance code byte 3                |
+| ACCEPTANCE_MASK_0_REG | 0x050  | Acceptance mask byte 0 (1=don't care) |
+| ACCEPTANCE_MASK_1_REG | 0x054  | Acceptance mask byte 1                |
+| ACCEPTANCE_MASK_2_REG | 0x058  | Acceptance mask byte 2                |
+| ACCEPTANCE_MASK_3_REG | 0x05C  | Acceptance mask byte 3                |
 
 ### TX Buffer Registers (Operating Mode, after TX request)
 
-| Register            | Offset | Description                                        |
-|---------------------|--------|----------------------------------------------------|
-| TX_FRAME_INFO_REG   | 0x040  | TX frame info (DLC, RTR, extended frame flag)      |
-| TX_ID / TX_DATA     | 0x044-0x070 | TX identifier and data bytes (layout depends on standard/extended frame) |
+| Register          | Offset      | Description                                                              |
+| ----------------- | ----------- | ------------------------------------------------------------------------ |
+| TX_FRAME_INFO_REG | 0x040       | TX frame info (DLC, RTR, extended frame flag)                            |
+| TX_ID / TX_DATA   | 0x044-0x070 | TX identifier and data bytes (layout depends on standard/extended frame) |
 
 Note: TX buffer registers share address space with acceptance filter registers. The interpretation depends on the operating mode.
 
 ### RX Buffer Registers (Operating Mode)
 
-| Register            | Offset | Description                                        |
-|---------------------|--------|----------------------------------------------------|
-| RX_FRAME_INFO_REG   | 0x040  | RX frame info (DLC, RTR, extended frame flag)      |
-| RX_ID / RX_DATA     | 0x044-0x070 | RX identifier and data bytes                  |
+| Register          | Offset      | Description                                   |
+| ----------------- | ----------- | --------------------------------------------- |
+| RX_FRAME_INFO_REG | 0x040       | RX frame info (DLC, RTR, extended frame flag) |
+| RX_ID / RX_DATA   | 0x044-0x070 | RX identifier and data bytes                  |
 
 Note: RX data is read from the 64-byte FIFO. The RX buffer register window shows the head of the FIFO. After reading, issue a "release receive buffer" command to advance to the next frame.
 
 ### Additional Registers
 
-| Register            | Offset | Description                                        |
-|---------------------|--------|----------------------------------------------------|
-| RX_MSG_CNT_REG      | 0x074  | Number of messages in RX FIFO                      |
-| CLOCK_DIVIDER_REG   | 0x07C  | Clock divider and extended mode select             |
+| Register          | Offset | Description                            |
+| ----------------- | ------ | -------------------------------------- |
+| RX_MSG_CNT_REG    | 0x074  | Number of messages in RX FIFO          |
+| CLOCK_DIVIDER_REG | 0x07C  | Clock divider and extended mode select |
 
 ### Bus Timing Configuration
 
@@ -212,18 +212,18 @@ Baud rate = APB_CLK / (BRP_prescaler * (1 + TSEG1 + TSEG2))
 
 **Overall Complexity: MEDIUM**
 
-| Aspect                        | Difficulty | Notes                                                |
-|-------------------------------|------------|------------------------------------------------------|
-| SJA1000 register model        | Medium     | Well-documented but mode-dependent behavior is fiddly|
-| Mode state machine            | Low-Medium | Reset vs Operating with clear transition rules       |
-| TX frame processing           | Low        | Single buffer, straightforward format                |
-| RX FIFO management            | Medium     | 64-byte circular buffer with message framing         |
-| Acceptance filtering          | Medium     | Single/dual mode with mask logic                     |
-| Error management              | Low        | Can be simplified for emulation (no real bus errors)  |
-| Self-test/loopback mode       | Low        | Simple internal routing of TX to RX                  |
-| QEMU reference quality        | High       | Complete implementation available for reference       |
-| SJA1000 reuse potential       | High       | Standard IP; may find existing Renode/open-source model |
-| CAN bus infrastructure        | Medium     | Depends on Renode's existing CAN support              |
+| Aspect                  | Difficulty | Notes                                                   |
+| ----------------------- | ---------- | ------------------------------------------------------- |
+| SJA1000 register model  | Medium     | Well-documented but mode-dependent behavior is fiddly   |
+| Mode state machine      | Low-Medium | Reset vs Operating with clear transition rules          |
+| TX frame processing     | Low        | Single buffer, straightforward format                   |
+| RX FIFO management      | Medium     | 64-byte circular buffer with message framing            |
+| Acceptance filtering    | Medium     | Single/dual mode with mask logic                        |
+| Error management        | Low        | Can be simplified for emulation (no real bus errors)    |
+| Self-test/loopback mode | Low        | Simple internal routing of TX to RX                     |
+| QEMU reference quality  | High       | Complete implementation available for reference         |
+| SJA1000 reuse potential | High       | Standard IP; may find existing Renode/open-source model |
+| CAN bus infrastructure  | Medium     | Depends on Renode's existing CAN support                |
 
 **Estimated effort**: 2-3 weeks for a complete implementation including self-test and basic CAN bus communication.
 

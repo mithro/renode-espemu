@@ -14,20 +14,20 @@ The SDMMC controller's register interface is based on the Synopsys DesignWare Mo
 
 ## Hardware Specifications
 
-| Feature | Value |
-|---|---|
-| **Number of instances** | 1 |
-| **Base address** | 0x3FF68000 |
-| **Supported protocols** | SD Memory (v3.01), SDIO (v3.0), MMC (v4.41) |
-| **Bus widths** | 1-bit, 4-bit |
-| **Max clock** | 50 MHz (high speed), 25 MHz (default speed) |
-| **Card slots** | 2 (active one at a time, selected via card number in CMD register) |
-| **DMA** | Internal DMA Controller (IDMAC) with linked-list descriptors |
-| **FIFO depth** | 1024 bytes (256 x 32-bit words) |
-| **Max block size** | 4096 bytes |
-| **Response types** | Short (48-bit), Long (136-bit) |
-| **Auto-stop** | Hardware auto-stop (CMD12) after multi-block transfers |
-| **Data transfer modes** | Block transfer, stream transfer |
+| Feature                 | Value                                                              |
+| ----------------------- | ------------------------------------------------------------------ |
+| **Number of instances** | 1                                                                  |
+| **Base address**        | 0x3FF68000                                                         |
+| **Supported protocols** | SD Memory (v3.01), SDIO (v3.0), MMC (v4.41)                        |
+| **Bus widths**          | 1-bit, 4-bit                                                       |
+| **Max clock**           | 50 MHz (high speed), 25 MHz (default speed)                        |
+| **Card slots**          | 2 (active one at a time, selected via card number in CMD register) |
+| **DMA**                 | Internal DMA Controller (IDMAC) with linked-list descriptors       |
+| **FIFO depth**          | 1024 bytes (256 x 32-bit words)                                    |
+| **Max block size**      | 4096 bytes                                                         |
+| **Response types**      | Short (48-bit), Long (136-bit)                                     |
+| **Auto-stop**           | Hardware auto-stop (CMD12) after multi-block transfers             |
+| **Data transfer modes** | Block transfer, stream transfer                                    |
 
 ### Supported SD Commands
 The controller supports all standard SD/SDIO/MMC commands:
@@ -59,41 +59,41 @@ Note: The register interface is based on the Synopsys DesignWare Mobile Storage 
 The SDMMC register space is approximately 0x200 bytes. Key registers include:
 
 ### Control and Configuration
-| Register | Offset | Description |
-|---|---|---|
-| SDMMC_CTRL_REG | 0x00 | Controller control: reset, interrupt enable, DMA enable, read-wait |
-| SDMMC_PWREN_REG | 0x04 | Power enable per card slot |
-| SDMMC_CLKDIV_REG | 0x08 | Clock divider value (0-255, actual divider = 2 * value) |
-| SDMMC_CLKSRC_REG | 0x0C | Clock source selection per card |
-| SDMMC_CLKENA_REG | 0x10 | Clock enable and low-power mode per card |
-| SDMMC_TMOUT_REG | 0x14 | Response timeout and data timeout values |
-| SDMMC_CTYPE_REG | 0x18 | Card type: 1-bit or 4-bit bus width per card |
-| SDMMC_BLKSIZ_REG | 0x1C | Block size (1-65535 bytes) |
-| SDMMC_BYTCNT_REG | 0x20 | Byte count for data transfer |
-| SDMMC_FIFOTH_REG | 0x4C | FIFO threshold watermark (TX threshold, RX threshold, DMA burst size) |
-| SDMMC_CARDTHRCTL_REG | 0x100 | Card read threshold (for busy signaling) |
+| Register             | Offset | Description                                                           |
+| -------------------- | ------ | --------------------------------------------------------------------- |
+| SDMMC_CTRL_REG       | 0x00   | Controller control: reset, interrupt enable, DMA enable, read-wait    |
+| SDMMC_PWREN_REG      | 0x04   | Power enable per card slot                                            |
+| SDMMC_CLKDIV_REG     | 0x08   | Clock divider value (0-255, actual divider = 2 * value)               |
+| SDMMC_CLKSRC_REG     | 0x0C   | Clock source selection per card                                       |
+| SDMMC_CLKENA_REG     | 0x10   | Clock enable and low-power mode per card                              |
+| SDMMC_TMOUT_REG      | 0x14   | Response timeout and data timeout values                              |
+| SDMMC_CTYPE_REG      | 0x18   | Card type: 1-bit or 4-bit bus width per card                          |
+| SDMMC_BLKSIZ_REG     | 0x1C   | Block size (1-65535 bytes)                                            |
+| SDMMC_BYTCNT_REG     | 0x20   | Byte count for data transfer                                          |
+| SDMMC_FIFOTH_REG     | 0x4C   | FIFO threshold watermark (TX threshold, RX threshold, DMA burst size) |
+| SDMMC_CARDTHRCTL_REG | 0x100  | Card read threshold (for busy signaling)                              |
 
 ### Command Path
-| Register | Offset | Description |
-|---|---|---|
-| SDMMC_CMDARG_REG | 0x28 | Command argument (32-bit value sent with command) |
-| SDMMC_CMD_REG | 0x2C | Command register: command index (6 bits), response expect, response long, data expected, read/write, auto-stop, send-init, card number, **start_cmd** bit |
-| SDMMC_RESP0_REG | 0x30 | Response bits [31:0] (short response) / bits [31:0] (long response) |
-| SDMMC_RESP1_REG | 0x34 | Response bits [63:32] (long response) |
-| SDMMC_RESP2_REG | 0x38 | Response bits [95:64] (long response) |
-| SDMMC_RESP3_REG | 0x3C | Response bits [127:96] (long response) |
+| Register         | Offset | Description                                                                                                                                               |
+| ---------------- | ------ | --------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| SDMMC_CMDARG_REG | 0x28   | Command argument (32-bit value sent with command)                                                                                                         |
+| SDMMC_CMD_REG    | 0x2C   | Command register: command index (6 bits), response expect, response long, data expected, read/write, auto-stop, send-init, card number, **start_cmd** bit |
+| SDMMC_RESP0_REG  | 0x30   | Response bits [31:0] (short response) / bits [31:0] (long response)                                                                                       |
+| SDMMC_RESP1_REG  | 0x34   | Response bits [63:32] (long response)                                                                                                                     |
+| SDMMC_RESP2_REG  | 0x38   | Response bits [95:64] (long response)                                                                                                                     |
+| SDMMC_RESP3_REG  | 0x3C   | Response bits [127:96] (long response)                                                                                                                    |
 
 ### Status
-| Register | Offset | Description |
-|---|---|---|
-| SDMMC_STATUS_REG | 0x48 | Status: FIFO count, DMA request, state machine states, card-present, data-busy, data-3-status |
+| Register         | Offset | Description                                                                                   |
+| ---------------- | ------ | --------------------------------------------------------------------------------------------- |
+| SDMMC_STATUS_REG | 0x48   | Status: FIFO count, DMA request, state machine states, card-present, data-busy, data-3-status |
 
 ### Interrupt Handling
-| Register | Offset | Description |
-|---|---|---|
-| SDMMC_RINTSTS_REG | 0x44 | Raw interrupt status (write-1-to-clear) |
-| SDMMC_INTMASK_REG | 0x24 | Interrupt mask (enable/disable individual sources) |
-| SDMMC_MINTSTS_REG | 0x40 | Masked interrupt status (RINTSTS & INTMASK) |
+| Register          | Offset | Description                                        |
+| ----------------- | ------ | -------------------------------------------------- |
+| SDMMC_RINTSTS_REG | 0x44   | Raw interrupt status (write-1-to-clear)            |
+| SDMMC_INTMASK_REG | 0x24   | Interrupt mask (enable/disable individual sources) |
+| SDMMC_MINTSTS_REG | 0x40   | Masked interrupt status (RINTSTS & INTMASK)        |
 
 ### Key Interrupt Sources
 - **CMD_DONE (bit 2)**: Command completed
@@ -113,15 +113,15 @@ The SDMMC register space is approximately 0x200 bytes. Key registers include:
 - **SDIO_INTERRUPT (bit 16)**: SDIO card interrupt (for SDIO devices)
 
 ### Internal DMA Controller (IDMAC)
-| Register | Offset | Description |
-|---|---|---|
-| SDMMC_BMOD_REG | 0x80 | Bus mode: DMA enable, fixed burst, descriptor skip length, software reset |
-| SDMMC_PLDMND_REG | 0x84 | Poll demand: trigger DMA to re-read descriptors |
-| SDMMC_DBADDR_REG | 0x88 | Descriptor list base address (start of linked-list in memory) |
-| SDMMC_IDSTS_REG | 0x8C | IDMAC status: normal/abnormal interrupt summary, specific DMA interrupts |
-| SDMMC_IDINTEN_REG | 0x90 | IDMAC interrupt enable |
-| SDMMC_DSCADDR_REG | 0x94 | Current host descriptor address (read-only) |
-| SDMMC_BUFADDR_REG | 0x98 | Current buffer descriptor address (read-only) |
+| Register          | Offset | Description                                                               |
+| ----------------- | ------ | ------------------------------------------------------------------------- |
+| SDMMC_BMOD_REG    | 0x80   | Bus mode: DMA enable, fixed burst, descriptor skip length, software reset |
+| SDMMC_PLDMND_REG  | 0x84   | Poll demand: trigger DMA to re-read descriptors                           |
+| SDMMC_DBADDR_REG  | 0x88   | Descriptor list base address (start of linked-list in memory)             |
+| SDMMC_IDSTS_REG   | 0x8C   | IDMAC status: normal/abnormal interrupt summary, specific DMA interrupts  |
+| SDMMC_IDINTEN_REG | 0x90   | IDMAC interrupt enable                                                    |
+| SDMMC_DSCADDR_REG | 0x94   | Current host descriptor address (read-only)                               |
+| SDMMC_BUFADDR_REG | 0x98   | Current buffer descriptor address (read-only)                             |
 
 ### IDMAC Descriptor Format
 Each DMA descriptor is 16 bytes (4 x 32-bit words):
@@ -131,9 +131,9 @@ Each DMA descriptor is 16 bytes (4 x 32-bit words):
 - **Word 3 (DES3)**: Buffer address 2 / next descriptor address (in chain mode)
 
 ### Data FIFO
-| Register | Offset | Description |
-|---|---|---|
-| SDMMC_DATA_REG | 0x200 | Data FIFO read/write port (also accessible as 0x100-0x1FF mirror) |
+| Register       | Offset | Description                                                       |
+| -------------- | ------ | ----------------------------------------------------------------- |
+| SDMMC_DATA_REG | 0x200  | Data FIFO read/write port (also accessible as 0x100-0x1FF mirror) |
 
 ## Source Code References
 
@@ -239,18 +239,18 @@ The SD card initialization sequence that the ESP-IDF driver performs:
 
 ## Complexity Assessment
 
-| Component | Complexity | Priority | Rationale |
-|---|---|---|---|
-| **Command path** | MEDIUM | HIGH | Core of the controller. Must handle command issue, response capture, and CMD_DONE interrupt. Well-defined protocol. |
-| **IDMAC (DMA engine)** | MEDIUM-HIGH | HIGH | Linked-list descriptor parsing with control flags (OWN, FS, LS, CH, ER). Critical for data transfers. |
-| **SD card read** | MEDIUM | HIGH | CMD17/CMD18 with IDMAC for block reads. Primary use case for SD card storage. |
-| **SD card write** | MEDIUM | HIGH | CMD24/CMD25 with IDMAC for block writes. Required for filesystem write support. |
-| **Card initialization** | MEDIUM | HIGH | Must support full init sequence (CMD0/CMD8/ACMD41/CMD2/CMD3/CMD7). Many command-response pairs. |
-| **Interrupt handling** | MEDIUM | HIGH | CMD_DONE, DATA_OVER, and error interrupts are critical. IDMAC interrupts for DMA completion. |
-| **Status register** | LOW-MEDIUM | MEDIUM | FIFO count, state machine state, card-present. Mostly read-only reporting. |
-| **SDIO support** | HIGH | LOW | CMD52/CMD53 and function-based I/O. Complex protocol. Only needed for SDIO WiFi. |
-| **Multi-block + auto-stop** | MEDIUM | MEDIUM | CMD18/CMD25 with automatic CMD12. Common for filesystem I/O. |
-| **Clock/power control** | LOW | LOW | Store values, no functional effect in emulation. |
+| Component                   | Complexity  | Priority | Rationale                                                                                                           |
+| --------------------------- | ----------- | -------- | ------------------------------------------------------------------------------------------------------------------- |
+| **Command path**            | MEDIUM      | HIGH     | Core of the controller. Must handle command issue, response capture, and CMD_DONE interrupt. Well-defined protocol. |
+| **IDMAC (DMA engine)**      | MEDIUM-HIGH | HIGH     | Linked-list descriptor parsing with control flags (OWN, FS, LS, CH, ER). Critical for data transfers.               |
+| **SD card read**            | MEDIUM      | HIGH     | CMD17/CMD18 with IDMAC for block reads. Primary use case for SD card storage.                                       |
+| **SD card write**           | MEDIUM      | HIGH     | CMD24/CMD25 with IDMAC for block writes. Required for filesystem write support.                                     |
+| **Card initialization**     | MEDIUM      | HIGH     | Must support full init sequence (CMD0/CMD8/ACMD41/CMD2/CMD3/CMD7). Many command-response pairs.                     |
+| **Interrupt handling**      | MEDIUM      | HIGH     | CMD_DONE, DATA_OVER, and error interrupts are critical. IDMAC interrupts for DMA completion.                        |
+| **Status register**         | LOW-MEDIUM  | MEDIUM   | FIFO count, state machine state, card-present. Mostly read-only reporting.                                          |
+| **SDIO support**            | HIGH        | LOW      | CMD52/CMD53 and function-based I/O. Complex protocol. Only needed for SDIO WiFi.                                    |
+| **Multi-block + auto-stop** | MEDIUM      | MEDIUM   | CMD18/CMD25 with automatic CMD12. Common for filesystem I/O.                                                        |
+| **Clock/power control**     | LOW         | LOW      | Store values, no functional effect in emulation.                                                                    |
 
 **Overall SDMMC complexity: MEDIUM-HIGH**
 

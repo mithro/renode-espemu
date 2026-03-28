@@ -62,61 +62,61 @@ TRM PDF: https://www.espressif.com/sites/default/files/documentation/esp32_techn
 
 ### AES Registers (base 0x3FF01000)
 
-| Register              | Offset      | Description                                     |
-|-----------------------|-------------|-------------------------------------------------|
-| AES_KEY_0_REG - AES_KEY_7_REG | 0x000-0x01C | AES key (8 x 32-bit words = 256 bits max) |
-| AES_TEXT_0_REG - AES_TEXT_3_REG | 0x020-0x02C | Input/output data block (4 x 32-bit = 128 bits) |
-| AES_MODE_REG          | 0x030       | Mode select: [0]=encrypt/decrypt, [2:1]=key size (0=128,1=192,2=256) |
-| AES_START_REG         | 0x034       | Write 1 to start AES operation                  |
-| AES_IDLE_REG          | 0x038       | Reads 1 when AES engine is idle (operation complete) |
-| AES_ENDIAN_REG        | 0x040       | Endianness configuration                        |
+| Register                        | Offset      | Description                                                          |
+| ------------------------------- | ----------- | -------------------------------------------------------------------- |
+| AES_KEY_0_REG - AES_KEY_7_REG   | 0x000-0x01C | AES key (8 x 32-bit words = 256 bits max)                            |
+| AES_TEXT_0_REG - AES_TEXT_3_REG | 0x020-0x02C | Input/output data block (4 x 32-bit = 128 bits)                      |
+| AES_MODE_REG                    | 0x030       | Mode select: [0]=encrypt/decrypt, [2:1]=key size (0=128,1=192,2=256) |
+| AES_START_REG                   | 0x034       | Write 1 to start AES operation                                       |
+| AES_IDLE_REG                    | 0x038       | Reads 1 when AES engine is idle (operation complete)                 |
+| AES_ENDIAN_REG                  | 0x040       | Endianness configuration                                             |
 
 ### SHA Registers (base 0x3FF03000)
 
-| Register              | Offset      | Description                                     |
-|-----------------------|-------------|-------------------------------------------------|
+| Register                         | Offset      | Description                                       |
+| -------------------------------- | ----------- | ------------------------------------------------- |
 | SHA_TEXT_0_REG - SHA_TEXT_31_REG | 0x080-0x0FC | Message block input (32 x 32-bit = 1024 bits max) |
-| SHA_1_START_REG       | 0x080 (*)   | Start SHA-1 hash (first block)                  |
-| SHA_1_CONTINUE_REG    | 0x084       | Continue SHA-1 hash (subsequent blocks)          |
-| SHA_1_LOAD_REG        | 0x088       | Load SHA-1 hash result back into registers       |
-| SHA_1_BUSY_REG        | 0x08C       | SHA-1 busy status                                |
-| SHA_256_START_REG     | 0x090       | Start SHA-256 hash (first block)                 |
-| SHA_256_CONTINUE_REG  | 0x094       | Continue SHA-256 hash (subsequent blocks)        |
-| SHA_256_LOAD_REG      | 0x098       | Load SHA-256 result                              |
-| SHA_256_BUSY_REG      | 0x09C       | SHA-256 busy status                              |
-| SHA_384_START_REG     | 0x0A0       | Start SHA-384 hash (first block)                 |
-| SHA_384_CONTINUE_REG  | 0x0A4       | Continue SHA-384 hash (subsequent blocks)        |
-| SHA_384_LOAD_REG      | 0x0A8       | Load SHA-384 result                              |
-| SHA_384_BUSY_REG      | 0x0AC       | SHA-384 busy status                              |
-| SHA_512_START_REG     | 0x0B0       | Start SHA-512 hash (first block)                 |
-| SHA_512_CONTINUE_REG  | 0x0B4       | Continue SHA-512 hash (subsequent blocks)        |
-| SHA_512_LOAD_REG      | 0x0B8       | Load SHA-512 result                              |
-| SHA_512_BUSY_REG      | 0x0BC       | SHA-512 busy status                              |
+| SHA_1_START_REG                  | 0x080 (*)   | Start SHA-1 hash (first block)                    |
+| SHA_1_CONTINUE_REG               | 0x084       | Continue SHA-1 hash (subsequent blocks)           |
+| SHA_1_LOAD_REG                   | 0x088       | Load SHA-1 hash result back into registers        |
+| SHA_1_BUSY_REG                   | 0x08C       | SHA-1 busy status                                 |
+| SHA_256_START_REG                | 0x090       | Start SHA-256 hash (first block)                  |
+| SHA_256_CONTINUE_REG             | 0x094       | Continue SHA-256 hash (subsequent blocks)         |
+| SHA_256_LOAD_REG                 | 0x098       | Load SHA-256 result                               |
+| SHA_256_BUSY_REG                 | 0x09C       | SHA-256 busy status                               |
+| SHA_384_START_REG                | 0x0A0       | Start SHA-384 hash (first block)                  |
+| SHA_384_CONTINUE_REG             | 0x0A4       | Continue SHA-384 hash (subsequent blocks)         |
+| SHA_384_LOAD_REG                 | 0x0A8       | Load SHA-384 result                               |
+| SHA_384_BUSY_REG                 | 0x0AC       | SHA-384 busy status                               |
+| SHA_512_START_REG                | 0x0B0       | Start SHA-512 hash (first block)                  |
+| SHA_512_CONTINUE_REG             | 0x0B4       | Continue SHA-512 hash (subsequent blocks)         |
+| SHA_512_LOAD_REG                 | 0x0B8       | Load SHA-512 result                               |
+| SHA_512_BUSY_REG                 | 0x0BC       | SHA-512 busy status                               |
 
 Note: SHA register offsets are algorithm-dependent. The hash state (intermediate/final hash values) is read from the SHA_H_x registers at the base of the SHA register space.
 
-| Register              | Offset      | Description                                     |
-|-----------------------|-------------|-------------------------------------------------|
+| Register                   | Offset      | Description                                                    |
+| -------------------------- | ----------- | -------------------------------------------------------------- |
 | SHA_H_0_REG - SHA_H_15_REG | 0x000-0x03C | Hash state registers (16 x 32-bit = 512 bits, for SHA-384/512) |
 
 ### RSA/MPI Registers (base 0x3FF02000)
 
-| Register              | Offset      | Description                                     |
-|-----------------------|-------------|-------------------------------------------------|
-| RSA_MEM_M_BLOCK_BASE  | 0x000       | Modulus M memory (up to 4096 bits = 128 words)   |
-| RSA_MEM_Z_BLOCK_BASE  | 0x200       | Result Z memory (up to 4096 bits)                |
-| RSA_MEM_Y_BLOCK_BASE  | 0x400       | Operand Y memory (up to 4096 bits)               |
-| RSA_MEM_X_BLOCK_BASE  | 0x600       | Operand X / Exponent memory (up to 4096 bits)    |
-| RSA_M_DASH_REG        | 0x800       | M' (Montgomery parameter: -M^(-1) mod 2^32)     |
-| RSA_MODEXP_MODE_REG   | 0x804       | Modular exponentiation operand length (in 32-bit words / 16 - 1) |
-| RSA_MODEXP_START_REG  | 0x808       | Start modular exponentiation                     |
-| RSA_MODMULT_MODE_REG  | 0x80C       | Modular multiplication operand length            |
-| RSA_MODMULT_START_REG | 0x810       | Start modular multiplication                     |
-| RSA_MULT_MODE_REG     | 0x814       | Multiplication operand length                    |
-| RSA_MULT_START_REG    | 0x818       | Start multiplication                             |
-| RSA_CLEAN_REG         | 0x81C       | Reads 1 when operand memory is zeroed after reset |
-| RSA_IDLE_REG          | 0x820       | Reads 1 when RSA engine is idle                  |
-| RSA_INTERRUPT_REG     | 0x824       | Interrupt status and clear                       |
+| Register              | Offset | Description                                                      |
+| --------------------- | ------ | ---------------------------------------------------------------- |
+| RSA_MEM_M_BLOCK_BASE  | 0x000  | Modulus M memory (up to 4096 bits = 128 words)                   |
+| RSA_MEM_Z_BLOCK_BASE  | 0x200  | Result Z memory (up to 4096 bits)                                |
+| RSA_MEM_Y_BLOCK_BASE  | 0x400  | Operand Y memory (up to 4096 bits)                               |
+| RSA_MEM_X_BLOCK_BASE  | 0x600  | Operand X / Exponent memory (up to 4096 bits)                    |
+| RSA_M_DASH_REG        | 0x800  | M' (Montgomery parameter: -M^(-1) mod 2^32)                      |
+| RSA_MODEXP_MODE_REG   | 0x804  | Modular exponentiation operand length (in 32-bit words / 16 - 1) |
+| RSA_MODEXP_START_REG  | 0x808  | Start modular exponentiation                                     |
+| RSA_MODMULT_MODE_REG  | 0x80C  | Modular multiplication operand length                            |
+| RSA_MODMULT_START_REG | 0x810  | Start modular multiplication                                     |
+| RSA_MULT_MODE_REG     | 0x814  | Multiplication operand length                                    |
+| RSA_MULT_START_REG    | 0x818  | Start multiplication                                             |
+| RSA_CLEAN_REG         | 0x81C  | Reads 1 when operand memory is zeroed after reset                |
+| RSA_IDLE_REG          | 0x820  | Reads 1 when RSA engine is idle                                  |
+| RSA_INTERRUPT_REG     | 0x824  | Interrupt status and clear                                       |
 
 ## Source Code References
 
@@ -217,15 +217,15 @@ Note: SHA register offsets are algorithm-dependent. The hash state (intermediate
 
 **Overall Complexity: MEDIUM**
 
-| Aspect                        | Difficulty | Notes                                                |
-|-------------------------------|------------|------------------------------------------------------|
-| AES implementation            | Low        | Standard AES with well-defined registers; C# has built-in support |
-| SHA implementation            | Medium     | Block-level compression function exposure requires careful implementation |
-| RSA implementation            | Medium-High| Large operand handling, big-number arithmetic, Montgomery multiplication |
-| Register interfaces           | Low        | All three have simple register-mapped interfaces     |
-| QEMU reference quality        | High       | All three have complete QEMU implementations to reference |
-| Testing                       | Low-Medium | Can be tested with known test vectors                |
-| Endianness handling           | Medium     | Must match hardware byte ordering precisely          |
+| Aspect                 | Difficulty  | Notes                                                                     |
+| ---------------------- | ----------- | ------------------------------------------------------------------------- |
+| AES implementation     | Low         | Standard AES with well-defined registers; C# has built-in support         |
+| SHA implementation     | Medium      | Block-level compression function exposure requires careful implementation |
+| RSA implementation     | Medium-High | Large operand handling, big-number arithmetic, Montgomery multiplication  |
+| Register interfaces    | Low         | All three have simple register-mapped interfaces                          |
+| QEMU reference quality | High        | All three have complete QEMU implementations to reference                 |
+| Testing                | Low-Medium  | Can be tested with known test vectors                                     |
+| Endianness handling    | Medium      | Must match hardware byte ordering precisely                               |
 
 **Estimated effort**:
 - AES: 3-5 days

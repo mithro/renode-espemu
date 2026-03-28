@@ -32,38 +32,38 @@ The UART controllers are among the most heavily exercised peripherals in any ESP
 
 Key registers that an emulator must model (offsets from each UART base address):
 
-| Offset | Register | Purpose |
-|--------|----------|---------|
-| `0x000` | `UART_FIFO_REG` | Read/write FIFO data (byte at a time) |
-| `0x004` | `UART_INT_RAW_REG` | Raw interrupt status (read-only) |
-| `0x008` | `UART_INT_ST_REG` | Masked interrupt status (INT_RAW & INT_ENA) |
-| `0x00C` | `UART_INT_ENA_REG` | Interrupt enable bits |
-| `0x010` | `UART_INT_CLR_REG` | Write-1-to-clear interrupt bits |
-| `0x014` | `UART_CLKDIV_REG` | Clock divider (baud rate configuration) |
-| `0x018` | `UART_AUTOBAUD_REG` | Auto-baud rate detection control |
-| `0x01C` | `UART_STATUS_REG` | TX/RX FIFO counts, RTS/CTS/DTR/DSR line states |
-| `0x020` | `UART_CONF0_REG` | Core config: parity, stop bits, data length, TX/RX reset, flow control |
-| `0x024` | `UART_CONF1_REG` | FIFO thresholds: RX full, TX empty, RX timeout |
-| `0x028` | `UART_LOWPULSE_REG` | Auto-baud: minimum low pulse duration |
-| `0x02C` | `UART_HIGHPULSE_REG` | Auto-baud: minimum high pulse duration |
-| `0x030` | `UART_RXD_CNT_REG` | Count of RX edge transitions (auto-baud) |
-| `0x034` | `UART_FLOW_CONF_REG` | Software flow control config (XON/XOFF) |
-| `0x038` | `UART_SLEEP_CONF_REG` | Sleep mode wakeup threshold |
-| `0x03C` | `UART_SWFC_CONF_REG` | Software flow control character definitions |
-| `0x040` | `UART_IDLE_CONF_REG` | TX/RX idle thresholds |
-| `0x044` | `UART_RS485_CONF_REG` | RS-485 mode configuration |
-| `0x048` | `UART_AT_CMD_PRECNT_REG` | AT command detection: pre-idle time |
-| `0x04C` | `UART_AT_CMD_POSTCNT_REG` | AT command detection: post-idle time |
-| `0x050` | `UART_AT_CMD_GAPTOUT_REG` | AT command detection: gap timeout |
-| `0x054` | `UART_AT_CMD_CHAR_REG` | AT command detection: character and count |
-| `0x058` | `UART_MEM_CONF_REG` | TX/RX memory allocation (in 128-byte units) |
-| `0x05C` | `UART_MEM_TX_STATUS_REG` | TX FIFO read/write pointer status |
-| `0x060` | `UART_MEM_RX_STATUS_REG` | RX FIFO read/write pointer status |
-| `0x064` | `UART_MEM_CNT_STATUS_REG` | TX/RX FIFO byte count |
-| `0x068` | `UART_POSPULSE_REG` | Auto-baud: positive pulse minimum duration |
-| `0x06C` | `UART_NEGPULSE_REG` | Auto-baud: negative pulse minimum duration |
-| `0x078` | `UART_DATE_REG` | Version/date register |
-| `0x07C` | `UART_ID_REG` | UART ID register |
+| Offset  | Register                  | Purpose                                                                |
+| ------- | ------------------------- | ---------------------------------------------------------------------- |
+| `0x000` | `UART_FIFO_REG`           | Read/write FIFO data (byte at a time)                                  |
+| `0x004` | `UART_INT_RAW_REG`        | Raw interrupt status (read-only)                                       |
+| `0x008` | `UART_INT_ST_REG`         | Masked interrupt status (INT_RAW & INT_ENA)                            |
+| `0x00C` | `UART_INT_ENA_REG`        | Interrupt enable bits                                                  |
+| `0x010` | `UART_INT_CLR_REG`        | Write-1-to-clear interrupt bits                                        |
+| `0x014` | `UART_CLKDIV_REG`         | Clock divider (baud rate configuration)                                |
+| `0x018` | `UART_AUTOBAUD_REG`       | Auto-baud rate detection control                                       |
+| `0x01C` | `UART_STATUS_REG`         | TX/RX FIFO counts, RTS/CTS/DTR/DSR line states                         |
+| `0x020` | `UART_CONF0_REG`          | Core config: parity, stop bits, data length, TX/RX reset, flow control |
+| `0x024` | `UART_CONF1_REG`          | FIFO thresholds: RX full, TX empty, RX timeout                         |
+| `0x028` | `UART_LOWPULSE_REG`       | Auto-baud: minimum low pulse duration                                  |
+| `0x02C` | `UART_HIGHPULSE_REG`      | Auto-baud: minimum high pulse duration                                 |
+| `0x030` | `UART_RXD_CNT_REG`        | Count of RX edge transitions (auto-baud)                               |
+| `0x034` | `UART_FLOW_CONF_REG`      | Software flow control config (XON/XOFF)                                |
+| `0x038` | `UART_SLEEP_CONF_REG`     | Sleep mode wakeup threshold                                            |
+| `0x03C` | `UART_SWFC_CONF_REG`      | Software flow control character definitions                            |
+| `0x040` | `UART_IDLE_CONF_REG`      | TX/RX idle thresholds                                                  |
+| `0x044` | `UART_RS485_CONF_REG`     | RS-485 mode configuration                                              |
+| `0x048` | `UART_AT_CMD_PRECNT_REG`  | AT command detection: pre-idle time                                    |
+| `0x04C` | `UART_AT_CMD_POSTCNT_REG` | AT command detection: post-idle time                                   |
+| `0x050` | `UART_AT_CMD_GAPTOUT_REG` | AT command detection: gap timeout                                      |
+| `0x054` | `UART_AT_CMD_CHAR_REG`    | AT command detection: character and count                              |
+| `0x058` | `UART_MEM_CONF_REG`       | TX/RX memory allocation (in 128-byte units)                            |
+| `0x05C` | `UART_MEM_TX_STATUS_REG`  | TX FIFO read/write pointer status                                      |
+| `0x060` | `UART_MEM_RX_STATUS_REG`  | RX FIFO read/write pointer status                                      |
+| `0x064` | `UART_MEM_CNT_STATUS_REG` | TX/RX FIFO byte count                                                  |
+| `0x068` | `UART_POSPULSE_REG`       | Auto-baud: positive pulse minimum duration                             |
+| `0x06C` | `UART_NEGPULSE_REG`       | Auto-baud: negative pulse minimum duration                             |
+| `0x078` | `UART_DATE_REG`           | Version/date register                                                  |
+| `0x07C` | `UART_ID_REG`             | UART ID register                                                       |
 
 ## Source Code References
 

@@ -36,45 +36,45 @@ TRM PDF: https://www.espressif.com/sites/default/files/documentation/esp32_techn
 
 ### SPI DMA Registers (per SPI instance, e.g., SPI2 base 0x3FF64000, SPI3 base 0x3FF65000)
 
-| Register             | Offset | Description                                      |
-|----------------------|--------|--------------------------------------------------|
-| SPI_DMA_CONF_REG     | 0x100  | DMA configuration (enable, reset, burst mode)    |
-| SPI_DMA_OUT_LINK_REG | 0x104  | TX linked-list descriptor start address and control |
-| SPI_DMA_IN_LINK_REG  | 0x108  | RX linked-list descriptor start address and control |
-| SPI_DMA_STATUS_REG   | 0x10C  | DMA status (TX/RX active, error flags)           |
-| SPI_DMA_INT_ENA_REG  | 0x110  | DMA interrupt enable                             |
-| SPI_DMA_INT_RAW_REG  | 0x114  | DMA interrupt raw status                         |
-| SPI_DMA_INT_ST_REG   | 0x118  | DMA interrupt masked status                      |
-| SPI_DMA_INT_CLR_REG  | 0x11C  | DMA interrupt clear                              |
-| SPI_IN_ERR_EOF_DES_ADDR_REG  | 0x120  | Address of inlink descriptor with error   |
-| SPI_IN_SUC_EOF_DES_ADDR_REG  | 0x124  | Address of inlink descriptor with EOF     |
-| SPI_OUT_EOF_DES_ADDR_REG     | 0x128  | Address of outlink descriptor with EOF    |
-| SPI_OUT_EOF_BFR_DES_ADDR_REG | 0x12C  | Address of buffer for outlink EOF desc    |
-| SPI_DMA_RSTATUS_REG  | 0x130  | RX DMA FSM status                                |
-| SPI_DMA_TSTATUS_REG  | 0x134  | TX DMA FSM status                                |
+| Register                     | Offset | Description                                         |
+| ---------------------------- | ------ | --------------------------------------------------- |
+| SPI_DMA_CONF_REG             | 0x100  | DMA configuration (enable, reset, burst mode)       |
+| SPI_DMA_OUT_LINK_REG         | 0x104  | TX linked-list descriptor start address and control |
+| SPI_DMA_IN_LINK_REG          | 0x108  | RX linked-list descriptor start address and control |
+| SPI_DMA_STATUS_REG           | 0x10C  | DMA status (TX/RX active, error flags)              |
+| SPI_DMA_INT_ENA_REG          | 0x110  | DMA interrupt enable                                |
+| SPI_DMA_INT_RAW_REG          | 0x114  | DMA interrupt raw status                            |
+| SPI_DMA_INT_ST_REG           | 0x118  | DMA interrupt masked status                         |
+| SPI_DMA_INT_CLR_REG          | 0x11C  | DMA interrupt clear                                 |
+| SPI_IN_ERR_EOF_DES_ADDR_REG  | 0x120  | Address of inlink descriptor with error             |
+| SPI_IN_SUC_EOF_DES_ADDR_REG  | 0x124  | Address of inlink descriptor with EOF               |
+| SPI_OUT_EOF_DES_ADDR_REG     | 0x128  | Address of outlink descriptor with EOF              |
+| SPI_OUT_EOF_BFR_DES_ADDR_REG | 0x12C  | Address of buffer for outlink EOF desc              |
+| SPI_DMA_RSTATUS_REG          | 0x130  | RX DMA FSM status                                   |
+| SPI_DMA_TSTATUS_REG          | 0x134  | TX DMA FSM status                                   |
 
 ### UHCI Registers (UHCI0 base 0x3FF54000, UHCI1 base 0x3FF4C000)
 
-| Register                | Offset | Description                                    |
-|-------------------------|--------|------------------------------------------------|
-| UHCI_CONF0_REG          | 0x000  | Configuration (separator, UART selection)      |
-| UHCI_INT_RAW_REG        | 0x004  | Interrupt raw status                           |
-| UHCI_INT_ST_REG         | 0x008  | Interrupt masked status                        |
-| UHCI_INT_ENA_REG        | 0x00C  | Interrupt enable                               |
-| UHCI_INT_CLR_REG        | 0x010  | Interrupt clear                                |
-| UHCI_DMA_OUT_STATUS_REG | 0x014  | TX DMA status                                  |
-| UHCI_DMA_OUT_PUSH_REG   | 0x018  | Push data into TX FIFO                         |
-| UHCI_DMA_IN_STATUS_REG  | 0x01C  | RX DMA status                                  |
-| UHCI_DMA_IN_POP_REG     | 0x020  | Pop data from RX FIFO                          |
-| UHCI_DMA_OUT_LINK_REG   | 0x024  | TX linked-list start address                   |
-| UHCI_DMA_IN_LINK_REG    | 0x028  | RX linked-list start address                   |
-| UHCI_DMA_OUT_EOF_DES_ADDR_REG | 0x02C | Address of TX EOF descriptor             |
-| UHCI_DMA_IN_SUC_EOF_DES_ADDR_REG | 0x030 | Address of RX success EOF descriptor  |
-| UHCI_DMA_IN_ERR_EOF_DES_ADDR_REG | 0x034 | Address of RX error EOF descriptor    |
-| UHCI_DMA_IN_DSCR_REG    | 0x038  | Current inlink descriptor address              |
-| UHCI_DMA_OUT_DSCR_REG   | 0x03C  | Current outlink descriptor address             |
-| UHCI_ESC_CONF0_REG      | 0x040  | Escape sequence config 0                       |
-| UHCI_ESC_CONF1_REG      | 0x044  | Escape sequence config 1                       |
+| Register                         | Offset | Description                               |
+| -------------------------------- | ------ | ----------------------------------------- |
+| UHCI_CONF0_REG                   | 0x000  | Configuration (separator, UART selection) |
+| UHCI_INT_RAW_REG                 | 0x004  | Interrupt raw status                      |
+| UHCI_INT_ST_REG                  | 0x008  | Interrupt masked status                   |
+| UHCI_INT_ENA_REG                 | 0x00C  | Interrupt enable                          |
+| UHCI_INT_CLR_REG                 | 0x010  | Interrupt clear                           |
+| UHCI_DMA_OUT_STATUS_REG          | 0x014  | TX DMA status                             |
+| UHCI_DMA_OUT_PUSH_REG            | 0x018  | Push data into TX FIFO                    |
+| UHCI_DMA_IN_STATUS_REG           | 0x01C  | RX DMA status                             |
+| UHCI_DMA_IN_POP_REG              | 0x020  | Pop data from RX FIFO                     |
+| UHCI_DMA_OUT_LINK_REG            | 0x024  | TX linked-list start address              |
+| UHCI_DMA_IN_LINK_REG             | 0x028  | RX linked-list start address              |
+| UHCI_DMA_OUT_EOF_DES_ADDR_REG    | 0x02C  | Address of TX EOF descriptor              |
+| UHCI_DMA_IN_SUC_EOF_DES_ADDR_REG | 0x030  | Address of RX success EOF descriptor      |
+| UHCI_DMA_IN_ERR_EOF_DES_ADDR_REG | 0x034  | Address of RX error EOF descriptor        |
+| UHCI_DMA_IN_DSCR_REG             | 0x038  | Current inlink descriptor address         |
+| UHCI_DMA_OUT_DSCR_REG            | 0x03C  | Current outlink descriptor address        |
+| UHCI_ESC_CONF0_REG               | 0x040  | Escape sequence config 0                  |
+| UHCI_ESC_CONF1_REG               | 0x044  | Escape sequence config 1                  |
 
 ## Source Code References
 
@@ -133,15 +133,15 @@ Since ESP32 uses peripheral-embedded DMA rather than a centralized controller, t
 
 **Overall Complexity: HIGH**
 
-| Aspect                        | Difficulty | Notes                                                |
-|-------------------------------|------------|------------------------------------------------------|
-| Descriptor parsing            | Medium     | Well-documented 12-byte structure                    |
-| Linked-list traversal         | Medium     | Standard linked-list with owner bit handshake        |
-| Per-peripheral integration    | High       | Must be tightly coupled with SPI/I2S/UHCI internals  |
-| Multiple DMA flavors          | High       | SPI DMA, I2S DMA, and UHCI all differ in details     |
-| Interrupt generation          | Medium     | Standard interrupt pattern per peripheral            |
-| Testing                       | High       | Requires working peripheral + DMA + descriptor chain |
-| No centralized model          | High       | Cannot implement once and share; each peripheral differs |
+| Aspect                     | Difficulty | Notes                                                    |
+| -------------------------- | ---------- | -------------------------------------------------------- |
+| Descriptor parsing         | Medium     | Well-documented 12-byte structure                        |
+| Linked-list traversal      | Medium     | Standard linked-list with owner bit handshake            |
+| Per-peripheral integration | High       | Must be tightly coupled with SPI/I2S/UHCI internals      |
+| Multiple DMA flavors       | High       | SPI DMA, I2S DMA, and UHCI all differ in details         |
+| Interrupt generation       | Medium     | Standard interrupt pattern per peripheral                |
+| Testing                    | High       | Requires working peripheral + DMA + descriptor chain     |
+| No centralized model       | High       | Cannot implement once and share; each peripheral differs |
 
 **Estimated effort**: 3-4 weeks for a complete implementation across SPI, I2S, and UHCI peripherals.
 

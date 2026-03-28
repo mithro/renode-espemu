@@ -30,8 +30,8 @@ ESP-IDF uses the RNG during boot for stack canary initialization and during runt
 
 The RNG has an extremely simple register interface:
 
-| Address | Register | Purpose |
-|---------|----------|---------|
+| Address      | Register       | Purpose                                               |
+| ------------ | -------------- | ----------------------------------------------------- |
 | `0x3FF75144` | `WDEV_RND_REG` | Read-only: returns a 32-bit random value on each read |
 
 That is the complete register map. There are no control registers, no status registers, and no configuration registers. The RNG is always active and always produces a value when read.

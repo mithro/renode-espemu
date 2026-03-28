@@ -57,38 +57,38 @@ Touch sensor registers are within the SENS register block at base `0x3FF48800`, 
 
 ### Touch Configuration Registers
 
-| Register | Offset | Description |
-|----------|--------|-------------|
-| `SENS_SAR_TOUCH_CTRL1` | 0x0058 | Touch control 1: measurement time, sleep cycle, clock source |
-| `SENS_SAR_TOUCH_CTRL2` | 0x005C | Touch control 2: measurement enable, FSM mode, start trigger |
-| `SENS_SAR_TOUCH_ENABLE` | 0x008C | Per-pad enable bitmask (10 bits for T0-T9) |
+| Register                | Offset | Description                                                  |
+| ----------------------- | ------ | ------------------------------------------------------------ |
+| `SENS_SAR_TOUCH_CTRL1`  | 0x0058 | Touch control 1: measurement time, sleep cycle, clock source |
+| `SENS_SAR_TOUCH_CTRL2`  | 0x005C | Touch control 2: measurement enable, FSM mode, start trigger |
+| `SENS_SAR_TOUCH_ENABLE` | 0x008C | Per-pad enable bitmask (10 bits for T0-T9)                   |
 
 ### Touch Threshold Registers (per pad)
 
-| Register | Offset | Description |
-|----------|--------|-------------|
+| Register                | Offset | Description                         |
+| ----------------------- | ------ | ----------------------------------- |
 | `SENS_SAR_TOUCH_THRES1` | 0x0060 | Threshold for T0, T1 (16 bits each) |
-| `SENS_SAR_TOUCH_THRES2` | 0x0064 | Threshold for T2, T3 |
-| `SENS_SAR_TOUCH_THRES3` | 0x0068 | Threshold for T4, T5 |
-| `SENS_SAR_TOUCH_THRES4` | 0x006C | Threshold for T6, T7 |
-| `SENS_SAR_TOUCH_THRES5` | 0x0070 | Threshold for T8, T9 |
+| `SENS_SAR_TOUCH_THRES2` | 0x0064 | Threshold for T2, T3                |
+| `SENS_SAR_TOUCH_THRES3` | 0x0068 | Threshold for T4, T5                |
+| `SENS_SAR_TOUCH_THRES4` | 0x006C | Threshold for T6, T7                |
+| `SENS_SAR_TOUCH_THRES5` | 0x0070 | Threshold for T8, T9                |
 
 ### Touch Measurement Data Registers (read-only)
 
-| Register | Offset | Description |
-|----------|--------|-------------|
+| Register              | Offset | Description                                |
+| --------------------- | ------ | ------------------------------------------ |
 | `SENS_SAR_TOUCH_OUT1` | 0x0074 | Measurement data for T0, T1 (16 bits each) |
-| `SENS_SAR_TOUCH_OUT2` | 0x0078 | Measurement data for T2, T3 |
-| `SENS_SAR_TOUCH_OUT3` | 0x007C | Measurement data for T4, T5 |
-| `SENS_SAR_TOUCH_OUT4` | 0x0080 | Measurement data for T6, T7 |
-| `SENS_SAR_TOUCH_OUT5` | 0x0084 | Measurement data for T8, T9 |
+| `SENS_SAR_TOUCH_OUT2` | 0x0078 | Measurement data for T2, T3                |
+| `SENS_SAR_TOUCH_OUT3` | 0x007C | Measurement data for T4, T5                |
+| `SENS_SAR_TOUCH_OUT4` | 0x0080 | Measurement data for T6, T7                |
+| `SENS_SAR_TOUCH_OUT5` | 0x0084 | Measurement data for T8, T9                |
 
 ### Touch Status Registers
 
-| Register | Offset | Description |
-|----------|--------|-------------|
-| `SENS_SAR_TOUCH_STATUS0` | 0x0088 | Touch FSM status: currently scanning pad, measurement done |
-| `SENS_SAR_TOUCH_DETECT` | (within status) | Touch detection bitmask: which pads are in touch state |
+| Register                 | Offset          | Description                                                |
+| ------------------------ | --------------- | ---------------------------------------------------------- |
+| `SENS_SAR_TOUCH_STATUS0` | 0x0088          | Touch FSM status: currently scanning pad, measurement done |
+| `SENS_SAR_TOUCH_DETECT`  | (within status) | Touch detection bitmask: which pads are in touch state     |
 
 ### Configuration Fields Detail
 
@@ -197,16 +197,16 @@ There is no capacitive touch sensor peripheral in Renode's existing library. The
 
 ## Complexity Assessment
 
-| Aspect | Rating | Notes |
-|--------|--------|-------|
-| **Register count** | Low | ~15-18 touch-specific registers/fields within SENS block |
-| **Logic complexity** | Low-Medium | Measurement FSM adds moderate complexity; basic read is simple |
-| **Interrupt model** | Low-Medium | Single interrupt through RTC controller; threshold comparison per pad |
-| **External dependencies** | Medium | Shared SENS register block; RTC interrupt controller dependency |
-| **Clock domain complexity** | Low-Medium | Uses RTC_SLOW_CLK for measurement timing |
-| **DMA** | None | Touch sensor does not use DMA |
-| **QEMU reference available** | **No** | No QEMU touch sensor implementation |
-| **Overall effort** | **Low-Medium** | Estimated 1-2 days (assuming SENS block exists) |
-| **Priority** | **Low** | Specialized input method; lower priority than ADC/DAC for general emulation |
+| Aspect                       | Rating         | Notes                                                                       |
+| ---------------------------- | -------------- | --------------------------------------------------------------------------- |
+| **Register count**           | Low            | ~15-18 touch-specific registers/fields within SENS block                    |
+| **Logic complexity**         | Low-Medium     | Measurement FSM adds moderate complexity; basic read is simple              |
+| **Interrupt model**          | Low-Medium     | Single interrupt through RTC controller; threshold comparison per pad       |
+| **External dependencies**    | Medium         | Shared SENS register block; RTC interrupt controller dependency             |
+| **Clock domain complexity**  | Low-Medium     | Uses RTC_SLOW_CLK for measurement timing                                    |
+| **DMA**                      | None           | Touch sensor does not use DMA                                               |
+| **QEMU reference available** | **No**         | No QEMU touch sensor implementation                                         |
+| **Overall effort**           | **Low-Medium** | Estimated 1-2 days (assuming SENS block exists)                             |
+| **Priority**                 | **Low**        | Specialized input method; lower priority than ADC/DAC for general emulation |
 
 The touch sensor has moderate complexity primarily due to the FSM-driven measurement mode and RTC interrupt integration. The basic polling mode is simple to implement. The main value of touch sensor emulation is enabling test scripts to simulate user touch input for UI-oriented applications. Since it shares the SENS register block with ADC and DAC, it makes sense to implement all three together.

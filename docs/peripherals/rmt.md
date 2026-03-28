@@ -40,44 +40,44 @@ Each RMT channel has its own dedicated RAM block for storing pulse items, where 
 
 ### Per-Channel Configuration Registers (x8 channels)
 
-| Register | Offset | Description |
-|----------|--------|-------------|
-| `RMT_CHxCONF0` | 0x0020 + x*8 | Channel x config 0: clock divider, mem block count, carrier enable/polarity |
+| Register       | Offset       | Description                                                                                    |
+| -------------- | ------------ | ---------------------------------------------------------------------------------------------- |
+| `RMT_CHxCONF0` | 0x0020 + x*8 | Channel x config 0: clock divider, mem block count, carrier enable/polarity                    |
 | `RMT_CHxCONF1` | 0x0024 + x*8 | Channel x config 1: TX/RX enable, mem owner (TX/RX), idle output enable/level, ref_tick select |
 
 ### TX Control Registers
 
-| Register | Offset | Description |
-|----------|--------|-------------|
+| Register        | Offset       | Description                                                                       |
+| --------------- | ------------ | --------------------------------------------------------------------------------- |
 | `RMT_CHxSTATUS` | 0x0060 + x*4 | Channel x status (read-only): state machine state, memory position, counter value |
-| `RMT_CHxADDR` | 0x0080 + x*4 | Channel x current RAM read/write address (read-only) |
+| `RMT_CHxADDR`   | 0x0080 + x*4 | Channel x current RAM read/write address (read-only)                              |
 
 ### Interrupt Registers
 
-| Register | Offset | Description |
-|----------|--------|-------------|
-| `RMT_INT_RAW` | 0x00A0 | Raw interrupt status |
-| `RMT_INT_ST` | 0x00A4 | Masked interrupt status |
-| `RMT_INT_ENA` | 0x00A8 | Interrupt enable |
+| Register      | Offset | Description                        |
+| ------------- | ------ | ---------------------------------- |
+| `RMT_INT_RAW` | 0x00A0 | Raw interrupt status               |
+| `RMT_INT_ST`  | 0x00A4 | Masked interrupt status            |
+| `RMT_INT_ENA` | 0x00A8 | Interrupt enable                   |
 | `RMT_INT_CLR` | 0x00AC | Interrupt clear (write-1-to-clear) |
 
 ### Carrier Registers (per channel)
 
-| Register | Offset | Description |
-|----------|--------|-------------|
+| Register                | Offset       | Description                                          |
+| ----------------------- | ------------ | ---------------------------------------------------- |
 | `RMT_CHx_RX_CARRIER_RM` | 0x00B0 + x*4 | RX carrier removal thresholds (low/high cycle count) |
-| `RMT_CH0_TX_LIM` | 0x00D0 + x*4 | TX threshold value for wrap-around interrupt |
+| `RMT_CH0_TX_LIM`        | 0x00D0 + x*4 | TX threshold value for wrap-around interrupt         |
 
 ### Miscellaneous
 
-| Register | Offset | Description |
-|----------|--------|-------------|
+| Register       | Offset | Description                                                       |
+| -------------- | ------ | ----------------------------------------------------------------- |
 | `RMT_APB_CONF` | 0x00F0 | APB clock gate, memory access (FIFO mode vs direct), clock enable |
 
 ### RAM Region
 
-| Address Range | Description |
-|---------------|-------------|
+| Address Range             | Description                                                  |
+| ------------------------- | ------------------------------------------------------------ |
 | `0x3FF56400 - 0x3FF567FF` | RMT channel RAM (512 x 32-bit words, 2 pulse items per word) |
 
 Each pulse item is 16 bits: `{level[15], duration[14:0]}`. A zero-duration item marks end-of-sequence.
@@ -172,16 +172,16 @@ There is no existing RMT-like peripheral in Renode. Potentially relevant referen
 
 ## Complexity Assessment
 
-| Aspect | Rating | Notes |
-|--------|--------|-------|
-| **Register count** | Medium | ~60 registers plus 2 KB RAM region |
-| **Logic complexity** | Medium-High | TX state machine, RAM pointer management, threshold events |
-| **Interrupt model** | Medium | 32 interrupt sources (4 per channel x 8 channels) |
-| **External dependencies** | Low | GPIO matrix for signal routing (optional for emulation) |
-| **Clock domain complexity** | Low | Simple 8-bit clock divider per channel |
-| **DMA** | None | RMT uses its own dedicated RAM, not system DMA |
-| **QEMU reference available** | **No** | Must implement from TRM and HAL code analysis |
-| **Overall effort** | **Medium-High** | Estimated 3-4 days |
-| **Priority** | **High** | Very popular peripheral (WS2812 LEDs), commonly used in examples |
+| Aspect                       | Rating          | Notes                                                            |
+| ---------------------------- | --------------- | ---------------------------------------------------------------- |
+| **Register count**           | Medium          | ~60 registers plus 2 KB RAM region                               |
+| **Logic complexity**         | Medium-High     | TX state machine, RAM pointer management, threshold events       |
+| **Interrupt model**          | Medium          | 32 interrupt sources (4 per channel x 8 channels)                |
+| **External dependencies**    | Low             | GPIO matrix for signal routing (optional for emulation)          |
+| **Clock domain complexity**  | Low             | Simple 8-bit clock divider per channel                           |
+| **DMA**                      | None            | RMT uses its own dedicated RAM, not system DMA                   |
+| **QEMU reference available** | **No**          | Must implement from TRM and HAL code analysis                    |
+| **Overall effort**           | **Medium-High** | Estimated 3-4 days                                               |
+| **Priority**                 | **High**        | Very popular peripheral (WS2812 LEDs), commonly used in examples |
 
 The RMT is a high-priority peripheral due to its popularity for addressable LED control (WS2812/NeoPixel). The lack of a QEMU reference increases implementation effort. The TX path is more important than RX for most emulation scenarios. The dedicated RAM region with its access control adds some implementation complexity but is well-documented.

@@ -10,16 +10,16 @@ Each I2S controller has a built-in DMA engine that uses linked-list descriptors 
 
 ## Hardware Specifications
 
-| Feature | I2S0 | I2S1 |
-|---|---|---|
-| **Base address** | 0x3FF4F000 | 0x3FF6D000 |
-| **TX supported** | Yes | Yes |
-| **RX supported** | Yes | Yes |
-| **Camera mode** | Yes | No |
-| **LCD mode** | Yes | Yes |
-| **Built-in ADC/DAC mode** | Yes (via I2S0 only) | No |
-| **PDM mode** | Yes | No |
-| **DMA** | Yes (linked-list) | Yes (linked-list) |
+| Feature                   | I2S0                | I2S1              |
+| ------------------------- | ------------------- | ----------------- |
+| **Base address**          | 0x3FF4F000          | 0x3FF6D000        |
+| **TX supported**          | Yes                 | Yes               |
+| **RX supported**          | Yes                 | Yes               |
+| **Camera mode**           | Yes                 | No                |
+| **LCD mode**              | Yes                 | Yes               |
+| **Built-in ADC/DAC mode** | Yes (via I2S0 only) | No                |
+| **PDM mode**              | Yes                 | No                |
+| **DMA**                   | Yes (linked-list)   | Yes (linked-list) |
 
 ### Supported Audio Formats
 - **I2S Philips standard**: MSB-first, 1-clock delay after WS transition
@@ -64,49 +64,49 @@ Key sections:
 The I2S register space is approximately 0x100 bytes per controller. Key registers include:
 
 ### Configuration
-| Register | Offset | Description |
-|---|---|---|
-| I2S_CONF_REG | 0x08 | Main configuration: TX/RX reset, FIFO reset, TX/RX start, mode select (master/slave), channel format |
-| I2S_CONF1_REG | 0x0A0 | TX/RX PCM mode bypass, TX stop enable |
-| I2S_CONF2_REG | 0x0A8 | Camera/LCD mode enable, LCD TX WR/data mode select |
-| I2S_CONF_CHAN_REG | 0x2C | TX/RX channel mode (mono/stereo/dual-channel) |
+| Register          | Offset | Description                                                                                          |
+| ----------------- | ------ | ---------------------------------------------------------------------------------------------------- |
+| I2S_CONF_REG      | 0x08   | Main configuration: TX/RX reset, FIFO reset, TX/RX start, mode select (master/slave), channel format |
+| I2S_CONF1_REG     | 0x0A0  | TX/RX PCM mode bypass, TX stop enable                                                                |
+| I2S_CONF2_REG     | 0x0A8  | Camera/LCD mode enable, LCD TX WR/data mode select                                                   |
+| I2S_CONF_CHAN_REG | 0x2C   | TX/RX channel mode (mono/stereo/dual-channel)                                                        |
 
 ### Sample Rate / Clock
-| Register | Offset | Description |
-|---|---|---|
-| I2S_SAMPLE_RATE_CONF_REG | 0x0B0 | TX/RX bit and channel dividers (BCK_DIV_NUM, module clock divider) |
-| I2S_CLKM_CONF_REG | 0x0AC | Clock module configuration: clock divider integer/fractional, clock source select (APB/APLL) |
+| Register                 | Offset | Description                                                                                  |
+| ------------------------ | ------ | -------------------------------------------------------------------------------------------- |
+| I2S_SAMPLE_RATE_CONF_REG | 0x0B0  | TX/RX bit and channel dividers (BCK_DIV_NUM, module clock divider)                           |
+| I2S_CLKM_CONF_REG        | 0x0AC  | Clock module configuration: clock divider integer/fractional, clock source select (APB/APLL) |
 
 ### FIFO Configuration
-| Register | Offset | Description |
-|---|---|---|
-| I2S_FIFO_CONF_REG | 0x20 | TX/RX FIFO configuration: data length, FIFO thresholds, DMA enable |
+| Register          | Offset | Description                                                        |
+| ----------------- | ------ | ------------------------------------------------------------------ |
+| I2S_FIFO_CONF_REG | 0x20   | TX/RX FIFO configuration: data length, FIFO thresholds, DMA enable |
 
 ### Data Format
-| Register | Offset | Description |
-|---|---|---|
-| I2S_CONF_SIGLE_DATA_REG | 0x28 | Static single data value (used when TX FIFO is empty) |
+| Register                | Offset | Description                                           |
+| ----------------------- | ------ | ----------------------------------------------------- |
+| I2S_CONF_SIGLE_DATA_REG | 0x28   | Static single data value (used when TX FIFO is empty) |
 
 ### DMA Registers
-| Register | Offset | Description |
-|---|---|---|
-| I2S_OUT_LINK_REG | 0x30 | TX DMA linked-list descriptor start address and control |
-| I2S_IN_LINK_REG | 0x34 | RX DMA linked-list descriptor start address and control |
-| I2S_LC_CONF_REG | 0x60 | DMA configuration: check owner, loop mode, auto-wrback |
-| I2S_OUTLINK_DSCR_REG | 0x38 | Current TX DMA descriptor address (read-only) |
-| I2S_INLINK_DSCR_REG | 0x48 | Current RX DMA descriptor address (read-only) |
-| I2S_OUT_EOF_DES_ADDR_REG | 0x40 | TX EOF descriptor address |
-| I2S_IN_SUC_EOF_DES_ADDR_REG | 0x4C | RX success EOF descriptor address |
-| I2S_LC_STATE0_REG | 0x6C | TX DMA state |
-| I2S_LC_STATE1_REG | 0x70 | RX DMA state |
+| Register                    | Offset | Description                                             |
+| --------------------------- | ------ | ------------------------------------------------------- |
+| I2S_OUT_LINK_REG            | 0x30   | TX DMA linked-list descriptor start address and control |
+| I2S_IN_LINK_REG             | 0x34   | RX DMA linked-list descriptor start address and control |
+| I2S_LC_CONF_REG             | 0x60   | DMA configuration: check owner, loop mode, auto-wrback  |
+| I2S_OUTLINK_DSCR_REG        | 0x38   | Current TX DMA descriptor address (read-only)           |
+| I2S_INLINK_DSCR_REG         | 0x48   | Current RX DMA descriptor address (read-only)           |
+| I2S_OUT_EOF_DES_ADDR_REG    | 0x40   | TX EOF descriptor address                               |
+| I2S_IN_SUC_EOF_DES_ADDR_REG | 0x4C   | RX success EOF descriptor address                       |
+| I2S_LC_STATE0_REG           | 0x6C   | TX DMA state                                            |
+| I2S_LC_STATE1_REG           | 0x70   | RX DMA state                                            |
 
 ### Interrupts
-| Register | Offset | Description |
-|---|---|---|
-| I2S_INT_RAW_REG | 0x0C | Raw interrupt status |
-| I2S_INT_ST_REG | 0x10 | Masked interrupt status |
-| I2S_INT_ENA_REG | 0x14 | Interrupt enable |
-| I2S_INT_CLR_REG | 0x18 | Interrupt clear (write-1-to-clear) |
+| Register        | Offset | Description                        |
+| --------------- | ------ | ---------------------------------- |
+| I2S_INT_RAW_REG | 0x0C   | Raw interrupt status               |
+| I2S_INT_ST_REG  | 0x10   | Masked interrupt status            |
+| I2S_INT_ENA_REG | 0x14   | Interrupt enable                   |
+| I2S_INT_CLR_REG | 0x18   | Interrupt clear (write-1-to-clear) |
 
 ### Key Interrupt Sources
 - **TX_REMPTY**: TX DMA has sent all data
@@ -119,15 +119,15 @@ The I2S register space is approximately 0x100 bytes per controller. Key register
 - **IN_DSCR_ERR**: RX descriptor error (invalid descriptor)
 
 ### PDM Configuration (I2S0 only)
-| Register | Offset | Description |
-|---|---|---|
-| I2S_PDM_CONF_REG | 0x0B4 | PDM enable, decimation/interpolation filter config |
-| I2S_PDM_FREQ_CONF_REG | 0x0B8 | PDM frequency configuration |
+| Register              | Offset | Description                                        |
+| --------------------- | ------ | -------------------------------------------------- |
+| I2S_PDM_CONF_REG      | 0x0B4  | PDM enable, decimation/interpolation filter config |
+| I2S_PDM_FREQ_CONF_REG | 0x0B8  | PDM frequency configuration                        |
 
 ### Timing
-| Register | Offset | Description |
-|---|---|---|
-| I2S_TIMING_REG | 0x1C | Signal timing/delay configuration |
+| Register       | Offset | Description                       |
+| -------------- | ------ | --------------------------------- |
+| I2S_TIMING_REG | 0x1C   | Signal timing/delay configuration |
 
 ## Source Code References
 
@@ -203,18 +203,18 @@ For basic ESP-IDF compatibility, the minimum implementation needs:
 
 ## Complexity Assessment
 
-| Component | Complexity | Priority | Rationale |
-|---|---|---|---|
-| **DMA linked-list engine** | MEDIUM-HIGH | HIGH | Core data transport. Shared architecture with SPI DMA. Descriptor parsing, chaining, EOF handling, circular mode. |
-| **TX DMA path** | MEDIUM | MEDIUM | Consume data from descriptors, generate interrupts. Timing approximation needed for streaming. |
-| **RX DMA path** | MEDIUM | MEDIUM | Fill descriptors with data, generate interrupts. Data source depends on use case. |
-| **Configuration registers** | LOW | HIGH | Store all config values for driver read-back. Large register set but mostly passive storage. |
-| **Audio mode (I2S/PCM)** | LOW-MEDIUM | LOW | Format details irrelevant in emulation. Just move bytes. |
-| **PDM mode** | MEDIUM | LOW | I2S0 only. Rare in emulation scenarios. Filter math not needed. |
-| **Camera mode (LCD_CAM)** | HIGH | MEDIUM | Requires frame data injection, sync signal emulation, and coordination with camera sensor I2C model. Important for ESP32-CAM. |
-| **LCD output mode** | MEDIUM | LOW | Parallel display output. Useful for display emulation but lower priority. |
-| **Built-in ADC/DAC mode** | MEDIUM | LOW | I2S0 only. Requires integration with ADC/DAC peripheral models. |
-| **Interrupt generation** | MEDIUM | HIGH | DMA EOF, done, and error interrupts are critical for driver operation. |
+| Component                   | Complexity  | Priority | Rationale                                                                                                                     |
+| --------------------------- | ----------- | -------- | ----------------------------------------------------------------------------------------------------------------------------- |
+| **DMA linked-list engine**  | MEDIUM-HIGH | HIGH     | Core data transport. Shared architecture with SPI DMA. Descriptor parsing, chaining, EOF handling, circular mode.             |
+| **TX DMA path**             | MEDIUM      | MEDIUM   | Consume data from descriptors, generate interrupts. Timing approximation needed for streaming.                                |
+| **RX DMA path**             | MEDIUM      | MEDIUM   | Fill descriptors with data, generate interrupts. Data source depends on use case.                                             |
+| **Configuration registers** | LOW         | HIGH     | Store all config values for driver read-back. Large register set but mostly passive storage.                                  |
+| **Audio mode (I2S/PCM)**    | LOW-MEDIUM  | LOW      | Format details irrelevant in emulation. Just move bytes.                                                                      |
+| **PDM mode**                | MEDIUM      | LOW      | I2S0 only. Rare in emulation scenarios. Filter math not needed.                                                               |
+| **Camera mode (LCD_CAM)**   | HIGH        | MEDIUM   | Requires frame data injection, sync signal emulation, and coordination with camera sensor I2C model. Important for ESP32-CAM. |
+| **LCD output mode**         | MEDIUM      | LOW      | Parallel display output. Useful for display emulation but lower priority.                                                     |
+| **Built-in ADC/DAC mode**   | MEDIUM      | LOW      | I2S0 only. Requires integration with ADC/DAC peripheral models.                                                               |
+| **Interrupt generation**    | MEDIUM      | HIGH     | DMA EOF, done, and error interrupts are critical for driver operation.                                                        |
 
 **Overall I2S complexity: MEDIUM-HIGH**
 

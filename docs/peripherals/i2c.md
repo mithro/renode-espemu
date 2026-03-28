@@ -8,21 +8,21 @@ This command-based approach differs significantly from simpler I2C controllers (
 
 ## Hardware Specifications
 
-| Feature | Value |
-|---|---|
-| **Number of instances** | 2 (I2C0, I2C1) |
-| **Modes** | Master and Slave |
-| **Speed modes** | Standard (100 kHz), Fast (400 kHz) |
-| **Address width** | 7-bit |
-| **Base address (I2C0)** | 0x3FF53000 |
-| **Base address (I2C1)** | 0x3FF67000 |
-| **TX FIFO depth** | 32 bytes |
-| **RX FIFO depth** | 32 bytes |
-| **Command queue depth** | 16 commands (COMD0-COMD15) |
-| **SCL filter** | Configurable digital filter (0-7 APB clock cycles) |
-| **SDA filter** | Configurable digital filter (0-7 APB clock cycles) |
-| **Interrupts** | 13 interrupt sources per controller |
-| **Clock source** | APB clock (80 MHz) |
+| Feature                 | Value                                              |
+| ----------------------- | -------------------------------------------------- |
+| **Number of instances** | 2 (I2C0, I2C1)                                     |
+| **Modes**               | Master and Slave                                   |
+| **Speed modes**         | Standard (100 kHz), Fast (400 kHz)                 |
+| **Address width**       | 7-bit                                              |
+| **Base address (I2C0)** | 0x3FF53000                                         |
+| **Base address (I2C1)** | 0x3FF67000                                         |
+| **TX FIFO depth**       | 32 bytes                                           |
+| **RX FIFO depth**       | 32 bytes                                           |
+| **Command queue depth** | 16 commands (COMD0-COMD15)                         |
+| **SCL filter**          | Configurable digital filter (0-7 APB clock cycles) |
+| **SDA filter**          | Configurable digital filter (0-7 APB clock cycles) |
+| **Interrupts**          | 13 interrupt sources per controller                |
+| **Clock source**        | APB clock (80 MHz)                                 |
 
 ### Command Types
 The I2C controller executes transfers via a hardware command queue. Each command register encodes:
@@ -51,35 +51,35 @@ Key sections:
 The I2C register space is approximately 0x100 bytes per controller. Key registers include:
 
 ### Configuration
-| Register | Offset | Description |
-|---|---|---|
-| I2C_SCL_LOW_PERIOD_REG | 0x00 | SCL low period (clock divider low half) |
-| I2C_CTR_REG | 0x04 | Control register: master/slave mode, SCL force output, SDA force output, sample/setup time config, clock enable |
-| I2C_SR_REG | 0x08 | Status register: bus state, master state machine, TX/RX FIFO count |
-| I2C_TO_REG | 0x0C | Timeout register: SCL timeout threshold |
-| I2C_SLAVE_ADDR_REG | 0x10 | Slave address (7-bit) and 10-bit addressing mode select |
-| I2C_SCL_HIGH_PERIOD_REG | 0x38 | SCL high period (clock divider high half) |
-| I2C_SDA_HOLD_REG | 0x30 | SDA hold time after SCL negative edge |
-| I2C_SDA_SAMPLE_REG | 0x34 | SDA sample time after SCL positive edge |
+| Register                | Offset | Description                                                                                                     |
+| ----------------------- | ------ | --------------------------------------------------------------------------------------------------------------- |
+| I2C_SCL_LOW_PERIOD_REG  | 0x00   | SCL low period (clock divider low half)                                                                         |
+| I2C_CTR_REG             | 0x04   | Control register: master/slave mode, SCL force output, SDA force output, sample/setup time config, clock enable |
+| I2C_SR_REG              | 0x08   | Status register: bus state, master state machine, TX/RX FIFO count                                              |
+| I2C_TO_REG              | 0x0C   | Timeout register: SCL timeout threshold                                                                         |
+| I2C_SLAVE_ADDR_REG      | 0x10   | Slave address (7-bit) and 10-bit addressing mode select                                                         |
+| I2C_SCL_HIGH_PERIOD_REG | 0x38   | SCL high period (clock divider high half)                                                                       |
+| I2C_SDA_HOLD_REG        | 0x30   | SDA hold time after SCL negative edge                                                                           |
+| I2C_SDA_SAMPLE_REG      | 0x34   | SDA sample time after SCL positive edge                                                                         |
 
 ### FIFO
-| Register | Offset | Description |
-|---|---|---|
-| I2C_FIFO_CONF_REG | 0x18 | FIFO configuration: TX/RX FIFO thresholds, non-FIFO access mode |
-| I2C_DATA_REG | 0x1C | FIFO read/write data port (byte access) |
+| Register          | Offset | Description                                                     |
+| ----------------- | ------ | --------------------------------------------------------------- |
+| I2C_FIFO_CONF_REG | 0x18   | FIFO configuration: TX/RX FIFO thresholds, non-FIFO access mode |
+| I2C_DATA_REG      | 0x1C   | FIFO read/write data port (byte access)                         |
 
 ### Command Queue
-| Register | Offset | Description |
-|---|---|---|
+| Register                       | Offset      | Description                                                                                                                      |
+| ------------------------------ | ----------- | -------------------------------------------------------------------------------------------------------------------------------- |
 | I2C_COMD0_REG - I2C_COMD15_REG | 0x58 - 0x94 | 16 command registers, each encoding opcode, byte count, ACK settings. A DONE bit is set by hardware when each command completes. |
 
 ### Interrupts
-| Register | Offset | Description |
-|---|---|---|
-| I2C_INT_RAW_REG | 0x20 | Raw interrupt status |
-| I2C_INT_CLR_REG | 0x24 | Interrupt clear (write-1-to-clear) |
-| I2C_INT_ENA_REG | 0x28 | Interrupt enable mask |
-| I2C_INT_STATUS_REG | 0x2C | Masked interrupt status |
+| Register           | Offset | Description                        |
+| ------------------ | ------ | ---------------------------------- |
+| I2C_INT_RAW_REG    | 0x20   | Raw interrupt status               |
+| I2C_INT_CLR_REG    | 0x24   | Interrupt clear (write-1-to-clear) |
+| I2C_INT_ENA_REG    | 0x28   | Interrupt enable mask              |
+| I2C_INT_STATUS_REG | 0x2C   | Masked interrupt status            |
 
 ### Key Interrupt Sources
 - **TRANS_COMPLETE**: All commands in queue executed successfully
@@ -94,10 +94,10 @@ The I2C register space is approximately 0x100 bytes per controller. Key register
 - **RXFIFO_OVF**: RX FIFO overflow
 
 ### SCL Stretch / Filter
-| Register | Offset | Description |
-|---|---|---|
-| I2C_SCL_FILTER_CFG_REG | 0x3C | SCL digital filter configuration |
-| I2C_SDA_FILTER_CFG_REG | 0x40 | SDA digital filter configuration |
+| Register               | Offset | Description                      |
+| ---------------------- | ------ | -------------------------------- |
+| I2C_SCL_FILTER_CFG_REG | 0x3C   | SCL digital filter configuration |
+| I2C_SDA_FILTER_CFG_REG | 0x40   | SDA digital filter configuration |
 
 ## Source Code References
 
@@ -168,15 +168,15 @@ The central challenge in emulating the ESP32 I2C controller is faithfully implem
 
 ## Complexity Assessment
 
-| Component | Complexity | Priority | Rationale |
-|---|---|---|---|
-| **Command queue engine** | MEDIUM-HIGH | HIGH | Core of the I2C controller. 5 command types, sequential execution, DONE bit tracking. Must be correct for ESP-IDF driver. |
-| **TX/RX FIFOs** | LOW-MEDIUM | HIGH | 32-byte FIFOs with threshold-based interrupts. Standard FIFO implementation. |
-| **Master mode** | MEDIUM | HIGH | Address parsing, slave routing via Renode I2C bus, read/write transactions. |
-| **Interrupt generation** | MEDIUM | HIGH | 13 interrupt sources. TRANS_COMPLETE, ACK_ERR, and END_DETECT are critical. |
-| **Status register** | LOW | MEDIUM | Bus state and FSM state tracking. Mostly read-only reporting. |
-| **Slave mode** | MEDIUM | LOW | Needed only when emulating an ESP32 acting as I2C slave. Uncommon scenario. |
-| **Clock/timing config** | LOW | LOW | Store register values but no functional effect in emulation. |
+| Component                | Complexity  | Priority | Rationale                                                                                                                 |
+| ------------------------ | ----------- | -------- | ------------------------------------------------------------------------------------------------------------------------- |
+| **Command queue engine** | MEDIUM-HIGH | HIGH     | Core of the I2C controller. 5 command types, sequential execution, DONE bit tracking. Must be correct for ESP-IDF driver. |
+| **TX/RX FIFOs**          | LOW-MEDIUM  | HIGH     | 32-byte FIFOs with threshold-based interrupts. Standard FIFO implementation.                                              |
+| **Master mode**          | MEDIUM      | HIGH     | Address parsing, slave routing via Renode I2C bus, read/write transactions.                                               |
+| **Interrupt generation** | MEDIUM      | HIGH     | 13 interrupt sources. TRANS_COMPLETE, ACK_ERR, and END_DETECT are critical.                                               |
+| **Status register**      | LOW         | MEDIUM   | Bus state and FSM state tracking. Mostly read-only reporting.                                                             |
+| **Slave mode**           | MEDIUM      | LOW      | Needed only when emulating an ESP32 acting as I2C slave. Uncommon scenario.                                               |
+| **Clock/timing config**  | LOW         | LOW      | Store register values but no functional effect in emulation.                                                              |
 
 **Overall I2C complexity: MEDIUM**
 

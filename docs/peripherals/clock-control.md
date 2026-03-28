@@ -43,7 +43,7 @@ XTAL32K (32.768 kHz) ──> RTC_CLK (optional, more precise)
 
 ### CPU Clock Frequencies
 | PLL Setting | CPU Divider | CPU Frequency | APB Frequency |
-|-------------|-------------|---------------|---------------|
+| ----------- | ----------- | ------------- | ------------- |
 | PLL 320 MHz | /4          | 80 MHz        | 80 MHz        |
 | PLL 320 MHz | /2          | 160 MHz       | 80 MHz        |
 | PLL 480 MHz | /2          | 240 MHz       | 80 MHz        |
@@ -71,37 +71,37 @@ TRM PDF: https://www.espressif.com/sites/default/files/documentation/esp32_techn
 
 ### RTC_CNTL Registers (base 0x3FF48000) - PLL and Clock Source
 
-| Register                    | Offset | Description                                         |
-|-----------------------------|--------|-----------------------------------------------------|
+| Register                   | Offset | Description                                                  |
+| -------------------------- | ------ | ------------------------------------------------------------ |
 | RTC_CNTL_CLK_CONF_REG      | 0x070  | Main clock configuration (CPU clock source select, dividers) |
-| RTC_CNTL_OPTIONS0_REG      | 0x000  | Power/reset options (includes PLL force enable)     |
-| RTC_CNTL_BIAS_CONF_REG     | 0x018  | Bias configuration for oscillators                  |
-| RTC_CNTL_TIMER1_REG        | 0x01C  | PLL and CK8M startup wait times                     |
-| RTC_CNTL_TIMER2_REG        | 0x020  | Additional timing configuration                     |
-| RTC_CNTL_SLOW_CLK_CONF_REG | 0x074  | RTC slow clock source selection and calibration     |
-| RTC_CNTL_STORE4_REG        | 0x0B0  | Boot-persistent storage (used to store XTAL freq)   |
-| RTC_CNTL_STORE5_REG        | 0x0B4  | Boot-persistent storage (used for clock cal data)   |
-| RTC_CNTL_DIAG0_REG         | 0x0C0  | Diagnostic (includes CK8M ready status)             |
+| RTC_CNTL_OPTIONS0_REG      | 0x000  | Power/reset options (includes PLL force enable)              |
+| RTC_CNTL_BIAS_CONF_REG     | 0x018  | Bias configuration for oscillators                           |
+| RTC_CNTL_TIMER1_REG        | 0x01C  | PLL and CK8M startup wait times                              |
+| RTC_CNTL_TIMER2_REG        | 0x020  | Additional timing configuration                              |
+| RTC_CNTL_SLOW_CLK_CONF_REG | 0x074  | RTC slow clock source selection and calibration              |
+| RTC_CNTL_STORE4_REG        | 0x0B0  | Boot-persistent storage (used to store XTAL freq)            |
+| RTC_CNTL_STORE5_REG        | 0x0B4  | Boot-persistent storage (used for clock cal data)            |
+| RTC_CNTL_DIAG0_REG         | 0x0C0  | Diagnostic (includes CK8M ready status)                      |
 
 ### APB Control Registers (base 0x3FF66000)
 
-| Register                     | Offset | Description                                        |
-|------------------------------|--------|----------------------------------------------------|
-| APB_CTRL_SYSCLK_CONF_REG    | 0x000  | System clock pre-divider and source select          |
-| APB_CTRL_XTAL_TICK_CONF_REG | 0x004  | XTAL tick divider for REF_TICK generation           |
-| APB_CTRL_PLL_TICK_CONF_REG  | 0x008  | PLL tick divider for REF_TICK generation            |
-| APB_CTRL_CK8M_TICK_CONF_REG | 0x00C  | CK8M tick divider                                   |
-| APB_CTRL_DATE_REG           | 0x07C  | Version register                                    |
+| Register                    | Offset | Description                                |
+| --------------------------- | ------ | ------------------------------------------ |
+| APB_CTRL_SYSCLK_CONF_REG    | 0x000  | System clock pre-divider and source select |
+| APB_CTRL_XTAL_TICK_CONF_REG | 0x004  | XTAL tick divider for REF_TICK generation  |
+| APB_CTRL_PLL_TICK_CONF_REG  | 0x008  | PLL tick divider for REF_TICK generation   |
+| APB_CTRL_CK8M_TICK_CONF_REG | 0x00C  | CK8M tick divider                          |
+| APB_CTRL_DATE_REG           | 0x07C  | Version register                           |
 
 ### DPORT Clock Gate Registers (base 0x3FF00000)
 
-| Register                     | Offset | Description                                        |
-|------------------------------|--------|----------------------------------------------------|
-| DPORT_PERIP_CLK_EN_REG      | 0x0C0  | Peripheral clock gate enable (bit per peripheral)   |
-| DPORT_PERIP_RST_EN_REG      | 0x0C4  | Peripheral reset control (bit per peripheral)       |
-| DPORT_CPU_PER_CONF_REG      | 0x03C  | CPU period configuration (CPU clock divider select) |
-| DPORT_BT_LPCK_DIV_INT_REG   | 0x0D0  | Bluetooth low-power clock divider (integer part)    |
-| DPORT_BT_LPCK_DIV_FRAC_REG  | 0x0D4  | Bluetooth low-power clock divider (fractional part) |
+| Register                   | Offset | Description                                         |
+| -------------------------- | ------ | --------------------------------------------------- |
+| DPORT_PERIP_CLK_EN_REG     | 0x0C0  | Peripheral clock gate enable (bit per peripheral)   |
+| DPORT_PERIP_RST_EN_REG     | 0x0C4  | Peripheral reset control (bit per peripheral)       |
+| DPORT_CPU_PER_CONF_REG     | 0x03C  | CPU period configuration (CPU clock divider select) |
+| DPORT_BT_LPCK_DIV_INT_REG  | 0x0D0  | Bluetooth low-power clock divider (integer part)    |
+| DPORT_BT_LPCK_DIV_FRAC_REG | 0x0D4  | Bluetooth low-power clock divider (fractional part) |
 
 ## Source Code References
 
@@ -161,16 +161,16 @@ TRM PDF: https://www.espressif.com/sites/default/files/documentation/esp32_techn
 
 **Overall Complexity: MEDIUM**
 
-| Aspect                        | Difficulty | Notes                                                |
-|-------------------------------|------------|------------------------------------------------------|
-| PLL configuration registers   | Medium     | Mostly state tracking and readback                   |
-| Clock derivation logic        | Medium     | Straightforward divider chains                       |
-| APB/CPU clock computation     | Low        | Small number of well-defined frequency combos        |
-| DPORT clock gating            | Low        | Bit field tracking; gating enforcement optional      |
-| Boot compatibility            | Medium     | Must report correct defaults for boot to proceed     |
-| Inter-peripheral clock API    | Medium     | Other models need to query clock frequencies         |
-| RTC clock sources             | Low        | Mostly relevant for deep sleep (lower priority)      |
-| Audio PLL (APLL)              | Low-Medium | Only needed for I2S audio applications               |
+| Aspect                      | Difficulty | Notes                                            |
+| --------------------------- | ---------- | ------------------------------------------------ |
+| PLL configuration registers | Medium     | Mostly state tracking and readback               |
+| Clock derivation logic      | Medium     | Straightforward divider chains                   |
+| APB/CPU clock computation   | Low        | Small number of well-defined frequency combos    |
+| DPORT clock gating          | Low        | Bit field tracking; gating enforcement optional  |
+| Boot compatibility          | Medium     | Must report correct defaults for boot to proceed |
+| Inter-peripheral clock API  | Medium     | Other models need to query clock frequencies     |
+| RTC clock sources           | Low        | Mostly relevant for deep sleep (lower priority)  |
+| Audio PLL (APLL)            | Low-Medium | Only needed for I2S audio applications           |
 
 **Estimated effort**: 1-2 weeks for a functional implementation supporting boot and basic peripheral clocking.
 

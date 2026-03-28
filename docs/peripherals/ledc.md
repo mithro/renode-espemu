@@ -36,34 +36,34 @@ The LEDC register space is organized into high-speed and low-speed groups with i
 
 ### Timer Registers (per timer, x4 per speed group)
 
-| Register | Offset (HS) | Description |
-|----------|-------------|-------------|
-| `LEDC_HSTIMERx_CONF` | 0x0140 + x*8 | Timer x config: clock divider, duty resolution, pause/reset |
-| `LEDC_HSTIMERx_VALUE` | 0x0144 + x*8 | Timer x current counter value (read-only) |
-| `LEDC_LSTIMERx_CONF` | 0x0160 + x*8 | Low-speed timer x config |
-| `LEDC_LSTIMERx_VALUE` | 0x0164 + x*8 | Low-speed timer x current value |
+| Register              | Offset (HS)  | Description                                                 |
+| --------------------- | ------------ | ----------------------------------------------------------- |
+| `LEDC_HSTIMERx_CONF`  | 0x0140 + x*8 | Timer x config: clock divider, duty resolution, pause/reset |
+| `LEDC_HSTIMERx_VALUE` | 0x0144 + x*8 | Timer x current counter value (read-only)                   |
+| `LEDC_LSTIMERx_CONF`  | 0x0160 + x*8 | Low-speed timer x config                                    |
+| `LEDC_LSTIMERx_VALUE` | 0x0164 + x*8 | Low-speed timer x current value                             |
 
 ### Channel Registers (per channel, x8 per speed group)
 
-| Register | Offset (HS ch0) | Description |
-|----------|-----------------|-------------|
-| `LEDC_HSCHx_CONF0` | 0x0000 + x*0x14 | Channel config: timer select, output enable, idle level |
-| `LEDC_HSCHx_HPOINT` | 0x0004 + x*0x14 | High point value (PWM rising edge position) |
-| `LEDC_HSCHx_DUTY` | 0x0008 + x*0x14 | Duty cycle value (left-shifted by 4 bits for fractional duty) |
-| `LEDC_HSCHx_CONF1` | 0x000C + x*0x14 | Duty change config: step num, cycle num, scale, increase/decrease |
-| `LEDC_HSCHx_DUTY_R` | 0x0010 + x*0x14 | Current duty value (read-only, reflects running duty) |
+| Register            | Offset (HS ch0) | Description                                                       |
+| ------------------- | --------------- | ----------------------------------------------------------------- |
+| `LEDC_HSCHx_CONF0`  | 0x0000 + x*0x14 | Channel config: timer select, output enable, idle level           |
+| `LEDC_HSCHx_HPOINT` | 0x0004 + x*0x14 | High point value (PWM rising edge position)                       |
+| `LEDC_HSCHx_DUTY`   | 0x0008 + x*0x14 | Duty cycle value (left-shifted by 4 bits for fractional duty)     |
+| `LEDC_HSCHx_CONF1`  | 0x000C + x*0x14 | Duty change config: step num, cycle num, scale, increase/decrease |
+| `LEDC_HSCHx_DUTY_R` | 0x0010 + x*0x14 | Current duty value (read-only, reflects running duty)             |
 
 Low-speed channel registers follow the same layout starting at offset `0x00A0`.
 
 ### Global Registers
 
-| Register | Offset | Description |
-|----------|--------|-------------|
-| `LEDC_CONF` | 0x0190 | Global config: APB_CLK select for high-speed timers |
-| `LEDC_INT_RAW` | 0x0180 | Raw interrupt status |
-| `LEDC_INT_ST` | 0x0184 | Masked interrupt status |
-| `LEDC_INT_ENA` | 0x0188 | Interrupt enable |
-| `LEDC_INT_CLR` | 0x018C | Interrupt clear (write-1-to-clear) |
+| Register       | Offset | Description                                         |
+| -------------- | ------ | --------------------------------------------------- |
+| `LEDC_CONF`    | 0x0190 | Global config: APB_CLK select for high-speed timers |
+| `LEDC_INT_RAW` | 0x0180 | Raw interrupt status                                |
+| `LEDC_INT_ST`  | 0x0184 | Masked interrupt status                             |
+| `LEDC_INT_ENA` | 0x0188 | Interrupt enable                                    |
+| `LEDC_INT_CLR` | 0x018C | Interrupt clear (write-1-to-clear)                  |
 
 ### Interrupt Bits
 
@@ -155,16 +155,16 @@ There is no existing LEDC peripheral in Renode. Relevant reference implementatio
 
 ## Complexity Assessment
 
-| Aspect | Rating | Notes |
-|--------|--------|-------|
-| **Register count** | Low-Medium | ~100 registers, but highly repetitive (8 copies of same channel layout) |
-| **Logic complexity** | Medium | Timer counting is simple; fade engine adds moderate complexity |
-| **Interrupt model** | Low | Standard enable/status/clear pattern, 24 sources |
-| **External dependencies** | Low | Only needs GPIO matrix for output routing (optional for basic emulation) |
-| **Clock domain complexity** | Low-Medium | Multiple clock sources but straightforward mux |
-| **DMA** | None | LEDC does not use DMA |
-| **QEMU reference available** | Yes | Significantly reduces implementation risk |
-| **Overall effort** | **Medium** | Estimated 2-3 days |
-| **Priority** | **High** | Common peripheral, QEMU reference exists, good early win |
+| Aspect                       | Rating     | Notes                                                                    |
+| ---------------------------- | ---------- | ------------------------------------------------------------------------ |
+| **Register count**           | Low-Medium | ~100 registers, but highly repetitive (8 copies of same channel layout)  |
+| **Logic complexity**         | Medium     | Timer counting is simple; fade engine adds moderate complexity           |
+| **Interrupt model**          | Low        | Standard enable/status/clear pattern, 24 sources                         |
+| **External dependencies**    | Low        | Only needs GPIO matrix for output routing (optional for basic emulation) |
+| **Clock domain complexity**  | Low-Medium | Multiple clock sources but straightforward mux                           |
+| **DMA**                      | None       | LEDC does not use DMA                                                    |
+| **QEMU reference available** | Yes        | Significantly reduces implementation risk                                |
+| **Overall effort**           | **Medium** | Estimated 2-3 days                                                       |
+| **Priority**                 | **High**   | Common peripheral, QEMU reference exists, good early win                 |
 
 The LEDC is a strong candidate for early implementation due to its moderate complexity, existing QEMU reference, and wide usage in ESP-IDF applications. The fade engine is the primary complexity driver; a simplified model that correctly fires the completion interrupt will satisfy most firmware.

@@ -63,36 +63,36 @@ ADC registers are within the SENS (Sensor) register block at base `0x3FF48800`. 
 
 ### ADC1 Registers
 
-| Register | Offset | Description |
-|----------|--------|-------------|
-| `SENS_SAR_READ_CTRL` | 0x0000 | ADC1 config: SAR clock divider, sample bit width, data inversion |
-| `SENS_SAR_READ_STATUS1` | 0x0004 | ADC1 read status (read-only) |
-| `SENS_SAR_MEAS_WAIT1` | 0x000C | Measurement wait/timing config (part 1) |
-| `SENS_SAR_MEAS_WAIT2` | 0x0010 | Measurement wait/timing config (part 2) |
-| `SENS_SAR_MEAS_CTRL` | 0x0014 | Measurement control (XPD SAR, force control) |
-| `SENS_SAR_MEAS_START1` | 0x0054 | ADC1 measurement start: channel select (SAR1_EN_PAD), start trigger |
-| `SENS_SAR_TOUCH_CTRL1` | 0x0058 | Touch/SAR control (shared register) |
-| `SENS_SAR_ATTEN1` | 0x0034 | ADC1 per-channel attenuation (2 bits per channel, 8 channels = 16 bits) |
+| Register                | Offset | Description                                                             |
+| ----------------------- | ------ | ----------------------------------------------------------------------- |
+| `SENS_SAR_READ_CTRL`    | 0x0000 | ADC1 config: SAR clock divider, sample bit width, data inversion        |
+| `SENS_SAR_READ_STATUS1` | 0x0004 | ADC1 read status (read-only)                                            |
+| `SENS_SAR_MEAS_WAIT1`   | 0x000C | Measurement wait/timing config (part 1)                                 |
+| `SENS_SAR_MEAS_WAIT2`   | 0x0010 | Measurement wait/timing config (part 2)                                 |
+| `SENS_SAR_MEAS_CTRL`    | 0x0014 | Measurement control (XPD SAR, force control)                            |
+| `SENS_SAR_MEAS_START1`  | 0x0054 | ADC1 measurement start: channel select (SAR1_EN_PAD), start trigger     |
+| `SENS_SAR_TOUCH_CTRL1`  | 0x0058 | Touch/SAR control (shared register)                                     |
+| `SENS_SAR_ATTEN1`       | 0x0034 | ADC1 per-channel attenuation (2 bits per channel, 8 channels = 16 bits) |
 
 ### ADC2 Registers
 
-| Register | Offset | Description |
-|----------|--------|-------------|
-| `SENS_SAR_READ_CTRL2` | 0x0090 | ADC2 config: SAR clock divider, sample bit width, data inversion |
-| `SENS_SAR_READ_STATUS2` | 0x0094 | ADC2 read status (read-only) |
-| `SENS_SAR_MEAS_START2` | 0x0098 | ADC2 measurement start: channel select (SAR2_EN_PAD), start trigger |
-| `SENS_SAR_ATTEN2` | 0x009C | ADC2 per-channel attenuation (2 bits per channel, 10 channels = 20 bits) |
+| Register                | Offset | Description                                                              |
+| ----------------------- | ------ | ------------------------------------------------------------------------ |
+| `SENS_SAR_READ_CTRL2`   | 0x0090 | ADC2 config: SAR clock divider, sample bit width, data inversion         |
+| `SENS_SAR_READ_STATUS2` | 0x0094 | ADC2 read status (read-only)                                             |
+| `SENS_SAR_MEAS_START2`  | 0x0098 | ADC2 measurement start: channel select (SAR2_EN_PAD), start trigger      |
+| `SENS_SAR_ATTEN2`       | 0x009C | ADC2 per-channel attenuation (2 bits per channel, 10 channels = 20 bits) |
 
 ### Shared/Control Registers
 
-| Register | Offset | Description |
-|----------|--------|-------------|
-| `SENS_SAR_SLAVE_ADDR1-4` | 0x0018-0x0024 | I2C-like slave addresses for internal analog control |
-| `SENS_SAR_PATT_TAB1-4` | 0x0028-0x0030 | ADC1 pattern table (DMA mode: channel + attenuation sequence) |
-| `SENS_SAR_PATT_TAB5-8` | various | ADC2 pattern table |
-| `SENS_SAR_I2C_CTRL` | 0x0038 | Internal I2C bus control (for analog calibration) |
-| `SENS_SAR_MEM_WR_CTRL` | 0x003C | Memory write control for DMA |
-| `SENS_SAR_NOUSE` | 0x00F8 | Reserved/no use |
+| Register                 | Offset        | Description                                                   |
+| ------------------------ | ------------- | ------------------------------------------------------------- |
+| `SENS_SAR_SLAVE_ADDR1-4` | 0x0018-0x0024 | I2C-like slave addresses for internal analog control          |
+| `SENS_SAR_PATT_TAB1-4`   | 0x0028-0x0030 | ADC1 pattern table (DMA mode: channel + attenuation sequence) |
+| `SENS_SAR_PATT_TAB5-8`   | various       | ADC2 pattern table                                            |
+| `SENS_SAR_I2C_CTRL`      | 0x0038        | Internal I2C bus control (for analog calibration)             |
+| `SENS_SAR_MEM_WR_CTRL`   | 0x003C        | Memory write control for DMA                                  |
+| `SENS_SAR_NOUSE`         | 0x00F8        | Reserved/no use                                               |
 
 ### Key Data Flow
 
@@ -195,16 +195,16 @@ ADC registers are within the SENS (Sensor) register block at base `0x3FF48800`. 
 
 ## Complexity Assessment
 
-| Aspect | Rating | Notes |
-|--------|--------|-------|
-| **Register count** | Medium | ~25-30 ADC registers within shared SENS block (~100 total SENS registers) |
-| **Logic complexity** | Low-Medium | One-shot is simple (trigger -> return value). Continuous/DMA is complex. |
-| **Interrupt model** | Low | Minimal interrupt support for one-shot mode |
-| **External dependencies** | Medium | Shared SENS register block with DAC and Touch; DMA via I2S for continuous mode |
-| **Clock domain complexity** | Low | SAR clock divider is straightforward |
-| **DMA** | Medium (if implemented) | Continuous mode requires I2S DMA path; skip for initial implementation |
-| **QEMU reference available** | **No** | No QEMU ADC, but Renode has STM32_ADC reference |
-| **Overall effort** | **Medium** | Estimated 2-3 days for one-shot mode; +3-4 days for continuous/DMA |
-| **Priority** | **Medium-High** | Commonly used peripheral; one-shot mode is high value, continuous mode is lower priority |
+| Aspect                       | Rating                  | Notes                                                                                    |
+| ---------------------------- | ----------------------- | ---------------------------------------------------------------------------------------- |
+| **Register count**           | Medium                  | ~25-30 ADC registers within shared SENS block (~100 total SENS registers)                |
+| **Logic complexity**         | Low-Medium              | One-shot is simple (trigger -> return value). Continuous/DMA is complex.                 |
+| **Interrupt model**          | Low                     | Minimal interrupt support for one-shot mode                                              |
+| **External dependencies**    | Medium                  | Shared SENS register block with DAC and Touch; DMA via I2S for continuous mode           |
+| **Clock domain complexity**  | Low                     | SAR clock divider is straightforward                                                     |
+| **DMA**                      | Medium (if implemented) | Continuous mode requires I2S DMA path; skip for initial implementation                   |
+| **QEMU reference available** | **No**                  | No QEMU ADC, but Renode has STM32_ADC reference                                          |
+| **Overall effort**           | **Medium**              | Estimated 2-3 days for one-shot mode; +3-4 days for continuous/DMA                       |
+| **Priority**                 | **Medium-High**         | Commonly used peripheral; one-shot mode is high value, continuous mode is lower priority |
 
 The ADC is moderately complex with the main challenge being the shared SENS register block. One-shot mode is straightforward to implement and covers the majority of use cases. Continuous/DMA mode is significantly more complex due to the I2S DMA dependency and can be deferred. The Renode STM32_ADC provides a useful architectural reference for value injection and conversion modeling.

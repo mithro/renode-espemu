@@ -33,43 +33,43 @@ The temperature sensor uses a small number of registers within the SENS (SAR ADC
 
 ### Temperature Sensor Specific Registers
 
-| Offset | Register | Key Fields | Purpose |
-|--------|----------|------------|---------|
-| `0x004` | `SENS_SAR_MEAS_WAIT2_REG` | `SENS_FORCE_XPD_SAR` | Force SAR power on (needed for TSENS) |
-| `0x04C` | `SENS_SAR_TSENS_CTRL_REG` | `TSENS_XPD_WAIT`, `TSENS_XPD_FORCE`, `TSENS_CLK_DIV`, `TSENS_POWER_UP`, `TSENS_POWER_UP_FORCE`, `TSENS_DUMP_OUT`, `TSENS_IN_INV`, `TSENS_CLK_INV`, `TSENS_DAC` | Main temperature sensor control: power, clock, DAC offset, data inversion |
-| `0x050` | `SENS_SAR_I2C_CTRL_REG` | Various | I2C interface to internal analog blocks (used for TSENS calibration on some revisions) |
-| `0x06C` | `SENS_SAR_SLAVE_ADDR3_REG` | `SENS_TSENS_RDY_OUT`, `SENS_TSENS_OUT` | Temperature sensor output: 8-bit result and ready flag |
+| Offset  | Register                   | Key Fields                                                                                                                                                     | Purpose                                                                                |
+| ------- | -------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
+| `0x004` | `SENS_SAR_MEAS_WAIT2_REG`  | `SENS_FORCE_XPD_SAR`                                                                                                                                           | Force SAR power on (needed for TSENS)                                                  |
+| `0x04C` | `SENS_SAR_TSENS_CTRL_REG`  | `TSENS_XPD_WAIT`, `TSENS_XPD_FORCE`, `TSENS_CLK_DIV`, `TSENS_POWER_UP`, `TSENS_POWER_UP_FORCE`, `TSENS_DUMP_OUT`, `TSENS_IN_INV`, `TSENS_CLK_INV`, `TSENS_DAC` | Main temperature sensor control: power, clock, DAC offset, data inversion              |
+| `0x050` | `SENS_SAR_I2C_CTRL_REG`    | Various                                                                                                                                                        | I2C interface to internal analog blocks (used for TSENS calibration on some revisions) |
+| `0x06C` | `SENS_SAR_SLAVE_ADDR3_REG` | `SENS_TSENS_RDY_OUT`, `SENS_TSENS_OUT`                                                                                                                         | Temperature sensor output: 8-bit result and ready flag                                 |
 
 ### Context Registers (SAR ADC shared, may affect TSENS operation)
 
-| Offset | Register | Purpose |
-|--------|----------|---------|
-| `0x000` | `SENS_SAR_READ_CTRL_REG` | SAR1 read control (clock div, sample cycles) |
+| Offset  | Register                  | Purpose                                        |
+| ------- | ------------------------- | ---------------------------------------------- |
+| `0x000` | `SENS_SAR_READ_CTRL_REG`  | SAR1 read control (clock div, sample cycles)   |
 | `0x004` | `SENS_SAR_MEAS_WAIT2_REG` | SAR power control (affects TSENS power domain) |
-| `0x048` | `SENS_SAR_MEAS_CTRL_REG` | Overall measurement control |
+| `0x048` | `SENS_SAR_MEAS_CTRL_REG`  | Overall measurement control                    |
 
 ### Key Bit Fields in SENS_SAR_TSENS_CTRL_REG (offset 0x04C)
 
-| Bits | Field | Purpose |
-|------|-------|---------|
-| `31:24` | `TSENS_XPD_WAIT` | Wait cycles after power-up before measurement |
-| `23` | `TSENS_XPD_FORCE` | Force temperature sensor power domain control |
-| `22` | `TSENS_CLK_INV` | Invert clock |
-| `21:14` | `TSENS_CLK_DIV` | Clock divider for measurement timing |
-| `13` | `TSENS_POWER_UP` | Power up the temperature sensor (when FORCE=1) |
-| `12` | `TSENS_POWER_UP_FORCE` | Use software control for power (vs hardware auto) |
-| `11` | `TSENS_DUMP_OUT` | Start/trigger measurement |
-| `10` | `TSENS_IN_INV` | Invert input |
-| `9:6` | `TSENS_DAC` | DAC offset value (affects measurement range) |
-| `5:0` | Reserved | -- |
+| Bits    | Field                  | Purpose                                           |
+| ------- | ---------------------- | ------------------------------------------------- |
+| `31:24` | `TSENS_XPD_WAIT`       | Wait cycles after power-up before measurement     |
+| `23`    | `TSENS_XPD_FORCE`      | Force temperature sensor power domain control     |
+| `22`    | `TSENS_CLK_INV`        | Invert clock                                      |
+| `21:14` | `TSENS_CLK_DIV`        | Clock divider for measurement timing              |
+| `13`    | `TSENS_POWER_UP`       | Power up the temperature sensor (when FORCE=1)    |
+| `12`    | `TSENS_POWER_UP_FORCE` | Use software control for power (vs hardware auto) |
+| `11`    | `TSENS_DUMP_OUT`       | Start/trigger measurement                         |
+| `10`    | `TSENS_IN_INV`         | Invert input                                      |
+| `9:6`   | `TSENS_DAC`            | DAC offset value (affects measurement range)      |
+| `5:0`   | Reserved               | --                                                |
 
 ### Key Bit Fields in SENS_SAR_SLAVE_ADDR3_REG (offset 0x06C)
 
-| Bits | Field | Purpose |
-|------|-------|---------|
-| `31` | `SENS_TSENS_RDY_OUT` | Temperature measurement ready (read-only) |
-| `30:23` | `SENS_TSENS_OUT` | 8-bit temperature value (read-only) |
-| `22:0` | Other fields | I2C slave address configuration (unrelated to TSENS) |
+| Bits    | Field                | Purpose                                              |
+| ------- | -------------------- | ---------------------------------------------------- |
+| `31`    | `SENS_TSENS_RDY_OUT` | Temperature measurement ready (read-only)            |
+| `30:23` | `SENS_TSENS_OUT`     | 8-bit temperature value (read-only)                  |
+| `22:0`  | Other fields         | I2C slave address configuration (unrelated to TSENS) |
 
 ## Source Code References
 

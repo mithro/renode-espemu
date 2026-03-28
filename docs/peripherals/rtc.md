@@ -19,69 +19,69 @@ The RTC controller is CRITICAL for boot. The very first operations after reset i
 
 ### Clock System
 
-| Clock Domain | Source Options | Typical Frequency | Usage |
-|---|---|---|---|
-| CPU_CLK | PLL, XTAL, RTC8M | 80/160/240 MHz (PLL) | CPU core clock |
-| APB_CLK | Derived from CPU_CLK | 80 MHz | Peripheral bus clock |
-| RTC_FAST_CLK | RTC8M, XTAL_DIV | ~8 MHz | RTC fast peripherals |
-| RTC_SLOW_CLK | RTC150K, XTAL32K, RTC8M_DIV | ~150 kHz / 32.768 kHz | RTC timer, RWDT |
+| Clock Domain | Source Options              | Typical Frequency     | Usage                |
+| ------------ | --------------------------- | --------------------- | -------------------- |
+| CPU_CLK      | PLL, XTAL, RTC8M            | 80/160/240 MHz (PLL)  | CPU core clock       |
+| APB_CLK      | Derived from CPU_CLK        | 80 MHz                | Peripheral bus clock |
+| RTC_FAST_CLK | RTC8M, XTAL_DIV             | ~8 MHz                | RTC fast peripherals |
+| RTC_SLOW_CLK | RTC150K, XTAL32K, RTC8M_DIV | ~150 kHz / 32.768 kHz | RTC timer, RWDT      |
 
 ### PLL Configuration
 
-| PLL Setting | CPU Clock | APB Clock |
-|---|---|---|
-| PLL_320 | 80 MHz or 160 MHz | 80 MHz |
-| PLL_480 | 80 MHz, 160 MHz, or 240 MHz | 80 MHz |
+| PLL Setting | CPU Clock                   | APB Clock |
+| ----------- | --------------------------- | --------- |
+| PLL_320     | 80 MHz or 160 MHz           | 80 MHz    |
+| PLL_480     | 80 MHz, 160 MHz, or 240 MHz | 80 MHz    |
 
 ### Reset Reasons
 
 The RTC controller records the reason for the most recent reset in `RTC_CNTL_RESET_STATE_REG`:
 
-| Reset Cause Code | Name | Description |
-|---|---|---|
-| 0x01 | POWERON_RESET | Power-on reset (initial power-up) |
-| 0x03 | SW_RESET | Software reset via `RTC_CNTL_SW_SYS_RST` |
-| 0x04 | OWDT_RESET | Legacy watchdog reset |
-| 0x05 | DEEPSLEEP_RESET | Wake from deep sleep |
-| 0x06 | SDIO_RESET | SDIO reset |
-| 0x07 | TG0WDT_SYS_RESET | Timer Group 0 WDT system reset |
-| 0x08 | TG1WDT_SYS_RESET | Timer Group 1 WDT system reset |
-| 0x09 | RTCWDT_SYS_RESET | RTC WDT system reset |
-| 0x0A | INTRUSION_RESET | Intrusion test reset |
-| 0x0B | TGWDT_CPU_RESET | Timer Group WDT CPU reset |
-| 0x0C | SW_CPU_RESET | Software CPU reset |
-| 0x0D | RTCWDT_CPU_RESET | RTC WDT CPU reset |
-| 0x0E | EXT_CPU_RESET | External CPU reset |
-| 0x0F | RTCWDT_BROWN_OUT | Brownout reset |
-| 0x10 | RTCWDT_RTC_RESET | RTC reset |
+| Reset Cause Code | Name             | Description                              |
+| ---------------- | ---------------- | ---------------------------------------- |
+| 0x01             | POWERON_RESET    | Power-on reset (initial power-up)        |
+| 0x03             | SW_RESET         | Software reset via `RTC_CNTL_SW_SYS_RST` |
+| 0x04             | OWDT_RESET       | Legacy watchdog reset                    |
+| 0x05             | DEEPSLEEP_RESET  | Wake from deep sleep                     |
+| 0x06             | SDIO_RESET       | SDIO reset                               |
+| 0x07             | TG0WDT_SYS_RESET | Timer Group 0 WDT system reset           |
+| 0x08             | TG1WDT_SYS_RESET | Timer Group 1 WDT system reset           |
+| 0x09             | RTCWDT_SYS_RESET | RTC WDT system reset                     |
+| 0x0A             | INTRUSION_RESET  | Intrusion test reset                     |
+| 0x0B             | TGWDT_CPU_RESET  | Timer Group WDT CPU reset                |
+| 0x0C             | SW_CPU_RESET     | Software CPU reset                       |
+| 0x0D             | RTCWDT_CPU_RESET | RTC WDT CPU reset                        |
+| 0x0E             | EXT_CPU_RESET    | External CPU reset                       |
+| 0x0F             | RTCWDT_BROWN_OUT | Brownout reset                           |
+| 0x10             | RTCWDT_RTC_RESET | RTC reset                                |
 
 ### Base Addresses
 
-| Peripheral | Base Address | Size |
-|---|---|---|
-| RTC Controller (RTC_CNTL) | 0x3FF48000 | 0x0100+ |
-| RTC I/O (RTC_IO) | 0x3FF48400 | 0x0100+ |
-| RTC I2C | 0x3FF48800 | |
+| Peripheral                | Base Address | Size    |
+| ------------------------- | ------------ | ------- |
+| RTC Controller (RTC_CNTL) | 0x3FF48000   | 0x0100+ |
+| RTC I/O (RTC_IO)          | 0x3FF48400   | 0x0100+ |
+| RTC I2C                   | 0x3FF48800   |         |
 
 ### Power Domains
 
-| Domain | Controls | Deep Sleep Behavior |
-|---|---|---|
-| RTC Power | RTC peripherals, RTC memory | Always on |
-| Digital Core | CPU, digital peripherals | Powered down in deep sleep |
-| WiFi | WiFi RF/baseband | Powered down in deep sleep (configurable) |
-| RTC Peripherals | RTC GPIO, touch sensors, ULP | Configurable |
-| RTC Fast Memory | 8 KB fast RTC memory | Configurable |
-| RTC Slow Memory | 8 KB slow RTC memory | Configurable |
+| Domain          | Controls                     | Deep Sleep Behavior                       |
+| --------------- | ---------------------------- | ----------------------------------------- |
+| RTC Power       | RTC peripherals, RTC memory  | Always on                                 |
+| Digital Core    | CPU, digital peripherals     | Powered down in deep sleep                |
+| WiFi            | WiFi RF/baseband             | Powered down in deep sleep (configurable) |
+| RTC Peripherals | RTC GPIO, touch sensors, ULP | Configurable                              |
+| RTC Fast Memory | 8 KB fast RTC memory         | Configurable                              |
+| RTC Slow Memory | 8 KB slow RTC memory         | Configurable                              |
 
 ### Brownout Detector
 
-| Feature | Specification |
-|---|---|
+| Feature            | Specification                                       |
+| ------------------ | --------------------------------------------------- |
 | Voltage Thresholds | 7 levels, configurable (approximately 2.1V to 2.7V) |
-| Actions | Interrupt, system reset, or both |
-| Flash Protection | Can disable flash when brownout detected |
-| Enable/Disable | Software configurable |
+| Actions            | Interrupt, system reset, or both                    |
+| Flash Protection   | Can disable flash when brownout detected            |
+| Enable/Disable     | Software configurable                               |
 
 ## TRM Chapter Reference
 
@@ -93,14 +93,14 @@ Note: Despite the "RTC" name, this peripheral is more of a system controller tha
 
 ### Key Sections
 
-| Section | Topic |
-|---|---|
-| 26.1 | System clock overview and configuration |
-| 26.2 | Reset sources and reset state |
-| 26.3 | Power management and deep sleep |
-| 26.4 | RTC timer (48-bit counter for deep sleep timing) |
-| 26.5 | Brownout detector |
-| 26.6 | Register descriptions |
+| Section | Topic                                            |
+| ------- | ------------------------------------------------ |
+| 26.1    | System clock overview and configuration          |
+| 26.2    | Reset sources and reset state                    |
+| 26.3    | Power management and deep sleep                  |
+| 26.4    | RTC timer (48-bit counter for deep sleep timing) |
+| 26.5    | Brownout detector                                |
+| 26.6    | Register descriptions                            |
 
 ### Critical TRM Details
 
@@ -118,112 +118,112 @@ Note: Despite the "RTC" name, this peripheral is more of a system controller tha
 
 ### Clock Configuration Registers
 
-| Register | Offset | Description |
-|---|---|---|
-| RTC_CNTL_CLK_CONF_REG | 0x0070 | Clock configuration (SOC_CLK_SEL, fast/slow clock source) |
-| RTC_CNTL_TIMER1_REG | 0x001C | PLL calibration wait times |
-| RTC_CNTL_TIMER2_REG | 0x0020 | ULP wakeup timer |
-| RTC_CNTL_OPTIONS0_REG | 0x0000 | System options (SW reset trigger) |
-| RTC_CNTL_SW_CPU_STALL_REG | 0x00AC | CPU stall control |
+| Register                  | Offset | Description                                               |
+| ------------------------- | ------ | --------------------------------------------------------- |
+| RTC_CNTL_CLK_CONF_REG     | 0x0070 | Clock configuration (SOC_CLK_SEL, fast/slow clock source) |
+| RTC_CNTL_TIMER1_REG       | 0x001C | PLL calibration wait times                                |
+| RTC_CNTL_TIMER2_REG       | 0x0020 | ULP wakeup timer                                          |
+| RTC_CNTL_OPTIONS0_REG     | 0x0000 | System options (SW reset trigger)                         |
+| RTC_CNTL_SW_CPU_STALL_REG | 0x00AC | CPU stall control                                         |
 
 ### Key CLK_CONF_REG Fields
 
-| Field | Bits | Description |
-|---|---|---|
-| SOC_CLK_SEL | 28:27 | System clock source: 0=XTAL, 1=PLL, 2=RTC8M, 3=APLL |
-| FAST_CLK_RTC_SEL | 29 | RTC fast clock: 0=XTAL_DIV, 1=RTC8M |
-| ANA_CLK_RTC_SEL | 31:30 | RTC slow clock: 0=RTC150K, 1=XTAL32K, 2=RTC8M_DIV |
-| CK8M_DIV_SEL | 6:4 | 8MHz RC oscillator divider |
+| Field            | Bits  | Description                                         |
+| ---------------- | ----- | --------------------------------------------------- |
+| SOC_CLK_SEL      | 28:27 | System clock source: 0=XTAL, 1=PLL, 2=RTC8M, 3=APLL |
+| FAST_CLK_RTC_SEL | 29    | RTC fast clock: 0=XTAL_DIV, 1=RTC8M                 |
+| ANA_CLK_RTC_SEL  | 31:30 | RTC slow clock: 0=RTC150K, 1=XTAL32K, 2=RTC8M_DIV   |
+| CK8M_DIV_SEL     | 6:4   | 8MHz RC oscillator divider                          |
 
 ### Reset and State Registers
 
-| Register | Offset | Description |
-|---|---|---|
-| RTC_CNTL_RESET_STATE_REG | 0x0034 | Reset reason for both CPUs |
-| RTC_CNTL_STORE0_REG | 0x004C | General-purpose store register 0 (deep sleep wake stub) |
-| RTC_CNTL_STORE1_REG | 0x0050 | General-purpose store register 1 |
-| RTC_CNTL_STORE2_REG | 0x0054 | General-purpose store register 2 |
-| RTC_CNTL_STORE3_REG | 0x0058 | General-purpose store register 3 |
-| RTC_CNTL_STORE4_REG | 0x005C | General-purpose store register 4 (boot state) |
-| RTC_CNTL_STORE5_REG | 0x0060 | General-purpose store register 5 |
-| RTC_CNTL_STORE6_REG | 0x0064 | General-purpose store register 6 |
-| RTC_CNTL_STORE7_REG | 0x0068 | General-purpose store register 7 |
+| Register                 | Offset | Description                                             |
+| ------------------------ | ------ | ------------------------------------------------------- |
+| RTC_CNTL_RESET_STATE_REG | 0x0034 | Reset reason for both CPUs                              |
+| RTC_CNTL_STORE0_REG      | 0x004C | General-purpose store register 0 (deep sleep wake stub) |
+| RTC_CNTL_STORE1_REG      | 0x0050 | General-purpose store register 1                        |
+| RTC_CNTL_STORE2_REG      | 0x0054 | General-purpose store register 2                        |
+| RTC_CNTL_STORE3_REG      | 0x0058 | General-purpose store register 3                        |
+| RTC_CNTL_STORE4_REG      | 0x005C | General-purpose store register 4 (boot state)           |
+| RTC_CNTL_STORE5_REG      | 0x0060 | General-purpose store register 5                        |
+| RTC_CNTL_STORE6_REG      | 0x0064 | General-purpose store register 6                        |
+| RTC_CNTL_STORE7_REG      | 0x0068 | General-purpose store register 7                        |
 
 ### Key RESET_STATE_REG Fields
 
-| Field | Bits | Description |
-|---|---|---|
-| RESET_CAUSE_PROCPU | 5:0 | PRO_CPU reset reason code |
-| RESET_CAUSE_APPCPU | 11:6 | APP_CPU reset reason code |
-| STAT_VECTOR_SEL_PROCPU | 13 | PRO_CPU reset vector selection (ROM or RTC) |
-| STAT_VECTOR_SEL_APPCPU | 14 | APP_CPU reset vector selection |
+| Field                  | Bits | Description                                 |
+| ---------------------- | ---- | ------------------------------------------- |
+| RESET_CAUSE_PROCPU     | 5:0  | PRO_CPU reset reason code                   |
+| RESET_CAUSE_APPCPU     | 11:6 | APP_CPU reset reason code                   |
+| STAT_VECTOR_SEL_PROCPU | 13   | PRO_CPU reset vector selection (ROM or RTC) |
+| STAT_VECTOR_SEL_APPCPU | 14   | APP_CPU reset vector selection              |
 
 ### Power Management Registers
 
-| Register | Offset | Description |
-|---|---|---|
-| RTC_CNTL_SLP_TIMER0_REG | 0x0004 | Deep sleep wakeup timer (low 32 bits) |
-| RTC_CNTL_SLP_TIMER1_REG | 0x0008 | Deep sleep wakeup timer (high 16 bits) |
-| RTC_CNTL_STATE0_REG | 0x0018 | Sleep/wakeup state machine control |
+| Register                  | Offset | Description                                            |
+| ------------------------- | ------ | ------------------------------------------------------ |
+| RTC_CNTL_SLP_TIMER0_REG   | 0x0004 | Deep sleep wakeup timer (low 32 bits)                  |
+| RTC_CNTL_SLP_TIMER1_REG   | 0x0008 | Deep sleep wakeup timer (high 16 bits)                 |
+| RTC_CNTL_STATE0_REG       | 0x0018 | Sleep/wakeup state machine control                     |
 | RTC_CNTL_WAKEUP_STATE_REG | 0x003C | Wakeup enable mask (which sources can wake from sleep) |
-| RTC_CNTL_DIG_PWC_REG | 0x0080 | Digital power control |
-| RTC_CNTL_DIG_ISO_REG | 0x0084 | Digital domain isolation |
-| RTC_CNTL_PWC_REG | 0x0088 | RTC power control |
+| RTC_CNTL_DIG_PWC_REG      | 0x0080 | Digital power control                                  |
+| RTC_CNTL_DIG_ISO_REG      | 0x0084 | Digital domain isolation                               |
+| RTC_CNTL_PWC_REG          | 0x0088 | RTC power control                                      |
 
 ### Brownout Detection Registers
 
-| Register | Offset | Description |
-|---|---|---|
+| Register               | Offset | Description                     |
+| ---------------------- | ------ | ------------------------------- |
 | RTC_CNTL_BROWN_OUT_REG | 0x00D4 | Brownout detector configuration |
 
 ### Key BROWN_OUT_REG Fields
 
-| Field | Bits | Description |
-|---|---|---|
-| CLOSE_FLASH_ENA | 6 | Close flash on brownout |
-| PD_RF_ENA | 5 | Power down RF on brownout |
-| RST_WAIT | 14:7 | Reset wait cycles |
-| RST_ENA | 15 | Enable reset on brownout |
-| THRES | 18:16 | Voltage threshold selection (0-7) |
-| ENA | 19 | Brownout detector enable |
-| DET | 31 | Brownout detected (read-only status) |
+| Field           | Bits  | Description                          |
+| --------------- | ----- | ------------------------------------ |
+| CLOSE_FLASH_ENA | 6     | Close flash on brownout              |
+| PD_RF_ENA       | 5     | Power down RF on brownout            |
+| RST_WAIT        | 14:7  | Reset wait cycles                    |
+| RST_ENA         | 15    | Enable reset on brownout             |
+| THRES           | 18:16 | Voltage threshold selection (0-7)    |
+| ENA             | 19    | Brownout detector enable             |
+| DET             | 31    | Brownout detected (read-only status) |
 
 ### RTC Watchdog Registers
 
 See `docs/peripherals/watchdog.md` for detailed RWDT register documentation.
 
-| Register | Offset | Description |
-|---|---|---|
-| RTC_CNTL_WDTCONFIG0_REG | 0x008C | RWDT configuration |
-| RTC_CNTL_WDTCONFIG1_REG | 0x0090 | Stage 0 timeout |
-| RTC_CNTL_WDTCONFIG2_REG | 0x0094 | Stage 1 timeout |
-| RTC_CNTL_WDTCONFIG3_REG | 0x0098 | Stage 2 timeout |
-| RTC_CNTL_WDTCONFIG4_REG | 0x009C | Stage 3 timeout |
-| RTC_CNTL_WDTFEED_REG | 0x00A0 | RWDT feed register |
+| Register                 | Offset | Description           |
+| ------------------------ | ------ | --------------------- |
+| RTC_CNTL_WDTCONFIG0_REG  | 0x008C | RWDT configuration    |
+| RTC_CNTL_WDTCONFIG1_REG  | 0x0090 | Stage 0 timeout       |
+| RTC_CNTL_WDTCONFIG2_REG  | 0x0094 | Stage 1 timeout       |
+| RTC_CNTL_WDTCONFIG3_REG  | 0x0098 | Stage 2 timeout       |
+| RTC_CNTL_WDTCONFIG4_REG  | 0x009C | Stage 3 timeout       |
+| RTC_CNTL_WDTFEED_REG     | 0x00A0 | RWDT feed register    |
 | RTC_CNTL_WDTWPROTECT_REG | 0x00A4 | RWDT write protection |
 
 ### Interrupt Registers
 
-| Register | Offset | Description |
-|---|---|---|
-| RTC_CNTL_INT_RAW_REG | 0x0040 | Raw interrupt status |
-| RTC_CNTL_INT_ST_REG | 0x0044 | Masked interrupt status |
-| RTC_CNTL_INT_ENA_REG | 0x0048 | Interrupt enable |
-| RTC_CNTL_INT_CLR_REG | 0x004C | Interrupt clear |
+| Register             | Offset | Description             |
+| -------------------- | ------ | ----------------------- |
+| RTC_CNTL_INT_RAW_REG | 0x0040 | Raw interrupt status    |
+| RTC_CNTL_INT_ST_REG  | 0x0044 | Masked interrupt status |
+| RTC_CNTL_INT_ENA_REG | 0x0048 | Interrupt enable        |
+| RTC_CNTL_INT_CLR_REG | 0x004C | Interrupt clear         |
 
 ### RTC Interrupt Sources
 
-| Bit | Source | Description |
-|---|---|---|
-| 0 | SLP_WAKEUP | Wake from sleep |
-| 1 | SLP_REJECT | Sleep rejected |
-| 2 | SDIO_IDLE | SDIO idle |
-| 3 | WDT | RTC watchdog |
-| 4 | TIME_VALID | RTC time valid |
-| 6 | ULP_CP | ULP coprocessor |
-| 7 | TOUCH | Touch pad |
-| 8 | BROWN_OUT | Brownout detected |
-| 9 | MAIN_TIMER | RTC main timer |
+| Bit | Source     | Description       |
+| --- | ---------- | ----------------- |
+| 0   | SLP_WAKEUP | Wake from sleep   |
+| 1   | SLP_REJECT | Sleep rejected    |
+| 2   | SDIO_IDLE  | SDIO idle         |
+| 3   | WDT        | RTC watchdog      |
+| 4   | TIME_VALID | RTC time valid    |
+| 6   | ULP_CP     | ULP coprocessor   |
+| 7   | TOUCH      | Touch pad         |
+| 8   | BROWN_OUT  | Brownout detected |
+| 9   | MAIN_TIMER | RTC main timer    |
 
 ## Source Code References
 
@@ -436,20 +436,20 @@ These components must work for the ESP32 to boot:
 
 ### Implementation Priority
 
-| Component | Priority | Reason |
-|---|---|---|
-| Reset reason registers | CRITICAL | Read at very start of boot |
-| Store registers (STORE0-7) | CRITICAL | Bootloader state and XTAL freq |
-| CLK_CONF_REG (SOC_CLK_SEL) | CRITICAL | Clock source tracking |
-| OPTIONS0_REG (SW reset) | HIGH | Software reset support |
-| RWDT registers | HIGH | See watchdog.md, needed for boot |
-| RTC interrupt registers | HIGH | RTC interrupt sources |
-| Power domain registers (stub) | MEDIUM | Accept writes, all domains stay on |
-| Brownout registers (stub) | MEDIUM | Accept config, never trigger |
-| CPU stall control | MEDIUM | Dual-core operation |
-| RTC timer (48-bit) | MEDIUM | System timekeeping |
-| Deep sleep state machine | LOW | Not needed for basic operation |
-| ULP control | LOW | Specialized use cases only |
+| Component                     | Priority | Reason                             |
+| ----------------------------- | -------- | ---------------------------------- |
+| Reset reason registers        | CRITICAL | Read at very start of boot         |
+| Store registers (STORE0-7)    | CRITICAL | Bootloader state and XTAL freq     |
+| CLK_CONF_REG (SOC_CLK_SEL)    | CRITICAL | Clock source tracking              |
+| OPTIONS0_REG (SW reset)       | HIGH     | Software reset support             |
+| RWDT registers                | HIGH     | See watchdog.md, needed for boot   |
+| RTC interrupt registers       | HIGH     | RTC interrupt sources              |
+| Power domain registers (stub) | MEDIUM   | Accept writes, all domains stay on |
+| Brownout registers (stub)     | MEDIUM   | Accept config, never trigger       |
+| CPU stall control             | MEDIUM   | Dual-core operation                |
+| RTC timer (48-bit)            | MEDIUM   | System timekeeping                 |
+| Deep sleep state machine      | LOW      | Not needed for basic operation     |
+| ULP control                   | LOW      | Specialized use cases only         |
 
 ## Complexity Assessment
 
@@ -457,15 +457,15 @@ These components must work for the ESP32 to boot:
 
 #### Justification
 
-| Factor | Rating | Notes |
-|---|---|---|
-| Register complexity | High | Large register space (~100+ registers) with many sub-functions |
-| Behavioral complexity | Medium-High | Multiple independent sub-systems (clock, reset, power, brownout, WDT) |
-| Timing sensitivity | Medium | Clock switching must be consistent, but emulation can abstract timing |
-| Boot criticality | CRITICAL | Reset reason and clock config are the very first things firmware accesses |
-| Stubbing viability | High | Many subsystems can be effectively stubbed (brownout, power management, deep sleep) |
-| QEMU reference quality | High | Complete implementation available |
-| Renode reference quality | Medium | STM32F4_RTC covers some patterns but ESP32 RTC is much more complex |
+| Factor                   | Rating      | Notes                                                                               |
+| ------------------------ | ----------- | ----------------------------------------------------------------------------------- |
+| Register complexity      | High        | Large register space (~100+ registers) with many sub-functions                      |
+| Behavioral complexity    | Medium-High | Multiple independent sub-systems (clock, reset, power, brownout, WDT)               |
+| Timing sensitivity       | Medium      | Clock switching must be consistent, but emulation can abstract timing               |
+| Boot criticality         | CRITICAL    | Reset reason and clock config are the very first things firmware accesses           |
+| Stubbing viability       | High        | Many subsystems can be effectively stubbed (brownout, power management, deep sleep) |
+| QEMU reference quality   | High        | Complete implementation available                                                   |
+| Renode reference quality | Medium      | STM32F4_RTC covers some patterns but ESP32 RTC is much more complex                 |
 
 #### Estimated Effort
 

@@ -12,91 +12,91 @@ The routing is configured through the DPORT (Dual-Port) register space, with sep
 
 ### Interrupt Matrix Architecture
 
-| Feature | Specification |
-|---|---|
-| Peripheral Interrupt Sources | 71 (numbered 0-70) |
-| CPU Interrupt Inputs | 32 per core (0-31), 26 usable for peripherals |
-| CPU Cores | 2 (PRO_CPU = CPU0, APP_CPU = CPU1) |
-| Routing Granularity | Per-source, per-core |
-| Routing Register Width | 5 bits per source (selects CPU interrupt 0-31) |
-| Shared Interrupts | Yes, multiple sources can map to same CPU interrupt |
-| Default Mapping | All sources mapped to CPU interrupt 0 (disabled) at reset |
+| Feature                      | Specification                                             |
+| ---------------------------- | --------------------------------------------------------- |
+| Peripheral Interrupt Sources | 71 (numbered 0-70)                                        |
+| CPU Interrupt Inputs         | 32 per core (0-31), 26 usable for peripherals             |
+| CPU Cores                    | 2 (PRO_CPU = CPU0, APP_CPU = CPU1)                        |
+| Routing Granularity          | Per-source, per-core                                      |
+| Routing Register Width       | 5 bits per source (selects CPU interrupt 0-31)            |
+| Shared Interrupts            | Yes, multiple sources can map to same CPU interrupt       |
+| Default Mapping              | All sources mapped to CPU interrupt 0 (disabled) at reset |
 
 ### CPU Interrupt Line Allocation
 
 The Xtensa LX6 CPU has 32 interrupt inputs (levels 1-6 + NMI), but not all are available for peripheral routing:
 
-| CPU Interrupt | Level | Type | Usage |
-|---|---|---|---|
-| 0 | 1 | Level | Used as "disabled" target (default mapping) |
-| 1 | 1 | Level | Available for peripherals |
-| 2 | 1 | Level | Available for peripherals |
-| 3 | 1 | Level | Available for peripherals |
-| 4 | 1 | Level | Available for peripherals |
-| 5 | 1 | Level | Available for peripherals |
-| 6 | 1 | Edge | Timer interrupt (debug) |
-| 7 | 1 | Edge | Software / profiling |
-| 8 | 1 | Level | Available for peripherals |
-| 9 | 1 | Level | Available for peripherals |
-| 10 | 1 | Edge | Available for peripherals |
-| 11 | 3 | Level | Profiling |
-| 12 | 1 | Level | Available for peripherals |
-| 13 | 1 | Level | Available for peripherals |
-| 14 | 7 | NMI | NMI (used for panic watchdog) |
-| 15 | 3 | Edge | Timer (internal) |
-| 16 | 5 | Edge | Timer (internal) |
-| 17 | 1 | Level | Available for peripherals |
-| 18 | 1 | Level | Available for peripherals |
-| 19 | 2 | Level | Available for peripherals |
-| 20 | 2 | Level | Available for peripherals |
-| 21 | 2 | Level | Available for peripherals |
-| 22 | 3 | Edge | Available for peripherals |
-| 23 | 3 | Level | Available for peripherals |
-| 24 | 4 | Level | Available for peripherals |
-| 25 | 4 | Level | Available for peripherals |
-| 26 | 5 | Level | Available for peripherals |
-| 27 | 3 | Level | Available for peripherals |
-| 28 | 4 | Edge | Available for peripherals |
-| 29 | 3 | Software | Software interrupt |
-| 30 | 4 | Edge | Reserved |
-| 31 | 5 | Edge | Timer (internal) |
+| CPU Interrupt | Level | Type     | Usage                                       |
+| ------------- | ----- | -------- | ------------------------------------------- |
+| 0             | 1     | Level    | Used as "disabled" target (default mapping) |
+| 1             | 1     | Level    | Available for peripherals                   |
+| 2             | 1     | Level    | Available for peripherals                   |
+| 3             | 1     | Level    | Available for peripherals                   |
+| 4             | 1     | Level    | Available for peripherals                   |
+| 5             | 1     | Level    | Available for peripherals                   |
+| 6             | 1     | Edge     | Timer interrupt (debug)                     |
+| 7             | 1     | Edge     | Software / profiling                        |
+| 8             | 1     | Level    | Available for peripherals                   |
+| 9             | 1     | Level    | Available for peripherals                   |
+| 10            | 1     | Edge     | Available for peripherals                   |
+| 11            | 3     | Level    | Profiling                                   |
+| 12            | 1     | Level    | Available for peripherals                   |
+| 13            | 1     | Level    | Available for peripherals                   |
+| 14            | 7     | NMI      | NMI (used for panic watchdog)               |
+| 15            | 3     | Edge     | Timer (internal)                            |
+| 16            | 5     | Edge     | Timer (internal)                            |
+| 17            | 1     | Level    | Available for peripherals                   |
+| 18            | 1     | Level    | Available for peripherals                   |
+| 19            | 2     | Level    | Available for peripherals                   |
+| 20            | 2     | Level    | Available for peripherals                   |
+| 21            | 2     | Level    | Available for peripherals                   |
+| 22            | 3     | Edge     | Available for peripherals                   |
+| 23            | 3     | Level    | Available for peripherals                   |
+| 24            | 4     | Level    | Available for peripherals                   |
+| 25            | 4     | Level    | Available for peripherals                   |
+| 26            | 5     | Level    | Available for peripherals                   |
+| 27            | 3     | Level    | Available for peripherals                   |
+| 28            | 4     | Edge     | Available for peripherals                   |
+| 29            | 3     | Software | Software interrupt                          |
+| 30            | 4     | Edge     | Reserved                                    |
+| 31            | 5     | Edge     | Timer (internal)                            |
 
 ### Peripheral Interrupt Source List (Selected Critical Sources)
 
-| Source Number | Peripheral Source | Description |
-|---|---|---|
-| 0 | MAC_INTR | WiFi MAC interrupt |
-| 6 | TG0_T0_LEVEL | Timer Group 0, Timer 0 (FreeRTOS tick) |
-| 7 | TG0_T1_LEVEL | Timer Group 0, Timer 1 |
-| 8 | TG0_WDT_LEVEL | Timer Group 0, Watchdog |
-| 9 | TG0_LACT_LEVEL | Timer Group 0, LACT |
-| 10 | TG1_T0_LEVEL | Timer Group 1, Timer 0 |
-| 11 | TG1_T1_LEVEL | Timer Group 1, Timer 1 |
-| 12 | TG1_WDT_LEVEL | Timer Group 1, Watchdog |
-| 13 | TG1_LACT_LEVEL | Timer Group 1, LACT |
-| 14 | GPIO_INTR | GPIO interrupt |
-| 17 | UART0_INTR | UART0 interrupt |
-| 18 | UART1_INTR | UART1 interrupt |
-| 19 | UART2_INTR | UART2 interrupt |
-| 24 | I2C_EXT0_INTR | I2C 0 interrupt |
-| 25 | I2C_EXT1_INTR | I2C 1 interrupt |
-| 28 | SPI1_INTR | SPI1 interrupt |
-| 29 | SPI2_INTR | SPI2 interrupt |
-| 30 | SPI3_INTR | SPI3 interrupt |
-| 35 | TIMER1_INTR | FRC Timer 1 |
-| 36 | TIMER2_INTR | FRC Timer 2 |
-| 46 | RTC_CORE_INTR | RTC interrupt |
-| 50 | CPU_INTR_FROM_CPU_0 | Cross-core interrupt 0 |
-| 51 | CPU_INTR_FROM_CPU_1 | Cross-core interrupt 1 |
-| 52 | CPU_INTR_FROM_CPU_2 | Cross-core interrupt 2 |
-| 53 | CPU_INTR_FROM_CPU_3 | Cross-core interrupt 3 |
+| Source Number | Peripheral Source   | Description                            |
+| ------------- | ------------------- | -------------------------------------- |
+| 0             | MAC_INTR            | WiFi MAC interrupt                     |
+| 6             | TG0_T0_LEVEL        | Timer Group 0, Timer 0 (FreeRTOS tick) |
+| 7             | TG0_T1_LEVEL        | Timer Group 0, Timer 1                 |
+| 8             | TG0_WDT_LEVEL       | Timer Group 0, Watchdog                |
+| 9             | TG0_LACT_LEVEL      | Timer Group 0, LACT                    |
+| 10            | TG1_T0_LEVEL        | Timer Group 1, Timer 0                 |
+| 11            | TG1_T1_LEVEL        | Timer Group 1, Timer 1                 |
+| 12            | TG1_WDT_LEVEL       | Timer Group 1, Watchdog                |
+| 13            | TG1_LACT_LEVEL      | Timer Group 1, LACT                    |
+| 14            | GPIO_INTR           | GPIO interrupt                         |
+| 17            | UART0_INTR          | UART0 interrupt                        |
+| 18            | UART1_INTR          | UART1 interrupt                        |
+| 19            | UART2_INTR          | UART2 interrupt                        |
+| 24            | I2C_EXT0_INTR       | I2C 0 interrupt                        |
+| 25            | I2C_EXT1_INTR       | I2C 1 interrupt                        |
+| 28            | SPI1_INTR           | SPI1 interrupt                         |
+| 29            | SPI2_INTR           | SPI2 interrupt                         |
+| 30            | SPI3_INTR           | SPI3 interrupt                         |
+| 35            | TIMER1_INTR         | FRC Timer 1                            |
+| 36            | TIMER2_INTR         | FRC Timer 2                            |
+| 46            | RTC_CORE_INTR       | RTC interrupt                          |
+| 50            | CPU_INTR_FROM_CPU_0 | Cross-core interrupt 0                 |
+| 51            | CPU_INTR_FROM_CPU_1 | Cross-core interrupt 1                 |
+| 52            | CPU_INTR_FROM_CPU_2 | Cross-core interrupt 2                 |
+| 53            | CPU_INTR_FROM_CPU_3 | Cross-core interrupt 3                 |
 
 ### Cross-Core Interrupts
 
 The ESP32 dual-core design requires a mechanism for one CPU to interrupt the other. This is handled through 4 cross-core interrupt sources (CPU_INTR_FROM_CPU_0 through CPU_INTR_FROM_CPU_3):
 
-| Register | Address | Description |
-|---|---|---|
+| Register                      | Address    | Description                                   |
+| ----------------------------- | ---------- | --------------------------------------------- |
 | DPORT_CPU_INTR_FROM_CPU_0_REG | 0x3FF000DC | Write bit 0 to trigger cross-core interrupt 0 |
 | DPORT_CPU_INTR_FROM_CPU_1_REG | 0x3FF000E0 | Write bit 0 to trigger cross-core interrupt 1 |
 | DPORT_CPU_INTR_FROM_CPU_2_REG | 0x3FF000E4 | Write bit 0 to trigger cross-core interrupt 2 |
@@ -116,13 +116,13 @@ FreeRTOS uses these for:
 
 ### Key Sections
 
-| Section | Topic |
-|---|---|
-| 7.1 | Introduction to interrupt matrix |
-| 7.2 | Peripheral interrupt sources (full list of 71 sources) |
-| 7.3 | CPU interrupt types and levels |
-| 7.4 | Interrupt configuration registers |
-| 7.5 | NMI interrupt mask |
+| Section | Topic                                                  |
+| ------- | ------------------------------------------------------ |
+| 7.1     | Introduction to interrupt matrix                       |
+| 7.2     | Peripheral interrupt sources (full list of 71 sources) |
+| 7.3     | CPU interrupt types and levels                         |
+| 7.4     | Interrupt configuration registers                      |
+| 7.5     | NMI interrupt mask                                     |
 
 ### Critical TRM Details
 
@@ -142,18 +142,18 @@ The routing registers are in the DPORT address space (base 0x3FF00000). Each per
 
 #### PRO_CPU Mapping Registers (selected)
 
-| Register | Offset | Source |
-|---|---|---|
-| DPORT_PRO_MAC_INTR_MAP_REG | 0x0104 | WiFi MAC -> PRO_CPU interrupt number |
-| DPORT_PRO_TG_T0_LEVEL_INT_MAP_REG | 0x011C | TG0_T0 -> PRO_CPU interrupt number |
-| DPORT_PRO_TG_T1_LEVEL_INT_MAP_REG | 0x0120 | TG0_T1 -> PRO_CPU interrupt number |
-| DPORT_PRO_TG_WDT_LEVEL_INT_MAP_REG | 0x0124 | TG0_WDT -> PRO_CPU interrupt number |
-| DPORT_PRO_TG1_T0_LEVEL_INT_MAP_REG | 0x012C | TG1_T0 -> PRO_CPU interrupt number |
-| DPORT_PRO_TG1_T1_LEVEL_INT_MAP_REG | 0x0130 | TG1_T1 -> PRO_CPU interrupt number |
-| DPORT_PRO_TG1_WDT_LEVEL_INT_MAP_REG | 0x0134 | TG1_WDT -> PRO_CPU interrupt number |
-| DPORT_PRO_GPIO_INTERRUPT_MAP_REG | 0x0138 | GPIO -> PRO_CPU interrupt number |
-| DPORT_PRO_UART_INTR_MAP_REG | 0x0148 | UART0 -> PRO_CPU interrupt number |
-| DPORT_PRO_UART1_INTR_MAP_REG | 0x014C | UART1 -> PRO_CPU interrupt number |
+| Register                              | Offset | Source                                   |
+| ------------------------------------- | ------ | ---------------------------------------- |
+| DPORT_PRO_MAC_INTR_MAP_REG            | 0x0104 | WiFi MAC -> PRO_CPU interrupt number     |
+| DPORT_PRO_TG_T0_LEVEL_INT_MAP_REG     | 0x011C | TG0_T0 -> PRO_CPU interrupt number       |
+| DPORT_PRO_TG_T1_LEVEL_INT_MAP_REG     | 0x0120 | TG0_T1 -> PRO_CPU interrupt number       |
+| DPORT_PRO_TG_WDT_LEVEL_INT_MAP_REG    | 0x0124 | TG0_WDT -> PRO_CPU interrupt number      |
+| DPORT_PRO_TG1_T0_LEVEL_INT_MAP_REG    | 0x012C | TG1_T0 -> PRO_CPU interrupt number       |
+| DPORT_PRO_TG1_T1_LEVEL_INT_MAP_REG    | 0x0130 | TG1_T1 -> PRO_CPU interrupt number       |
+| DPORT_PRO_TG1_WDT_LEVEL_INT_MAP_REG   | 0x0134 | TG1_WDT -> PRO_CPU interrupt number      |
+| DPORT_PRO_GPIO_INTERRUPT_MAP_REG      | 0x0138 | GPIO -> PRO_CPU interrupt number         |
+| DPORT_PRO_UART_INTR_MAP_REG           | 0x0148 | UART0 -> PRO_CPU interrupt number        |
+| DPORT_PRO_UART1_INTR_MAP_REG          | 0x014C | UART1 -> PRO_CPU interrupt number        |
 | DPORT_PRO_CPU_INTR_FROM_CPU_0_MAP_REG | 0x01C8 | Cross-core 0 -> PRO_CPU interrupt number |
 | DPORT_PRO_CPU_INTR_FROM_CPU_1_MAP_REG | 0x01CC | Cross-core 1 -> PRO_CPU interrupt number |
 | DPORT_PRO_CPU_INTR_FROM_CPU_2_MAP_REG | 0x01D0 | Cross-core 2 -> PRO_CPU interrupt number |
@@ -163,20 +163,20 @@ The routing registers are in the DPORT address space (base 0x3FF00000). Each per
 
 The APP_CPU mapping registers follow the same layout, starting at a different offset range. Each PRO_CPU register has an APP_CPU counterpart:
 
-| Register Pattern | Description |
-|---|---|
+| Register Pattern    | Description                                    |
+| ------------------- | ---------------------------------------------- |
 | DPORT_APP_*_MAP_REG | Same sources, mapped independently for APP_CPU |
 
 The APP_CPU mapping register block starts at offset 0x0204 and mirrors the PRO_CPU layout.
 
 ### Interrupt Status Registers
 
-| Register | Offset | Description |
-|---|---|---|
-| DPORT_PRO_INTR_STATUS_0_REG | 0x003C | PRO_CPU interrupt source status bits 0-31 |
+| Register                    | Offset | Description                                |
+| --------------------------- | ------ | ------------------------------------------ |
+| DPORT_PRO_INTR_STATUS_0_REG | 0x003C | PRO_CPU interrupt source status bits 0-31  |
 | DPORT_PRO_INTR_STATUS_1_REG | 0x0040 | PRO_CPU interrupt source status bits 32-63 |
 | DPORT_PRO_INTR_STATUS_2_REG | 0x0044 | PRO_CPU interrupt source status bits 64-70 |
-| DPORT_APP_INTR_STATUS_0_REG | 0x0048 | APP_CPU interrupt source status bits 0-31 |
+| DPORT_APP_INTR_STATUS_0_REG | 0x0048 | APP_CPU interrupt source status bits 0-31  |
 | DPORT_APP_INTR_STATUS_1_REG | 0x004C | APP_CPU interrupt source status bits 32-63 |
 | DPORT_APP_INTR_STATUS_2_REG | 0x0050 | APP_CPU interrupt source status bits 64-70 |
 
@@ -325,15 +325,15 @@ Option B is recommended for modularity, with the DPORT peripheral dispatching re
 
 ### Implementation Priority
 
-| Component | Priority | Reason |
-|---|---|---|
-| Routing table (per-core, per-source) | CRITICAL | All interrupts depend on routing |
-| Mapping register writes | CRITICAL | Firmware configures routing at boot |
-| Source state tracking + CPU IRQ assertion | CRITICAL | Interrupts must reach CPUs |
-| Status registers (read-only) | HIGH | Shared interrupt dispatch reads these |
-| Cross-core interrupt triggers | HIGH | FreeRTOS SMP requires this |
-| Dynamic re-routing | MEDIUM | Uncommon after boot, but firmware can do it |
-| NMI mask | LOW | Rarely used |
+| Component                                 | Priority | Reason                                      |
+| ----------------------------------------- | -------- | ------------------------------------------- |
+| Routing table (per-core, per-source)      | CRITICAL | All interrupts depend on routing            |
+| Mapping register writes                   | CRITICAL | Firmware configures routing at boot         |
+| Source state tracking + CPU IRQ assertion | CRITICAL | Interrupts must reach CPUs                  |
+| Status registers (read-only)              | HIGH     | Shared interrupt dispatch reads these       |
+| Cross-core interrupt triggers             | HIGH     | FreeRTOS SMP requires this                  |
+| Dynamic re-routing                        | MEDIUM   | Uncommon after boot, but firmware can do it |
+| NMI mask                                  | LOW      | Rarely used                                 |
 
 ## Complexity Assessment
 
@@ -341,15 +341,15 @@ Option B is recommended for modularity, with the DPORT peripheral dispatching re
 
 #### Justification
 
-| Factor | Rating | Notes |
-|---|---|---|
-| Register complexity | High | 71 sources x 2 cores = 142 mapping registers, plus status registers |
-| Behavioral complexity | Medium-High | Routing logic is conceptually simple but must handle all edge cases |
-| Timing sensitivity | Medium | Interrupt latency matters but routing is combinational (near-instant) |
-| Boot criticality | CRITICAL | Without interrupt routing, no peripheral interrupts work at all |
-| Integration complexity | High | Must interface with all peripheral models and both CPU cores |
-| QEMU reference quality | High | Complete implementation available |
-| Dual-core complexity | High | Independent routing per core, cross-core interrupts add complexity |
+| Factor                 | Rating      | Notes                                                                 |
+| ---------------------- | ----------- | --------------------------------------------------------------------- |
+| Register complexity    | High        | 71 sources x 2 cores = 142 mapping registers, plus status registers   |
+| Behavioral complexity  | Medium-High | Routing logic is conceptually simple but must handle all edge cases   |
+| Timing sensitivity     | Medium      | Interrupt latency matters but routing is combinational (near-instant) |
+| Boot criticality       | CRITICAL    | Without interrupt routing, no peripheral interrupts work at all       |
+| Integration complexity | High        | Must interface with all peripheral models and both CPU cores          |
+| QEMU reference quality | High        | Complete implementation available                                     |
+| Dual-core complexity   | High        | Independent routing per core, cross-core interrupts add complexity    |
 
 #### Estimated Effort
 

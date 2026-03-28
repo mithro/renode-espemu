@@ -37,80 +37,80 @@ TRM PDF: https://www.espressif.com/sites/default/files/documentation/esp32_techn
 
 ### System Configuration
 
-| Register                          | Offset | Description                                        |
-|-----------------------------------|--------|----------------------------------------------------|
-| DPORT_PRO_BOOT_REMAP_CTRL_REG    | 0x000  | PRO CPU boot remap control                         |
-| DPORT_APP_BOOT_REMAP_CTRL_REG    | 0x004  | APP CPU boot remap control                         |
-| DPORT_PERI_CLK_EN_REG            | 0x008  | Secondary peripheral clock enable                  |
-| DPORT_PERI_RST_EN_REG            | 0x00C  | Secondary peripheral reset                         |
-| DPORT_APPCPU_CTRL_REG_A          | 0x02C  | APP CPU clock control                              |
-| DPORT_APPCPU_CTRL_REG_B          | 0x030  | APP CPU clock gate                                 |
-| DPORT_APPCPU_CTRL_REG_C          | 0x034  | APP CPU reset vector (low bits)                    |
-| DPORT_APPCPU_CTRL_REG_D          | 0x038  | APP CPU reset control                              |
-| DPORT_CPU_PER_CONF_REG           | 0x03C  | CPU period/frequency configuration                 |
+| Register                      | Offset | Description                        |
+| ----------------------------- | ------ | ---------------------------------- |
+| DPORT_PRO_BOOT_REMAP_CTRL_REG | 0x000  | PRO CPU boot remap control         |
+| DPORT_APP_BOOT_REMAP_CTRL_REG | 0x004  | APP CPU boot remap control         |
+| DPORT_PERI_CLK_EN_REG         | 0x008  | Secondary peripheral clock enable  |
+| DPORT_PERI_RST_EN_REG         | 0x00C  | Secondary peripheral reset         |
+| DPORT_APPCPU_CTRL_REG_A       | 0x02C  | APP CPU clock control              |
+| DPORT_APPCPU_CTRL_REG_B       | 0x030  | APP CPU clock gate                 |
+| DPORT_APPCPU_CTRL_REG_C       | 0x034  | APP CPU reset vector (low bits)    |
+| DPORT_APPCPU_CTRL_REG_D       | 0x038  | APP CPU reset control              |
+| DPORT_CPU_PER_CONF_REG        | 0x03C  | CPU period/frequency configuration |
 
 ### Cache and MMU Control
 
-| Register                          | Offset | Description                                        |
-|-----------------------------------|--------|----------------------------------------------------|
-| DPORT_PRO_CACHE_CTRL_REG         | 0x040  | PRO CPU cache enable and mode                      |
-| DPORT_PRO_CACHE_CTRL1_REG        | 0x044  | PRO CPU cache address mask                         |
-| DPORT_APP_CACHE_CTRL_REG         | 0x058  | APP CPU cache enable and mode                      |
-| DPORT_APP_CACHE_CTRL1_REG        | 0x05C  | APP CPU cache address mask                         |
-| DPORT_CACHE_IA_INT_EN_REG        | 0x1A0  | Cache illegal access interrupt enable              |
+| Register                  | Offset | Description                           |
+| ------------------------- | ------ | ------------------------------------- |
+| DPORT_PRO_CACHE_CTRL_REG  | 0x040  | PRO CPU cache enable and mode         |
+| DPORT_PRO_CACHE_CTRL1_REG | 0x044  | PRO CPU cache address mask            |
+| DPORT_APP_CACHE_CTRL_REG  | 0x058  | APP CPU cache enable and mode         |
+| DPORT_APP_CACHE_CTRL1_REG | 0x05C  | APP CPU cache address mask            |
+| DPORT_CACHE_IA_INT_EN_REG | 0x1A0  | Cache illegal access interrupt enable |
 
 ### Peripheral Clock Gating and Reset
 
-| Register                          | Offset | Description                                        |
-|-----------------------------------|--------|----------------------------------------------------|
-| DPORT_PERIP_CLK_EN_REG           | 0x0C0  | Main peripheral clock enable (one bit per periph)  |
-| DPORT_PERIP_RST_EN_REG           | 0x0C4  | Main peripheral reset control (one bit per periph) |
-| DPORT_WIFI_CLK_EN_REG            | 0x0CC  | WiFi/BT/crypto clock enables                       |
-| DPORT_WIFI_RST_EN_REG            | 0x0D0  | WiFi/BT/crypto reset control                       |
+| Register               | Offset | Description                                        |
+| ---------------------- | ------ | -------------------------------------------------- |
+| DPORT_PERIP_CLK_EN_REG | 0x0C0  | Main peripheral clock enable (one bit per periph)  |
+| DPORT_PERIP_RST_EN_REG | 0x0C4  | Main peripheral reset control (one bit per periph) |
+| DPORT_WIFI_CLK_EN_REG  | 0x0CC  | WiFi/BT/crypto clock enables                       |
+| DPORT_WIFI_RST_EN_REG  | 0x0D0  | WiFi/BT/crypto reset control                       |
 
 #### DPORT_PERIP_CLK_EN_REG Bit Map (offset 0x0C0)
 
-| Bit  | Peripheral          | Bit  | Peripheral            |
-|------|---------------------|------|-----------------------|
-| 0    | TIMERS              | 16   | UHCI1                 |
-| 1    | SPI01 (SPI/SPI1)    | 17   | TIMERGROUP1           |
-| 2    | UART                | 18   | EFUSE                 |
-| 3    | WDG (Watchdog)      | 19   | TIMERGROUP0           |
-| 4    | I2S0                | 20   | SPI3 (VSPI)          |
-| 5    | UART1               | 21   | PWM0                  |
-| 6    | SPI2 (HSPI)         | 22   | I2C_EXT1              |
-| 7    | I2C_EXT0            | 23   | CAN (TWAI)            |
-| 8    | UHCI0               | 24   | PWM1                  |
-| 9    | RMT                 | 25   | I2S1                  |
-| 10   | PCNT                | 26   | SPI_DMA               |
-| 11   | LEDC                | 27   | UART2                 |
-| 12   | UHCI1_DMA (unused)  | 28   | UART_MEM              |
-| 13   | TIMERGROUP           | 29   | PWM2                  |
-| 14   | EFUSE_CLK           | 30   | PWM3                  |
-| 15   | TIMERGROUP_CLK      | 31   | -                     |
+| Bit | Peripheral         | Bit | Peripheral  |
+| --- | ------------------ | --- | ----------- |
+| 0   | TIMERS             | 16  | UHCI1       |
+| 1   | SPI01 (SPI/SPI1)   | 17  | TIMERGROUP1 |
+| 2   | UART               | 18  | EFUSE       |
+| 3   | WDG (Watchdog)     | 19  | TIMERGROUP0 |
+| 4   | I2S0               | 20  | SPI3 (VSPI) |
+| 5   | UART1              | 21  | PWM0        |
+| 6   | SPI2 (HSPI)        | 22  | I2C_EXT1    |
+| 7   | I2C_EXT0           | 23  | CAN (TWAI)  |
+| 8   | UHCI0              | 24  | PWM1        |
+| 9   | RMT                | 25  | I2S1        |
+| 10  | PCNT               | 26  | SPI_DMA     |
+| 11  | LEDC               | 27  | UART2       |
+| 12  | UHCI1_DMA (unused) | 28  | UART_MEM    |
+| 13  | TIMERGROUP         | 29  | PWM2        |
+| 14  | EFUSE_CLK          | 30  | PWM3        |
+| 15  | TIMERGROUP_CLK     | 31  | -           |
 
 ### Interrupt Matrix Mapping
 
-| Register Range                           | Offset Range  | Description                          |
-|------------------------------------------|---------------|--------------------------------------|
-| DPORT_PRO_*_MAP_REG (various)            | 0x104 - 0x19C | PRO CPU interrupt source mapping     |
-| DPORT_APP_*_MAP_REG (various)            | 0x200 - 0x298 | APP CPU interrupt source mapping     |
+| Register Range                | Offset Range  | Description                      |
+| ----------------------------- | ------------- | -------------------------------- |
+| DPORT_PRO_*_MAP_REG (various) | 0x104 - 0x19C | PRO CPU interrupt source mapping |
+| DPORT_APP_*_MAP_REG (various) | 0x200 - 0x298 | APP CPU interrupt source mapping |
 
 Each interrupt source has a dedicated register that specifies which CPU interrupt line (0-31) it should be routed to. There are approximately 70+ interrupt sources.
 
 ### Cross-Core Communication
 
-| Register                          | Offset | Description                                        |
-|-----------------------------------|--------|----------------------------------------------------|
-| DPORT_CPU_INTR_FROM_CPU_0_REG    | 0x0DC  | Cross-core interrupt 0 (generate IRQ to other CPU) |
-| DPORT_CPU_INTR_FROM_CPU_1_REG    | 0x0E0  | Cross-core interrupt 1                             |
-| DPORT_CPU_INTR_FROM_CPU_2_REG    | 0x0E4  | Cross-core interrupt 2                             |
-| DPORT_CPU_INTR_FROM_CPU_3_REG    | 0x0E8  | Cross-core interrupt 3                             |
+| Register                      | Offset | Description                                        |
+| ----------------------------- | ------ | -------------------------------------------------- |
+| DPORT_CPU_INTR_FROM_CPU_0_REG | 0x0DC  | Cross-core interrupt 0 (generate IRQ to other CPU) |
+| DPORT_CPU_INTR_FROM_CPU_1_REG | 0x0E0  | Cross-core interrupt 1                             |
+| DPORT_CPU_INTR_FROM_CPU_2_REG | 0x0E4  | Cross-core interrupt 2                             |
+| DPORT_CPU_INTR_FROM_CPU_3_REG | 0x0E8  | Cross-core interrupt 3                             |
 
 ### MMU Table Regions
 
-| Address Range           | Description                              |
-|-------------------------|------------------------------------------|
+| Address Range           | Description                                |
+| ----------------------- | ------------------------------------------ |
 | 0x3FF10000 - 0x3FF100FF | PRO CPU instruction flash MMU (64 entries) |
 | 0x3FF12000 - 0x3FF120FF | APP CPU instruction flash MMU (64 entries) |
 | 0x3FF14000 - 0x3FF140FF | Data flash MMU (64 entries)                |
@@ -198,17 +198,17 @@ DPORT should be one of the first peripherals implemented due to its central role
 
 **Overall Complexity: HIGH**
 
-| Aspect                        | Difficulty | Notes                                                |
-|-------------------------------|------------|------------------------------------------------------|
-| Basic register read/write     | Low        | Large register space but mostly simple storage       |
-| Clock gating tracking         | Low        | Bit field tracking                                   |
-| Reset control                 | Medium     | Need to wire reset signals to peripheral models      |
-| Interrupt matrix              | High       | ~70 sources x 2 CPUs, must integrate with Renode IRQ |
-| Cache/MMU registers           | High       | Complex interaction with address translation         |
-| APP CPU boot control          | Medium     | State machine for CPU stall/unstall/reset            |
-| Cross-core interrupts         | Medium     | Must reliably deliver IRQ across CPU models          |
-| Register space size           | Medium     | Very large number of registers to implement          |
-| Boot criticality              | Critical   | DPORT must be functional for ROM bootloader          |
+| Aspect                    | Difficulty | Notes                                                |
+| ------------------------- | ---------- | ---------------------------------------------------- |
+| Basic register read/write | Low        | Large register space but mostly simple storage       |
+| Clock gating tracking     | Low        | Bit field tracking                                   |
+| Reset control             | Medium     | Need to wire reset signals to peripheral models      |
+| Interrupt matrix          | High       | ~70 sources x 2 CPUs, must integrate with Renode IRQ |
+| Cache/MMU registers       | High       | Complex interaction with address translation         |
+| APP CPU boot control      | Medium     | State machine for CPU stall/unstall/reset            |
+| Cross-core interrupts     | Medium     | Must reliably deliver IRQ across CPU models          |
+| Register space size       | Medium     | Very large number of registers to implement          |
+| Boot criticality          | Critical   | DPORT must be functional for ROM bootloader          |
 
 **Estimated effort**: 3-5 weeks for a comprehensive implementation across all phases.
 

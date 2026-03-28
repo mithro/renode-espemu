@@ -12,26 +12,26 @@ In addition to the two timer groups, the ESP32 contains a legacy FRC (Free Runni
 
 ### Timer Group Architecture
 
-| Feature | Specification |
-|---|---|
-| Number of Timer Groups | 2 (TG0, TG1) |
-| Timers per Group | 2 (T0, T1) |
-| Total General-Purpose Timers | 4 |
-| Timer Width | 64 bits |
-| Prescaler | 16-bit (divider value 2-65536; value 0 and 1 both treated as 2) |
-| Clock Source | APB_CLK (typically 80 MHz) |
-| Count Direction | Up or Down (configurable) |
-| Alarm Function | Yes, 64-bit compare value |
-| Auto-Reload | Yes, configurable reload value on alarm |
-| Interrupt Generation | Per-timer alarm interrupt |
-| DMA Support | No |
+| Feature                      | Specification                                                   |
+| ---------------------------- | --------------------------------------------------------------- |
+| Number of Timer Groups       | 2 (TG0, TG1)                                                    |
+| Timers per Group             | 2 (T0, T1)                                                      |
+| Total General-Purpose Timers | 4                                                               |
+| Timer Width                  | 64 bits                                                         |
+| Prescaler                    | 16-bit (divider value 2-65536; value 0 and 1 both treated as 2) |
+| Clock Source                 | APB_CLK (typically 80 MHz)                                      |
+| Count Direction              | Up or Down (configurable)                                       |
+| Alarm Function               | Yes, 64-bit compare value                                       |
+| Auto-Reload                  | Yes, configurable reload value on alarm                         |
+| Interrupt Generation         | Per-timer alarm interrupt                                       |
+| DMA Support                  | No                                                              |
 
 ### Timer Group 0 Base Address
 
-| Peripheral | Base Address |
-|---|---|
-| Timer Group 0 | 0x3FF5F000 |
-| Timer Group 1 | 0x3FF60000 |
+| Peripheral    | Base Address |
+| ------------- | ------------ |
+| Timer Group 0 | 0x3FF5F000   |
+| Timer Group 1 | 0x3FF60000   |
 
 ### Clock Configuration
 
@@ -61,12 +61,12 @@ Each timer group also contains one Main Watchdog Timer (MWDT). See `docs/periphe
 
 ### Key Sections
 
-| Section | Topic |
-|---|---|
-| 17.1 | Introduction and features overview |
-| 17.2 | Functional description of 64-bit timers |
-| 17.3 | Watchdog timers (MWDT) |
-| 17.4 | Register summary and descriptions |
+| Section | Topic                                   |
+| ------- | --------------------------------------- |
+| 17.1    | Introduction and features overview      |
+| 17.2    | Functional description of 64-bit timers |
+| 17.3    | Watchdog timers (MWDT)                  |
+| 17.4    | Register summary and descriptions       |
 
 ### Critical Details from TRM
 
@@ -82,47 +82,47 @@ Each timer group also contains one Main Watchdog Timer (MWDT). See `docs/periphe
 
 ### Timer Registers (per timer, offsets relative to group base)
 
-| Register | Offset (T0) | Offset (T1) | Description |
-|---|---|---|---|
-| TIMGn_TxCONFIG_REG | 0x0000 | 0x0024 | Timer configuration (prescaler, count direction, enable, auto-reload, alarm enable) |
-| TIMGn_TxLO_REG | 0x0004 | 0x0028 | Timer counter value (low 32 bits, latched) |
-| TIMGn_TxHI_REG | 0x0008 | 0x002C | Timer counter value (high 32 bits, latched) |
-| TIMGn_TxUPDATE_REG | 0x000C | 0x0030 | Write to latch counter; read bit 31 for latch status |
-| TIMGn_TxALARMLO_REG | 0x0010 | 0x0034 | Alarm compare value (low 32 bits) |
-| TIMGn_TxALARMHI_REG | 0x0014 | 0x0038 | Alarm compare value (high 32 bits) |
-| TIMGn_TxLOADLO_REG | 0x0018 | 0x003C | Counter reload value (low 32 bits) |
-| TIMGn_TxLOADHI_REG | 0x001C | 0x0040 | Counter reload value (high 32 bits) |
-| TIMGn_TxLOAD_REG | 0x0020 | 0x0044 | Write to trigger counter reload from load registers |
+| Register            | Offset (T0) | Offset (T1) | Description                                                                         |
+| ------------------- | ----------- | ----------- | ----------------------------------------------------------------------------------- |
+| TIMGn_TxCONFIG_REG  | 0x0000      | 0x0024      | Timer configuration (prescaler, count direction, enable, auto-reload, alarm enable) |
+| TIMGn_TxLO_REG      | 0x0004      | 0x0028      | Timer counter value (low 32 bits, latched)                                          |
+| TIMGn_TxHI_REG      | 0x0008      | 0x002C      | Timer counter value (high 32 bits, latched)                                         |
+| TIMGn_TxUPDATE_REG  | 0x000C      | 0x0030      | Write to latch counter; read bit 31 for latch status                                |
+| TIMGn_TxALARMLO_REG | 0x0010      | 0x0034      | Alarm compare value (low 32 bits)                                                   |
+| TIMGn_TxALARMHI_REG | 0x0014      | 0x0038      | Alarm compare value (high 32 bits)                                                  |
+| TIMGn_TxLOADLO_REG  | 0x0018      | 0x003C      | Counter reload value (low 32 bits)                                                  |
+| TIMGn_TxLOADHI_REG  | 0x001C      | 0x0040      | Counter reload value (high 32 bits)                                                 |
+| TIMGn_TxLOAD_REG    | 0x0020      | 0x0044      | Write to trigger counter reload from load registers                                 |
 
 ### Interrupt Registers (per group)
 
-| Register | Offset | Description |
-|---|---|---|
-| TIMGn_INT_RAW_TIMERS_REG | 0x0098 | Raw interrupt status |
-| TIMGn_INT_ST_TIMERS_REG | 0x009C | Masked interrupt status |
-| TIMGn_INT_ENA_TIMERS_REG | 0x00A0 | Interrupt enable |
+| Register                 | Offset | Description                        |
+| ------------------------ | ------ | ---------------------------------- |
+| TIMGn_INT_RAW_TIMERS_REG | 0x0098 | Raw interrupt status               |
+| TIMGn_INT_ST_TIMERS_REG  | 0x009C | Masked interrupt status            |
+| TIMGn_INT_ENA_TIMERS_REG | 0x00A0 | Interrupt enable                   |
 | TIMGn_INT_CLR_TIMERS_REG | 0x00A4 | Interrupt clear (write 1 to clear) |
 
 ### Interrupt Bit Assignments
 
-| Bit | Interrupt Source |
-|---|---|
-| Bit 0 | T0 alarm |
-| Bit 1 | T1 alarm |
-| Bit 2 | WDT (MWDT) |
+| Bit   | Interrupt Source              |
+| ----- | ----------------------------- |
+| Bit 0 | T0 alarm                      |
+| Bit 1 | T1 alarm                      |
+| Bit 2 | WDT (MWDT)                    |
 | Bit 3 | Lact alarm (legacy, TG0 only) |
 
 ### Key CONFIG_REG Fields
 
-| Field | Bits | Description |
-|---|---|---|
-| EN | 31 | Timer enable (1 = counting) |
-| INCREASE | 30 | Count direction (1 = increment, 0 = decrement) |
-| AUTORELOAD | 29 | Auto-reload on alarm (1 = enabled) |
-| DIVIDER | 28:13 | 16-bit prescaler value |
-| EDGE_INT_EN | 12 | Edge interrupt enable |
-| LEVEL_INT_EN | 11 | Level interrupt enable |
-| ALARM_EN | 10 | Alarm enable (auto-clears on alarm match) |
+| Field        | Bits  | Description                                    |
+| ------------ | ----- | ---------------------------------------------- |
+| EN           | 31    | Timer enable (1 = counting)                    |
+| INCREASE     | 30    | Count direction (1 = increment, 0 = decrement) |
+| AUTORELOAD   | 29    | Auto-reload on alarm (1 = enabled)             |
+| DIVIDER      | 28:13 | 16-bit prescaler value                         |
+| EDGE_INT_EN  | 12    | Edge interrupt enable                          |
+| LEVEL_INT_EN | 11    | Level interrupt enable                         |
+| ALARM_EN     | 10    | Alarm enable (auto-clears on alarm match)      |
 
 ## Source Code References
 
@@ -269,17 +269,17 @@ ESP32_TimerGroup : IDoubleWordPeripheral, IKnownSize
 
 ### Implementation Priority
 
-| Component | Priority | Reason |
-|---|---|---|
-| TG0_T0 basic counting | CRITICAL | FreeRTOS tick source |
-| Alarm + interrupt | CRITICAL | FreeRTOS tick mechanism |
-| Counter latch read | HIGH | Counter read correctness |
-| Prescaler | HIGH | Correct timing intervals |
-| Auto-reload | HIGH | Periodic timer operation |
-| Count direction | MEDIUM | Most firmware uses count-up |
-| TG0_T1, TG1_T0, TG1_T1 | MEDIUM | Same implementation, different instances |
-| Edge vs level interrupt | LOW | Most firmware uses level |
-| Clock gating | LOW | Can stub as always-on |
+| Component               | Priority | Reason                                   |
+| ----------------------- | -------- | ---------------------------------------- |
+| TG0_T0 basic counting   | CRITICAL | FreeRTOS tick source                     |
+| Alarm + interrupt       | CRITICAL | FreeRTOS tick mechanism                  |
+| Counter latch read      | HIGH     | Counter read correctness                 |
+| Prescaler               | HIGH     | Correct timing intervals                 |
+| Auto-reload             | HIGH     | Periodic timer operation                 |
+| Count direction         | MEDIUM   | Most firmware uses count-up              |
+| TG0_T1, TG1_T0, TG1_T1  | MEDIUM   | Same implementation, different instances |
+| Edge vs level interrupt | LOW      | Most firmware uses level                 |
+| Clock gating            | LOW      | Can stub as always-on                    |
 
 ## Complexity Assessment
 
@@ -287,15 +287,15 @@ ESP32_TimerGroup : IDoubleWordPeripheral, IKnownSize
 
 #### Justification
 
-| Factor | Rating | Notes |
-|---|---|---|
-| Register complexity | Medium | ~10 registers per timer, clear bit fields |
-| Behavioral complexity | Medium-High | 64-bit counters, latch mechanism, alarm auto-clear, prescaler edge cases |
-| Timing sensitivity | High | FreeRTOS tick depends on accurate alarm timing |
-| Boot criticality | HIGH | FreeRTOS won't schedule without TG0_T0 |
-| Interrupt integration | Medium | Standard interrupt generation, routes through interrupt matrix |
-| QEMU reference quality | High | Complete implementation available |
-| Renode reference quality | High | STM32_Timer provides good patterns |
+| Factor                   | Rating      | Notes                                                                    |
+| ------------------------ | ----------- | ------------------------------------------------------------------------ |
+| Register complexity      | Medium      | ~10 registers per timer, clear bit fields                                |
+| Behavioral complexity    | Medium-High | 64-bit counters, latch mechanism, alarm auto-clear, prescaler edge cases |
+| Timing sensitivity       | High        | FreeRTOS tick depends on accurate alarm timing                           |
+| Boot criticality         | HIGH        | FreeRTOS won't schedule without TG0_T0                                   |
+| Interrupt integration    | Medium      | Standard interrupt generation, routes through interrupt matrix           |
+| QEMU reference quality   | High        | Complete implementation available                                        |
+| Renode reference quality | High        | STM32_Timer provides good patterns                                       |
 
 #### Estimated Effort
 

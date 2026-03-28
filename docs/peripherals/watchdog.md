@@ -18,39 +18,39 @@ During the ESP32 boot process, the bootloader enables the RTC WDT as a safety ne
 
 ### MWDT (Main Watchdog Timer) -- in Timer Groups
 
-| Feature | Specification |
-|---|---|
-| Instances | 2 (one per Timer Group: TG0, TG1) |
-| Clock Source | APB_CLK (80 MHz typical) |
-| Prescaler | Internal, divides APB clock (configurable) |
-| Timer Width | 32-bit countdown |
-| Number of Stages | 4 (Stage 0 through Stage 3) |
-| Stage Actions | Disabled (0), Interrupt (1), CPU Reset (2), System Reset (3) |
-| Write Protection | Yes, requires writing key value 0x50D83AA1 to WDT_WKEY register |
-| Feed Mechanism | Write to WDT_FEED register (after unlocking write protection) |
-| CPU Reset Duration | Configurable via SYS_RESET_LENGTH and CPU_RESET_LENGTH fields |
+| Feature            | Specification                                                   |
+| ------------------ | --------------------------------------------------------------- |
+| Instances          | 2 (one per Timer Group: TG0, TG1)                               |
+| Clock Source       | APB_CLK (80 MHz typical)                                        |
+| Prescaler          | Internal, divides APB clock (configurable)                      |
+| Timer Width        | 32-bit countdown                                                |
+| Number of Stages   | 4 (Stage 0 through Stage 3)                                     |
+| Stage Actions      | Disabled (0), Interrupt (1), CPU Reset (2), System Reset (3)    |
+| Write Protection   | Yes, requires writing key value 0x50D83AA1 to WDT_WKEY register |
+| Feed Mechanism     | Write to WDT_FEED register (after unlocking write protection)   |
+| CPU Reset Duration | Configurable via SYS_RESET_LENGTH and CPU_RESET_LENGTH fields   |
 
 ### RWDT (RTC Watchdog Timer) -- in RTC Controller
 
-| Feature | Specification |
-|---|---|
-| Instances | 1 |
-| Clock Source | RTC_SLOW_CLK (~150 kHz RC or 32.768 kHz XTAL) |
-| Timer Width | 32-bit countdown |
-| Number of Stages | 4 (Stage 0 through Stage 3) |
-| Stage Actions | Disabled (0), Interrupt (1), CPU Reset (2), System Reset (3), RTC Reset (4) |
-| Write Protection | Yes, requires writing key value 0x50D83AA1 to RTC_CNTL_WDTWPROTECT_REG |
-| Feed Mechanism | Write to RTC_CNTL_WDTFEED_REG |
-| Survives Deep Sleep | Yes |
-| Additional Action | RTC Reset (resets RTC domain, unique to RWDT) |
+| Feature             | Specification                                                               |
+| ------------------- | --------------------------------------------------------------------------- |
+| Instances           | 1                                                                           |
+| Clock Source        | RTC_SLOW_CLK (~150 kHz RC or 32.768 kHz XTAL)                               |
+| Timer Width         | 32-bit countdown                                                            |
+| Number of Stages    | 4 (Stage 0 through Stage 3)                                                 |
+| Stage Actions       | Disabled (0), Interrupt (1), CPU Reset (2), System Reset (3), RTC Reset (4) |
+| Write Protection    | Yes, requires writing key value 0x50D83AA1 to RTC_CNTL_WDTWPROTECT_REG      |
+| Feed Mechanism      | Write to RTC_CNTL_WDTFEED_REG                                               |
+| Survives Deep Sleep | Yes                                                                         |
+| Additional Action   | RTC Reset (resets RTC domain, unique to RWDT)                               |
 
 ### Base Addresses
 
-| WDT | Located In | Base Address | WDT Register Offset |
-|---|---|---|---|
-| MWDT0 | Timer Group 0 | 0x3FF5F000 | 0x0048 |
-| MWDT1 | Timer Group 1 | 0x3FF60000 | 0x0048 |
-| RWDT | RTC Controller | 0x3FF48000 | 0x008C |
+| WDT   | Located In     | Base Address | WDT Register Offset |
+| ----- | -------------- | ------------ | ------------------- |
+| MWDT0 | Timer Group 0  | 0x3FF5F000   | 0x0048              |
+| MWDT1 | Timer Group 1  | 0x3FF60000   | 0x0048              |
+| RWDT  | RTC Controller | 0x3FF48000   | 0x008C              |
 
 ### Stage Timeout Architecture
 
@@ -69,11 +69,11 @@ Feeding the WDT resets it back to Stage 0. Each stage has its own independent ti
 
 ### Typical Configuration (ESP-IDF defaults)
 
-| WDT | Stage 0 | Stage 1 | Stage 2 | Stage 3 |
-|---|---|---|---|---|
-| Task WDT (MWDT0) | Interrupt (print backtrace) | Disabled | Disabled | Disabled |
-| Bootloader WDT (RWDT) | System Reset | Disabled | Disabled | Disabled |
-| Interrupt WDT (MWDT1) | Interrupt | CPU Reset | Disabled | Disabled |
+| WDT                   | Stage 0                     | Stage 1   | Stage 2  | Stage 3  |
+| --------------------- | --------------------------- | --------- | -------- | -------- |
+| Task WDT (MWDT0)      | Interrupt (print backtrace) | Disabled  | Disabled | Disabled |
+| Bootloader WDT (RWDT) | System Reset                | Disabled  | Disabled | Disabled |
+| Interrupt WDT (MWDT1) | Interrupt                   | CPU Reset | Disabled | Disabled |
 
 ## TRM Chapter Reference
 
@@ -102,55 +102,55 @@ Feeding the WDT resets it back to Stage 0. Each stage has its own independent ti
 
 ### MWDT Registers (within Timer Group, offset from group base)
 
-| Register | Offset | Description |
-|---|---|---|
-| TIMGn_WDTCONFIG0_REG | 0x0048 | WDT configuration: stage actions, prescaler mode, enable |
-| TIMGn_WDTCONFIG1_REG | 0x004C | WDT prescaler value (clock divider) |
-| TIMGn_WDTCONFIG2_REG | 0x0050 | Stage 0 timeout value |
-| TIMGn_WDTCONFIG3_REG | 0x0054 | Stage 1 timeout value |
-| TIMGn_WDTCONFIG4_REG | 0x0058 | Stage 2 timeout value |
-| TIMGn_WDTCONFIG5_REG | 0x005C | Stage 3 timeout value |
-| TIMGn_WDTFEED_REG | 0x0060 | Write to feed (reset) watchdog |
-| TIMGn_WDTWPROTECT_REG | 0x0064 | Write protection key register |
+| Register              | Offset | Description                                              |
+| --------------------- | ------ | -------------------------------------------------------- |
+| TIMGn_WDTCONFIG0_REG  | 0x0048 | WDT configuration: stage actions, prescaler mode, enable |
+| TIMGn_WDTCONFIG1_REG  | 0x004C | WDT prescaler value (clock divider)                      |
+| TIMGn_WDTCONFIG2_REG  | 0x0050 | Stage 0 timeout value                                    |
+| TIMGn_WDTCONFIG3_REG  | 0x0054 | Stage 1 timeout value                                    |
+| TIMGn_WDTCONFIG4_REG  | 0x0058 | Stage 2 timeout value                                    |
+| TIMGn_WDTCONFIG5_REG  | 0x005C | Stage 3 timeout value                                    |
+| TIMGn_WDTFEED_REG     | 0x0060 | Write to feed (reset) watchdog                           |
+| TIMGn_WDTWPROTECT_REG | 0x0064 | Write protection key register                            |
 
 ### MWDT CONFIG0 Key Fields
 
-| Field | Bits | Description |
-|---|---|---|
-| WDT_EN | 31 | WDT enable |
-| WDT_STG0 | 30:29 | Stage 0 action (0=off, 1=interrupt, 2=CPU reset, 3=sys reset) |
-| WDT_STG1 | 28:27 | Stage 1 action |
-| WDT_STG2 | 26:25 | Stage 2 action |
-| WDT_STG3 | 24:23 | Stage 3 action |
-| WDT_CPU_RESET_LENGTH | 22:20 | CPU reset signal duration |
-| WDT_SYS_RESET_LENGTH | 19:17 | System reset signal duration |
-| WDT_FLASHBOOT_MOD_EN | 14 | Flash boot mode enable (uses fixed timeout for boot safety) |
+| Field                | Bits  | Description                                                   |
+| -------------------- | ----- | ------------------------------------------------------------- |
+| WDT_EN               | 31    | WDT enable                                                    |
+| WDT_STG0             | 30:29 | Stage 0 action (0=off, 1=interrupt, 2=CPU reset, 3=sys reset) |
+| WDT_STG1             | 28:27 | Stage 1 action                                                |
+| WDT_STG2             | 26:25 | Stage 2 action                                                |
+| WDT_STG3             | 24:23 | Stage 3 action                                                |
+| WDT_CPU_RESET_LENGTH | 22:20 | CPU reset signal duration                                     |
+| WDT_SYS_RESET_LENGTH | 19:17 | System reset signal duration                                  |
+| WDT_FLASHBOOT_MOD_EN | 14    | Flash boot mode enable (uses fixed timeout for boot safety)   |
 
 ### RWDT Registers (within RTC Controller, offset from RTC base 0x3FF48000)
 
-| Register | Offset | Description |
-|---|---|---|
-| RTC_CNTL_WDTCONFIG0_REG | 0x008C | WDT config: enable, stage actions, pause in sleep, reset lengths |
-| RTC_CNTL_WDTCONFIG1_REG | 0x0090 | Stage 0 timeout value |
-| RTC_CNTL_WDTCONFIG2_REG | 0x0094 | Stage 1 timeout value |
-| RTC_CNTL_WDTCONFIG3_REG | 0x0098 | Stage 2 timeout value |
-| RTC_CNTL_WDTCONFIG4_REG | 0x009C | Stage 3 timeout value |
-| RTC_CNTL_WDTFEED_REG | 0x00A0 | Write to feed (reset) RTC watchdog |
-| RTC_CNTL_WDTWPROTECT_REG | 0x00A4 | Write protection key register |
+| Register                 | Offset | Description                                                      |
+| ------------------------ | ------ | ---------------------------------------------------------------- |
+| RTC_CNTL_WDTCONFIG0_REG  | 0x008C | WDT config: enable, stage actions, pause in sleep, reset lengths |
+| RTC_CNTL_WDTCONFIG1_REG  | 0x0090 | Stage 0 timeout value                                            |
+| RTC_CNTL_WDTCONFIG2_REG  | 0x0094 | Stage 1 timeout value                                            |
+| RTC_CNTL_WDTCONFIG3_REG  | 0x0098 | Stage 2 timeout value                                            |
+| RTC_CNTL_WDTCONFIG4_REG  | 0x009C | Stage 3 timeout value                                            |
+| RTC_CNTL_WDTFEED_REG     | 0x00A0 | Write to feed (reset) RTC watchdog                               |
+| RTC_CNTL_WDTWPROTECT_REG | 0x00A4 | Write protection key register                                    |
 
 ### RWDT CONFIG0 Key Fields
 
-| Field | Bits | Description |
-|---|---|---|
-| WDT_EN | 31 | RTC WDT enable |
-| WDT_STG0 | 30:28 | Stage 0 action (3-bit: adds RTC reset option = 4) |
-| WDT_STG1 | 27:25 | Stage 1 action |
-| WDT_STG2 | 24:22 | Stage 2 action |
-| WDT_STG3 | 21:19 | Stage 3 action |
-| WDT_CPU_RESET_LENGTH | 18:16 | CPU reset signal duration |
-| WDT_SYS_RESET_LENGTH | 15:13 | System reset signal duration |
-| WDT_PAUSE_IN_SLP | 12 | Pause WDT during sleep |
-| WDT_FLASHBOOT_MOD_EN | 11 | Flash boot protection mode |
+| Field                | Bits  | Description                                       |
+| -------------------- | ----- | ------------------------------------------------- |
+| WDT_EN               | 31    | RTC WDT enable                                    |
+| WDT_STG0             | 30:28 | Stage 0 action (3-bit: adds RTC reset option = 4) |
+| WDT_STG1             | 27:25 | Stage 1 action                                    |
+| WDT_STG2             | 24:22 | Stage 2 action                                    |
+| WDT_STG3             | 21:19 | Stage 3 action                                    |
+| WDT_CPU_RESET_LENGTH | 18:16 | CPU reset signal duration                         |
+| WDT_SYS_RESET_LENGTH | 15:13 | System reset signal duration                      |
+| WDT_PAUSE_IN_SLP     | 12    | Pause WDT during sleep                            |
+| WDT_FLASHBOOT_MOD_EN | 11    | Flash boot protection mode                        |
 
 ## Source Code References
 
@@ -317,17 +317,17 @@ For initial boot support, the simplest viable approach is:
 
 ### Implementation Priority
 
-| Component | Priority | Reason |
-|---|---|---|
-| Write protection state machine | CRITICAL | All WDT operations require unlock/lock |
-| MWDT enable/disable | CRITICAL | Firmware disables WDT during boot |
-| RWDT enable/disable | CRITICAL | Bootloader configures RWDT |
-| Feed register (accept writes) | CRITICAL | Prevents WDT resets |
-| Flash boot mode disable | HIGH | Bootloader clears this flag |
-| Stage configuration registers | MEDIUM | Stores config, may not need active countdown |
-| Active stage countdown | LOW | Only needed for WDT-testing scenarios |
-| System reset action | LOW | Only needed with active countdown |
-| Interrupt action | LOW | Only needed with active countdown |
+| Component                      | Priority | Reason                                       |
+| ------------------------------ | -------- | -------------------------------------------- |
+| Write protection state machine | CRITICAL | All WDT operations require unlock/lock       |
+| MWDT enable/disable            | CRITICAL | Firmware disables WDT during boot            |
+| RWDT enable/disable            | CRITICAL | Bootloader configures RWDT                   |
+| Feed register (accept writes)  | CRITICAL | Prevents WDT resets                          |
+| Flash boot mode disable        | HIGH     | Bootloader clears this flag                  |
+| Stage configuration registers  | MEDIUM   | Stores config, may not need active countdown |
+| Active stage countdown         | LOW      | Only needed for WDT-testing scenarios        |
+| System reset action            | LOW      | Only needed with active countdown            |
+| Interrupt action               | LOW      | Only needed with active countdown            |
 
 ## Complexity Assessment
 
@@ -335,14 +335,14 @@ For initial boot support, the simplest viable approach is:
 
 #### Justification
 
-| Factor | Rating | Notes |
-|---|---|---|
-| Register complexity | Medium | Write-protected registers add state management |
-| Behavioral complexity | Medium | Multi-stage progression with different actions |
-| Timing sensitivity | Low-Medium | WDT timeouts are coarse; exact timing less critical than GP timers |
-| Boot criticality | HIGH | Must handle WDT disable during boot or system resets constantly |
-| Stubbing viability | High | Stub implementation (accept writes, never fire) works for most use cases |
-| QEMU reference quality | High | Complete implementation available |
+| Factor                 | Rating     | Notes                                                                    |
+| ---------------------- | ---------- | ------------------------------------------------------------------------ |
+| Register complexity    | Medium     | Write-protected registers add state management                           |
+| Behavioral complexity  | Medium     | Multi-stage progression with different actions                           |
+| Timing sensitivity     | Low-Medium | WDT timeouts are coarse; exact timing less critical than GP timers       |
+| Boot criticality       | HIGH       | Must handle WDT disable during boot or system resets constantly          |
+| Stubbing viability     | High       | Stub implementation (accept writes, never fire) works for most use cases |
+| QEMU reference quality | High       | Complete implementation available                                        |
 
 #### Estimated Effort
 

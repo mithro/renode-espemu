@@ -34,50 +34,50 @@ The GPIO Matrix is particularly important for emulation because ESP-IDF uses it 
 
 ### GPIO Controller Registers (base `0x3FF44000`)
 
-| Offset | Register | Purpose |
-|--------|----------|---------|
-| `0x004` | `GPIO_OUT_REG` | Output level for GPIO0-31 |
-| `0x008` | `GPIO_OUT_W1TS_REG` | Write-1-to-set output for GPIO0-31 |
-| `0x00C` | `GPIO_OUT_W1TC_REG` | Write-1-to-clear output for GPIO0-31 |
-| `0x010` | `GPIO_OUT1_REG` | Output level for GPIO32-39 |
-| `0x014` | `GPIO_OUT1_W1TS_REG` | Write-1-to-set output for GPIO32-39 |
-| `0x018` | `GPIO_OUT1_W1TC_REG` | Write-1-to-clear output for GPIO32-39 |
-| `0x020` | `GPIO_ENABLE_REG` | Output enable for GPIO0-31 |
-| `0x024` | `GPIO_ENABLE_W1TS_REG` | Write-1-to-set output enable for GPIO0-31 |
-| `0x028` | `GPIO_ENABLE_W1TC_REG` | Write-1-to-clear output enable for GPIO0-31 |
-| `0x02C` | `GPIO_ENABLE1_REG` | Output enable for GPIO32-39 |
-| `0x038` | `GPIO_STRAP_REG` | Boot strapping pin values (read-only, sampled at reset) |
-| `0x03C` | `GPIO_IN_REG` | Input level for GPIO0-31 |
-| `0x040` | `GPIO_IN1_REG` | Input level for GPIO32-39 |
-| `0x044` | `GPIO_STATUS_REG` | Interrupt status for GPIO0-31 |
-| `0x048` | `GPIO_STATUS_W1TS_REG` | Write-1-to-set interrupt status |
-| `0x04C` | `GPIO_STATUS_W1TC_REG` | Write-1-to-clear interrupt status |
-| `0x050` | `GPIO_STATUS1_REG` | Interrupt status for GPIO32-39 |
-| `0x058` | `GPIO_ACPU_INT_REG` | APP CPU interrupt status for GPIO0-31 |
-| `0x060` | `GPIO_ACPU_NMI_INT_REG` | APP CPU NMI status for GPIO0-31 |
-| `0x068` | `GPIO_PCPU_INT_REG` | PRO CPU interrupt status for GPIO0-31 |
-| `0x070` | `GPIO_PCPU_NMI_INT_REG` | PRO CPU NMI status for GPIO0-31 |
-| `0x074-0x0F4` | `GPIO_PIN0_REG` - `GPIO_PIN39_REG` | Per-pin config: interrupt type, wakeup enable, pad driver |
-| `0x130-0x52C` | `GPIO_FUNC0_IN_SEL_CFG_REG` - `GPIO_FUNC255_IN_SEL_CFG_REG` | GPIO Matrix: input signal routing (signal N -> which GPIO) |
+| Offset        | Register                                                     | Purpose                                                     |
+| ------------- | ------------------------------------------------------------ | ----------------------------------------------------------- |
+| `0x004`       | `GPIO_OUT_REG`                                               | Output level for GPIO0-31                                   |
+| `0x008`       | `GPIO_OUT_W1TS_REG`                                          | Write-1-to-set output for GPIO0-31                          |
+| `0x00C`       | `GPIO_OUT_W1TC_REG`                                          | Write-1-to-clear output for GPIO0-31                        |
+| `0x010`       | `GPIO_OUT1_REG`                                              | Output level for GPIO32-39                                  |
+| `0x014`       | `GPIO_OUT1_W1TS_REG`                                         | Write-1-to-set output for GPIO32-39                         |
+| `0x018`       | `GPIO_OUT1_W1TC_REG`                                         | Write-1-to-clear output for GPIO32-39                       |
+| `0x020`       | `GPIO_ENABLE_REG`                                            | Output enable for GPIO0-31                                  |
+| `0x024`       | `GPIO_ENABLE_W1TS_REG`                                       | Write-1-to-set output enable for GPIO0-31                   |
+| `0x028`       | `GPIO_ENABLE_W1TC_REG`                                       | Write-1-to-clear output enable for GPIO0-31                 |
+| `0x02C`       | `GPIO_ENABLE1_REG`                                           | Output enable for GPIO32-39                                 |
+| `0x038`       | `GPIO_STRAP_REG`                                             | Boot strapping pin values (read-only, sampled at reset)     |
+| `0x03C`       | `GPIO_IN_REG`                                                | Input level for GPIO0-31                                    |
+| `0x040`       | `GPIO_IN1_REG`                                               | Input level for GPIO32-39                                   |
+| `0x044`       | `GPIO_STATUS_REG`                                            | Interrupt status for GPIO0-31                               |
+| `0x048`       | `GPIO_STATUS_W1TS_REG`                                       | Write-1-to-set interrupt status                             |
+| `0x04C`       | `GPIO_STATUS_W1TC_REG`                                       | Write-1-to-clear interrupt status                           |
+| `0x050`       | `GPIO_STATUS1_REG`                                           | Interrupt status for GPIO32-39                              |
+| `0x058`       | `GPIO_ACPU_INT_REG`                                          | APP CPU interrupt status for GPIO0-31                       |
+| `0x060`       | `GPIO_ACPU_NMI_INT_REG`                                      | APP CPU NMI status for GPIO0-31                             |
+| `0x068`       | `GPIO_PCPU_INT_REG`                                          | PRO CPU interrupt status for GPIO0-31                       |
+| `0x070`       | `GPIO_PCPU_NMI_INT_REG`                                      | PRO CPU NMI status for GPIO0-31                             |
+| `0x074-0x0F4` | `GPIO_PIN0_REG` - `GPIO_PIN39_REG`                           | Per-pin config: interrupt type, wakeup enable, pad driver   |
+| `0x130-0x52C` | `GPIO_FUNC0_IN_SEL_CFG_REG` - `GPIO_FUNC255_IN_SEL_CFG_REG`  | GPIO Matrix: input signal routing (signal N -> which GPIO)  |
 | `0x530-0x5B0` | `GPIO_FUNC0_OUT_SEL_CFG_REG` - `GPIO_FUNC33_OUT_SEL_CFG_REG` | GPIO Matrix: output signal routing (GPIO N -> which signal) |
 
 ### IO MUX Registers (base `0x3FF49000`)
 
-| Offset | Register | Purpose |
-|--------|----------|---------|
-| `0x000` | `IO_MUX_PIN_CTRL` | Clock output configuration |
+| Offset          | Register                                 | Purpose                                                                            |
+| --------------- | ---------------------------------------- | ---------------------------------------------------------------------------------- |
+| `0x000`         | `IO_MUX_PIN_CTRL`                        | Clock output configuration                                                         |
 | `0x004`-`0x090` | `IO_MUX_GPIO0_REG` - `IO_MUX_GPIO39_REG` | Per-pin IO MUX config: function select, pull-up/down, drive strength, input enable |
 
 Note: IO MUX register offsets are NOT sequential by GPIO number. The mapping is defined in the TRM and in `io_mux_reg.h`. For example, GPIO0 is at offset 0x44, GPIO1 at 0x88, etc.
 
 ### GPIO Sigma-Delta Registers (base `0x3FF44F00`)
 
-| Offset | Register | Purpose |
-|--------|----------|---------|
+| Offset      | Register                                        | Purpose                           |
+| ----------- | ----------------------------------------------- | --------------------------------- |
 | `0x00-0x1C` | `GPIO_SIGMADELTA0_REG` - `GPIO_SIGMADELTA7_REG` | 8 sigma-delta modulation channels |
-| `0x20` | `GPIO_SIGMADELTA_CG_REG` | Sigma-delta clock gate |
-| `0x28` | `GPIO_SIGMADELTA_MISC_REG` | Sigma-delta misc config |
-| `0xFC` | `GPIO_SIGMADELTA_VERSION_REG` | Version register |
+| `0x20`      | `GPIO_SIGMADELTA_CG_REG`                        | Sigma-delta clock gate            |
+| `0x28`      | `GPIO_SIGMADELTA_MISC_REG`                      | Sigma-delta misc config           |
+| `0xFC`      | `GPIO_SIGMADELTA_VERSION_REG`                   | Version register                  |
 
 ## Source Code References
 

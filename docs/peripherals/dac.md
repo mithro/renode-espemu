@@ -44,37 +44,37 @@ DAC registers are within the SENS register block at base `0x3FF48800`, shared wi
 
 ### DAC Output Registers
 
-| Register | Offset | Description |
-|----------|--------|-------------|
-| `SENS_SAR_DAC_CTRL1` | 0x0098 (approx) | DAC control 1: DAC clock control, output enable |
+| Register             | Offset          | Description                                               |
+| -------------------- | --------------- | --------------------------------------------------------- |
+| `SENS_SAR_DAC_CTRL1` | 0x0098 (approx) | DAC control 1: DAC clock control, output enable           |
 | `SENS_SAR_DAC_CTRL2` | 0x009C (approx) | DAC control 2: per-channel data, CW enable, power control |
 
 Note: The exact register offsets for DAC-specific registers are within the SENS block. Key fields:
 
 ### DAC Control Fields (within SENS registers)
 
-| Field | Register | Description |
-|-------|----------|-------------|
-| `DAC_CW_EN` | `SENS_SAR_DAC_CTRL1` | Enable cosine waveform generator |
-| `DAC_CLK_INV` | `SENS_SAR_DAC_CTRL1` | Invert DAC clock |
-| `DAC_CLK_FORCE_LOW` | `SENS_SAR_DAC_CTRL1` | Force DAC clock low |
-| `DAC_CLK_FORCE_HIGH` | `SENS_SAR_DAC_CTRL1` | Force DAC clock high |
+| Field                | Register             | Description                      |
+| -------------------- | -------------------- | -------------------------------- |
+| `DAC_CW_EN`          | `SENS_SAR_DAC_CTRL1` | Enable cosine waveform generator |
+| `DAC_CLK_INV`        | `SENS_SAR_DAC_CTRL1` | Invert DAC clock                 |
+| `DAC_CLK_FORCE_LOW`  | `SENS_SAR_DAC_CTRL1` | Force DAC clock low              |
+| `DAC_CLK_FORCE_HIGH` | `SENS_SAR_DAC_CTRL1` | Force DAC clock high             |
 
 ### Per-Channel Fields (within SENS_SAR_DAC_CTRL2 or related)
 
-| Field | Description |
-|-------|-------------|
-| `DAC_DC1` / `DAC_DC2` | 8-bit DC offset for CW generator (channel 1/2) |
-| `DAC_SCALE1` / `DAC_SCALE2` | 2-bit amplitude scaling: 0=full, 1=1/2, 2=1/4, 3=1/8 |
-| `DAC_INV1` / `DAC_INV2` | 2-bit inversion: 0=none, 2=invert |
-| `DAC_CW_PHASE1` / `DAC_CW_PHASE2` | Not a separate register; inversion controls phase |
+| Field                             | Description                                          |
+| --------------------------------- | ---------------------------------------------------- |
+| `DAC_DC1` / `DAC_DC2`             | 8-bit DC offset for CW generator (channel 1/2)       |
+| `DAC_SCALE1` / `DAC_SCALE2`       | 2-bit amplitude scaling: 0=full, 1=1/2, 2=1/4, 3=1/8 |
+| `DAC_INV1` / `DAC_INV2`           | 2-bit inversion: 0=none, 2=invert                    |
+| `DAC_CW_PHASE1` / `DAC_CW_PHASE2` | Not a separate register; inversion controls phase    |
 
 ### RTC_IO Registers (for direct DAC output)
 
 The direct-write DAC output values are controlled through RTC_IO registers:
 
-| Register | Description |
-|----------|-------------|
+| Register              | Description                                                       |
+| --------------------- | ----------------------------------------------------------------- |
 | `RTC_IO_PAD_DAC1_REG` | DAC channel 1: XPD (power), DAC output enable, 8-bit output value |
 | `RTC_IO_PAD_DAC2_REG` | DAC channel 2: XPD (power), DAC output enable, 8-bit output value |
 
@@ -165,16 +165,16 @@ When using DMA mode, DAC data is routed through the I2S peripheral. The I2S regi
 
 ## Complexity Assessment
 
-| Aspect | Rating | Notes |
-|--------|--------|-------|
-| **Register count** | Very Low | ~5-8 DAC-specific registers/fields within SENS and RTC_IO blocks |
-| **Logic complexity** | Very Low | Direct write is trivial (write value -> output). CW is config-only in emulation. |
-| **Interrupt model** | None | DAC has no interrupts in direct/CW mode (DMA mode uses I2S interrupts) |
-| **External dependencies** | Medium | Shared SENS register block; DMA mode requires I2S integration |
-| **Clock domain complexity** | Low | CW generator uses RTC8M_CLK but only needs config storage |
-| **DMA** | Medium (if implemented) | Continuous mode via I2S DMA; skip for initial implementation |
-| **QEMU reference available** | **No** | No QEMU DAC implementation |
-| **Overall effort** | **Low** | Estimated 0.5-1 day for direct write mode (assuming SENS block exists) |
-| **Priority** | **Low** | Less commonly used than ADC; simple enough to add when SENS block is built |
+| Aspect                       | Rating                  | Notes                                                                            |
+| ---------------------------- | ----------------------- | -------------------------------------------------------------------------------- |
+| **Register count**           | Very Low                | ~5-8 DAC-specific registers/fields within SENS and RTC_IO blocks                 |
+| **Logic complexity**         | Very Low                | Direct write is trivial (write value -> output). CW is config-only in emulation. |
+| **Interrupt model**          | None                    | DAC has no interrupts in direct/CW mode (DMA mode uses I2S interrupts)           |
+| **External dependencies**    | Medium                  | Shared SENS register block; DMA mode requires I2S integration                    |
+| **Clock domain complexity**  | Low                     | CW generator uses RTC8M_CLK but only needs config storage                        |
+| **DMA**                      | Medium (if implemented) | Continuous mode via I2S DMA; skip for initial implementation                     |
+| **QEMU reference available** | **No**                  | No QEMU DAC implementation                                                       |
+| **Overall effort**           | **Low**                 | Estimated 0.5-1 day for direct write mode (assuming SENS block exists)           |
+| **Priority**                 | **Low**                 | Less commonly used than ADC; simple enough to add when SENS block is built       |
 
 The DAC is the simplest peripheral in this analysis. Direct write mode is trivially simple -- write an 8-bit value to a register. The main implementation effort is shared with the ADC and Touch sensor via the SENS register block. Once the SENS block infrastructure exists, adding DAC support is minimal work. DMA mode adds significant complexity due to I2S dependency but can be deferred.

@@ -8,17 +8,17 @@ SPI0 and SPI1 share the same bus signals but use different CS lines, with an arb
 
 ## Hardware Specifications
 
-| Feature | SPI0 | SPI1 | SPI2 (HSPI) | SPI3 (VSPI) |
-|---|---|---|---|---|
-| **Purpose** | Cache/Flash XIP | Flash/PSRAM programming | General-purpose | General-purpose |
-| **User accessible** | No | Limited (flash API) | Yes | Yes |
-| **Master mode** | Yes (fixed) | Yes (fixed) | Yes | Yes |
-| **Slave mode** | No | No | Yes | Yes |
-| **Max clock** | 80 MHz | 80 MHz | 80 MHz | 80 MHz |
-| **Data width** | 1/2/4-bit (QIO/DIO) | 1/2/4-bit (QIO/DIO) | 1-bit standard | 1-bit standard |
-| **FIFO size** | 64 bytes | 64 bytes | 64 bytes | 64 bytes |
-| **DMA support** | No (cache-driven) | Yes (shared DMA) | Yes (DMA channel 1 or 2) | Yes (DMA channel 1 or 2) |
-| **Base address** | 0x3FF43000 | 0x3FF42000 | 0x3FF64000 | 0x3FF65000 |
+| Feature             | SPI0                | SPI1                    | SPI2 (HSPI)              | SPI3 (VSPI)              |
+| ------------------- | ------------------- | ----------------------- | ------------------------ | ------------------------ |
+| **Purpose**         | Cache/Flash XIP     | Flash/PSRAM programming | General-purpose          | General-purpose          |
+| **User accessible** | No                  | Limited (flash API)     | Yes                      | Yes                      |
+| **Master mode**     | Yes (fixed)         | Yes (fixed)             | Yes                      | Yes                      |
+| **Slave mode**      | No                  | No                      | Yes                      | Yes                      |
+| **Max clock**       | 80 MHz              | 80 MHz                  | 80 MHz                   | 80 MHz                   |
+| **Data width**      | 1/2/4-bit (QIO/DIO) | 1/2/4-bit (QIO/DIO)     | 1-bit standard           | 1-bit standard           |
+| **FIFO size**       | 64 bytes            | 64 bytes                | 64 bytes                 | 64 bytes                 |
+| **DMA support**     | No (cache-driven)   | Yes (shared DMA)        | Yes (DMA channel 1 or 2) | Yes (DMA channel 1 or 2) |
+| **Base address**    | 0x3FF43000          | 0x3FF42000              | 0x3FF64000               | 0x3FF65000               |
 
 - **Clock modes**: Supports all 4 SPI modes (CPOL/CPHA combinations: mode 0, 1, 2, 3)
 - **DMA**: Two DMA channels shared among SPI1/SPI2/SPI3. Uses linked-list descriptors for scatter-gather transfers. Maximum single DMA transfer is 4092 bytes per descriptor.
@@ -45,46 +45,46 @@ Key sections:
 The SPI register space is approximately 0x100 bytes per controller. Key registers include:
 
 ### Command and Control
-| Register | Offset | Description |
-|---|---|---|
-| SPI_CMD_REG | 0x00 | Command register; set SPI_USR bit to start a transfer |
-| SPI_CTRL_REG | 0x08 | Control register: read mode (QIO/DIO/QOUT/DOUT/fast/slow) |
-| SPI_CTRL2_REG | 0x14 | Setup/hold time, MISO delay configuration |
-| SPI_USER_REG | 0x1C | User-defined command phases (cmd/addr/dummy/data enable bits) |
-| SPI_USER1_REG | 0x20 | Address bit length, dummy cycle count |
-| SPI_USER2_REG | 0x24 | Command value and command bit length |
+| Register      | Offset | Description                                                   |
+| ------------- | ------ | ------------------------------------------------------------- |
+| SPI_CMD_REG   | 0x00   | Command register; set SPI_USR bit to start a transfer         |
+| SPI_CTRL_REG  | 0x08   | Control register: read mode (QIO/DIO/QOUT/DOUT/fast/slow)     |
+| SPI_CTRL2_REG | 0x14   | Setup/hold time, MISO delay configuration                     |
+| SPI_USER_REG  | 0x1C   | User-defined command phases (cmd/addr/dummy/data enable bits) |
+| SPI_USER1_REG | 0x20   | Address bit length, dummy cycle count                         |
+| SPI_USER2_REG | 0x24   | Command value and command bit length                          |
 
 ### Clock Configuration
-| Register | Offset | Description |
-|---|---|---|
-| SPI_CLOCK_REG | 0x18 | Clock divider (pre-divider, count-N, count-H, count-L) |
+| Register      | Offset | Description                                            |
+| ------------- | ------ | ------------------------------------------------------ |
+| SPI_CLOCK_REG | 0x18   | Clock divider (pre-divider, count-N, count-H, count-L) |
 
 ### Data Buffers
-| Register | Offset | Description |
-|---|---|---|
+| Register                 | Offset      | Description                                    |
+| ------------------------ | ----------- | ---------------------------------------------- |
 | SPI_W0_REG - SPI_W15_REG | 0x80 - 0xBC | 16 x 32-bit data buffer words (64 bytes total) |
 
 ### DMA Registers
-| Register | Offset | Description |
-|---|---|---|
-| SPI_DMA_CONF_REG | 0x100 | DMA configuration (TX/RX enable, reset) |
-| SPI_DMA_OUT_LINK_REG | 0x104 | TX linked-list descriptor start address |
-| SPI_DMA_IN_LINK_REG | 0x108 | RX linked-list descriptor start address |
-| SPI_DMA_STATUS_REG | 0x10C | DMA status register |
+| Register             | Offset | Description                             |
+| -------------------- | ------ | --------------------------------------- |
+| SPI_DMA_CONF_REG     | 0x100  | DMA configuration (TX/RX enable, reset) |
+| SPI_DMA_OUT_LINK_REG | 0x104  | TX linked-list descriptor start address |
+| SPI_DMA_IN_LINK_REG  | 0x108  | RX linked-list descriptor start address |
+| SPI_DMA_STATUS_REG   | 0x10C  | DMA status register                     |
 
 ### Status and Interrupts
-| Register | Offset | Description |
-|---|---|---|
-| SPI_SLAVE_REG | 0x30 | Slave mode config and transfer-done status/interrupt |
-| SPI_SLV_WRBUF_DLEN_REG | 0x34 | Slave write buffer length |
-| SPI_SLV_RDBUF_DLEN_REG | 0x38 | Slave read buffer length |
+| Register               | Offset | Description                                          |
+| ---------------------- | ------ | ---------------------------------------------------- |
+| SPI_SLAVE_REG          | 0x30   | Slave mode config and transfer-done status/interrupt |
+| SPI_SLV_WRBUF_DLEN_REG | 0x34   | Slave write buffer length                            |
+| SPI_SLV_RDBUF_DLEN_REG | 0x38   | Slave read buffer length                             |
 
 ### Flash-Specific (SPI0/SPI1)
-| Register | Offset | Description |
-|---|---|---|
-| SPI_ADDR_REG | 0x04 | Flash address for read/write/erase commands |
-| SPI_MOSI_DLEN_REG | 0x28 | MOSI data bit length |
-| SPI_MISO_DLEN_REG | 0x2C | MISO data bit length |
+| Register          | Offset | Description                                 |
+| ----------------- | ------ | ------------------------------------------- |
+| SPI_ADDR_REG      | 0x04   | Flash address for read/write/erase commands |
+| SPI_MOSI_DLEN_REG | 0x28   | MOSI data bit length                        |
+| SPI_MISO_DLEN_REG | 0x2C   | MISO data bit length                        |
 
 ## Source Code References
 
@@ -145,14 +145,14 @@ GP-SPI follows a more standard SPI controller pattern:
 
 ## Complexity Assessment
 
-| Component | Complexity | Priority | Rationale |
-|---|---|---|---|
-| **SPI0 Flash XIP** | HIGH | CRITICAL | Required for boot. Must integrate with cache/MMU and flash memory model. Complex interaction between cache requests and SPI flash commands. |
-| **SPI1 Flash Programming** | MEDIUM | HIGH | Required for flash write/erase operations. Bootloader and OTA updates depend on this. Command set is well-defined. |
-| **SPI0/SPI1 Arbiter** | LOW | HIGH | Can be simplified in emulation since there is no real bus contention. |
-| **SPI2/SPI3 GP-SPI Master** | MEDIUM | MEDIUM | Standard SPI master with buffer and DMA. Phase-based transfer model adds some complexity. |
-| **SPI2/SPI3 GP-SPI Slave** | MEDIUM | LOW | Rarely needed in typical emulation scenarios. |
-| **SPI DMA Engine** | MEDIUM-HIGH | MEDIUM | Linked-list descriptor parsing, scatter-gather, shared DMA channels. Required for efficient large transfers. |
+| Component                   | Complexity  | Priority | Rationale                                                                                                                                   |
+| --------------------------- | ----------- | -------- | ------------------------------------------------------------------------------------------------------------------------------------------- |
+| **SPI0 Flash XIP**          | HIGH        | CRITICAL | Required for boot. Must integrate with cache/MMU and flash memory model. Complex interaction between cache requests and SPI flash commands. |
+| **SPI1 Flash Programming**  | MEDIUM      | HIGH     | Required for flash write/erase operations. Bootloader and OTA updates depend on this. Command set is well-defined.                          |
+| **SPI0/SPI1 Arbiter**       | LOW         | HIGH     | Can be simplified in emulation since there is no real bus contention.                                                                       |
+| **SPI2/SPI3 GP-SPI Master** | MEDIUM      | MEDIUM   | Standard SPI master with buffer and DMA. Phase-based transfer model adds some complexity.                                                   |
+| **SPI2/SPI3 GP-SPI Slave**  | MEDIUM      | LOW      | Rarely needed in typical emulation scenarios.                                                                                               |
+| **SPI DMA Engine**          | MEDIUM-HIGH | MEDIUM   | Linked-list descriptor parsing, scatter-gather, shared DMA channels. Required for efficient large transfers.                                |
 
 **Overall SPI complexity: HIGH**
 

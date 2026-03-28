@@ -45,33 +45,33 @@ The PCNT is a relatively simple peripheral focused on counting logic with config
 
 ### Per-Unit Configuration Registers (x8 units)
 
-| Register | Offset | Description |
-|----------|--------|-------------|
+| Register        | Offset          | Description                                                                                  |
+| --------------- | --------------- | -------------------------------------------------------------------------------------------- |
 | `PCNT_Ux_CONF0` | 0x0000 + x*0x0C | Unit x config 0: channel 0/1 edge actions, level actions, threshold enable, filter threshold |
-| `PCNT_Ux_CONF1` | 0x0004 + x*0x0C | Unit x config 1: high limit value, low limit value |
-| `PCNT_Ux_CONF2` | 0x0008 + x*0x0C | Unit x config 2: threshold 0 value, threshold 1 value |
+| `PCNT_Ux_CONF1` | 0x0004 + x*0x0C | Unit x config 1: high limit value, low limit value                                           |
+| `PCNT_Ux_CONF2` | 0x0008 + x*0x0C | Unit x config 2: threshold 0 value, threshold 1 value                                        |
 
 ### Per-Unit Status Registers (x8 units)
 
-| Register | Offset | Description |
-|----------|--------|-------------|
-| `PCNT_Ux_CNT` | 0x0060 + x*4 | Unit x current counter value (16-bit signed, read-only) |
+| Register         | Offset       | Description                                                                               |
+| ---------------- | ------------ | ----------------------------------------------------------------------------------------- |
+| `PCNT_Ux_CNT`    | 0x0060 + x*4 | Unit x current counter value (16-bit signed, read-only)                                   |
 | `PCNT_Ux_STATUS` | 0x0080 + x*4 | Unit x status: zero crossing, threshold 0/1 reached, high/low limit reached, zero latched |
 
 ### Control Registers
 
-| Register | Offset | Description |
-|----------|--------|-------------|
+| Register    | Offset | Description                                                                           |
+| ----------- | ------ | ------------------------------------------------------------------------------------- |
 | `PCNT_CTRL` | 0x00B0 | Global control: per-unit counter pause, per-unit counter reset, per-unit clock enable |
 
 ### Interrupt Registers
 
-| Register | Offset | Description |
-|----------|--------|-------------|
+| Register       | Offset | Description                                                 |
+| -------------- | ------ | ----------------------------------------------------------- |
 | `PCNT_INT_RAW` | 0x00A0 | Raw interrupt status (1 bit per unit, bit x = unit x event) |
-| `PCNT_INT_ST` | 0x00A4 | Masked interrupt status |
-| `PCNT_INT_ENA` | 0x00A8 | Interrupt enable |
-| `PCNT_INT_CLR` | 0x00AC | Interrupt clear (write-1-to-clear) |
+| `PCNT_INT_ST`  | 0x00A4 | Masked interrupt status                                     |
+| `PCNT_INT_ENA` | 0x00A8 | Interrupt enable                                            |
+| `PCNT_INT_CLR` | 0x00AC | Interrupt clear (write-1-to-clear)                          |
 
 ### Configuration Details for PCNT_Ux_CONF0
 
@@ -160,16 +160,16 @@ There is no direct pulse counter peripheral in Renode's existing library. Potent
 
 ## Complexity Assessment
 
-| Aspect | Rating | Notes |
-|--------|--------|-------|
-| **Register count** | Low | ~35 registers, highly regular |
-| **Logic complexity** | Low-Medium | Simple counting logic with configurable actions; watchpoint detection |
-| **Interrupt model** | Low | 8 interrupt sources (1 per unit), standard pattern |
-| **External dependencies** | Medium | Requires GPIO input infrastructure for meaningful operation |
-| **Clock domain complexity** | None | Counter is event-driven, not clock-driven |
-| **DMA** | None | PCNT does not use DMA |
-| **QEMU reference available** | **No** | Must implement from TRM and HAL code analysis |
-| **Overall effort** | **Low-Medium** | Estimated 1-2 days |
-| **Priority** | **Medium** | Used for rotary encoders and event counting; simpler than LEDC/RMT |
+| Aspect                       | Rating         | Notes                                                                 |
+| ---------------------------- | -------------- | --------------------------------------------------------------------- |
+| **Register count**           | Low            | ~35 registers, highly regular                                         |
+| **Logic complexity**         | Low-Medium     | Simple counting logic with configurable actions; watchpoint detection |
+| **Interrupt model**          | Low            | 8 interrupt sources (1 per unit), standard pattern                    |
+| **External dependencies**    | Medium         | Requires GPIO input infrastructure for meaningful operation           |
+| **Clock domain complexity**  | None           | Counter is event-driven, not clock-driven                             |
+| **DMA**                      | None           | PCNT does not use DMA                                                 |
+| **QEMU reference available** | **No**         | Must implement from TRM and HAL code analysis                         |
+| **Overall effort**           | **Low-Medium** | Estimated 1-2 days                                                    |
+| **Priority**                 | **Medium**     | Used for rotary encoders and event counting; simpler than LEDC/RMT    |
 
 The PCNT is one of the simpler peripherals to emulate. The core logic is a configurable counter with edge/level action tables, which is straightforward to implement. The main consideration is properly integrating with Renode's GPIO infrastructure to receive input signals. This peripheral would be a good early implementation target due to its simplicity.

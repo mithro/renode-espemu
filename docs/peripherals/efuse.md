@@ -35,44 +35,44 @@ Block 0 (BLK0) contains system parameters: MAC address (48 bits), chip revision,
 
 ### eFuse Data Registers (read-only view of programmed bits)
 
-| Offset | Register | Purpose |
-|--------|----------|---------|
-| `0x000` | `EFUSE_BLK0_RDATA0_REG` | BLK0 word 0: WR_DIS (write disable bits) |
-| `0x004` | `EFUSE_BLK0_RDATA1_REG` | BLK0 word 1: RD_DIS, coding scheme, various config bits |
-| `0x008` | `EFUSE_BLK0_RDATA2_REG` | BLK0 word 2: WIFI_MAC_Address (bytes 0-3, low 32 bits of MAC) |
-| `0x00C` | `EFUSE_BLK0_RDATA3_REG` | BLK0 word 3: WIFI_MAC_Address (bytes 4-5) + chip revision + misc |
-| `0x010` | `EFUSE_BLK0_RDATA4_REG` | BLK0 word 4: SPI pad config, CK8M frequency, XPD_SDIO |
-| `0x014` | `EFUSE_BLK0_RDATA5_REG` | BLK0 word 5: SPI pad config continued, flash encryption count |
-| `0x018` | `EFUSE_BLK0_RDATA6_REG` | BLK0 word 6: Key status, coding scheme, console debug, security |
-| `0x01C` | `EFUSE_BLK0_RDATA7_REG` | BLK0 word 7: Reserved / additional config |
-| `0x020-0x03C` | `EFUSE_BLK1_RDATA0-7_REG` | BLK1 (8 words): Flash encryption key |
-| `0x040-0x05C` | `EFUSE_BLK2_RDATA0-7_REG` | BLK2 (8 words): Secure boot key |
-| `0x060-0x07C` | `EFUSE_BLK3_RDATA0-7_REG` | BLK3 (8 words): User data / custom MAC |
+| Offset        | Register                  | Purpose                                                          |
+| ------------- | ------------------------- | ---------------------------------------------------------------- |
+| `0x000`       | `EFUSE_BLK0_RDATA0_REG`   | BLK0 word 0: WR_DIS (write disable bits)                         |
+| `0x004`       | `EFUSE_BLK0_RDATA1_REG`   | BLK0 word 1: RD_DIS, coding scheme, various config bits          |
+| `0x008`       | `EFUSE_BLK0_RDATA2_REG`   | BLK0 word 2: WIFI_MAC_Address (bytes 0-3, low 32 bits of MAC)    |
+| `0x00C`       | `EFUSE_BLK0_RDATA3_REG`   | BLK0 word 3: WIFI_MAC_Address (bytes 4-5) + chip revision + misc |
+| `0x010`       | `EFUSE_BLK0_RDATA4_REG`   | BLK0 word 4: SPI pad config, CK8M frequency, XPD_SDIO            |
+| `0x014`       | `EFUSE_BLK0_RDATA5_REG`   | BLK0 word 5: SPI pad config continued, flash encryption count    |
+| `0x018`       | `EFUSE_BLK0_RDATA6_REG`   | BLK0 word 6: Key status, coding scheme, console debug, security  |
+| `0x01C`       | `EFUSE_BLK0_RDATA7_REG`   | BLK0 word 7: Reserved / additional config                        |
+| `0x020-0x03C` | `EFUSE_BLK1_RDATA0-7_REG` | BLK1 (8 words): Flash encryption key                             |
+| `0x040-0x05C` | `EFUSE_BLK2_RDATA0-7_REG` | BLK2 (8 words): Secure boot key                                  |
+| `0x060-0x07C` | `EFUSE_BLK3_RDATA0-7_REG` | BLK3 (8 words): User data / custom MAC                           |
 
 ### eFuse Programming Registers
 
-| Offset | Register | Purpose |
-|--------|----------|---------|
+| Offset        | Register                  | Purpose                               |
+| ------------- | ------------------------- | ------------------------------------- |
 | `0x098-0x0B4` | `EFUSE_BLK0_WDATA0-7_REG` | Write data for BLK0 (bits to program) |
-| `0x0B8-0x0D4` | `EFUSE_BLK1_WDATA0-7_REG` | Write data for BLK1 |
-| `0x0D8-0x0F4` | `EFUSE_BLK2_WDATA0-7_REG` | Write data for BLK2 |
-| `0x0F8-0x114` | `EFUSE_BLK3_WDATA0-7_REG` | Write data for BLK3 |
+| `0x0B8-0x0D4` | `EFUSE_BLK1_WDATA0-7_REG` | Write data for BLK1                   |
+| `0x0D8-0x0F4` | `EFUSE_BLK2_WDATA0-7_REG` | Write data for BLK2                   |
+| `0x0F8-0x114` | `EFUSE_BLK3_WDATA0-7_REG` | Write data for BLK3                   |
 
 ### eFuse Control Registers
 
-| Offset | Register | Purpose |
-|--------|----------|---------|
-| `0x118` | `EFUSE_CLK_REG` | eFuse clock configuration |
-| `0x11C` | `EFUSE_CONF_REG` | eFuse operation configuration (read/program command) |
-| `0x120` | `EFUSE_STATUS_REG` | eFuse status (busy/idle) |
-| `0x124` | `EFUSE_CMD_REG` | Command register: trigger read (0x1) or program (0x2) operation |
-| `0x128` | `EFUSE_INT_RAW_REG` | Raw interrupt status (program done, read done) |
-| `0x12C` | `EFUSE_INT_ST_REG` | Masked interrupt status |
-| `0x130` | `EFUSE_INT_ENA_REG` | Interrupt enable |
-| `0x134` | `EFUSE_INT_CLR_REG` | Interrupt clear |
-| `0x138` | `EFUSE_DAC_CONF_REG` | DAC configuration for programming voltage |
-| `0x13C` | `EFUSE_DEC_STATUS_REG` | Decoding status (for 3/4 coding scheme) |
-| `0x1FC` | `EFUSE_DATE_REG` | Version/date register |
+| Offset  | Register               | Purpose                                                         |
+| ------- | ---------------------- | --------------------------------------------------------------- |
+| `0x118` | `EFUSE_CLK_REG`        | eFuse clock configuration                                       |
+| `0x11C` | `EFUSE_CONF_REG`       | eFuse operation configuration (read/program command)            |
+| `0x120` | `EFUSE_STATUS_REG`     | eFuse status (busy/idle)                                        |
+| `0x124` | `EFUSE_CMD_REG`        | Command register: trigger read (0x1) or program (0x2) operation |
+| `0x128` | `EFUSE_INT_RAW_REG`    | Raw interrupt status (program done, read done)                  |
+| `0x12C` | `EFUSE_INT_ST_REG`     | Masked interrupt status                                         |
+| `0x130` | `EFUSE_INT_ENA_REG`    | Interrupt enable                                                |
+| `0x134` | `EFUSE_INT_CLR_REG`    | Interrupt clear                                                 |
+| `0x138` | `EFUSE_DAC_CONF_REG`   | DAC configuration for programming voltage                       |
+| `0x13C` | `EFUSE_DEC_STATUS_REG` | Decoding status (for 3/4 coding scheme)                         |
+| `0x1FC` | `EFUSE_DATE_REG`       | Version/date register                                           |
 
 ## Source Code References
 
