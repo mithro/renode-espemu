@@ -17,21 +17,21 @@ How to use the rpi4-esp test station for hardware/emulation comparison, and how 
 
 The ESP32-C3 on the [rpi4-esp test station](06-test-station-hardware.md) has **built-in USB-JTAG/serial** via its USB interface. This is the most convenient debug target:
 
-| Capability | Status |
-|---|---|
-| **JTAG connection** | Built-in via USB (Interface 2 = vendor-specific JTAG) |
-| **OpenOCD config** | `board/esp32c3-builtin.cfg` |
-| **No external hardware** | Direct USB connection to `/dev/ttyESP32C3` |
-| **Hardware breakpoints** | 8 (RISC-V trigger module) |
-| **Hardware watchpoints** | 8 (data access triggers) |
-| **Single-stepping** | Yes (instruction and source-level) |
-| **GDB integration** | Full (via OpenOCD GDB server) |
-| **Flash programming** | Via OpenOCD (`program_esp`) |
-| **FreeRTOS awareness** | Yes (thread enumeration, stack inspection) |
-| **Application tracing** | Yes (via JTAG, UART, or USB simultaneously) |
-| **SystemView** | Yes (SEGGER real-time OS analysis) |
-| **Code coverage (gcov)** | Yes (via JTAG + esp_gcov component) |
-| **Semihosting** | Yes (file I/O, printf via debug channel) |
+| Capability               | Status                                                |
+| ------------------------ | ----------------------------------------------------- |
+| **JTAG connection**      | Built-in via USB (Interface 2 = vendor-specific JTAG) |
+| **OpenOCD config**       | `board/esp32c3-builtin.cfg`                           |
+| **No external hardware** | Direct USB connection to `/dev/ttyESP32C3`            |
+| **Hardware breakpoints** | 8 (RISC-V trigger module)                             |
+| **Hardware watchpoints** | 8 (data access triggers)                              |
+| **Single-stepping**      | Yes (instruction and source-level)                    |
+| **GDB integration**      | Full (via OpenOCD GDB server)                         |
+| **Flash programming**    | Via OpenOCD (`program_esp`)                           |
+| **FreeRTOS awareness**   | Yes (thread enumeration, stack inspection)            |
+| **Application tracing**  | Yes (via JTAG, UART, or USB simultaneously)           |
+| **SystemView**           | Yes (SEGGER real-time OS analysis)                    |
+| **Code coverage (gcov)** | Yes (via JTAG + esp_gcov component)                   |
+| **Semihosting**          | Yes (file I/O, printf via debug channel)              |
 
 To start debugging the ESP32-C3 from rpi4-esp:
 
@@ -48,21 +48,21 @@ riscv32-esp-elf-gdb -ex "target remote :3333" build/app.elf
 
 The two ESP32 (Xtensa LX6) boards need external JTAG hardware:
 
-| Board | JTAG Interface | Additional Hardware Needed |
-|---|---|---|
+| Board                  | JTAG Interface                                         | Additional Hardware Needed  |
+| ---------------------- | ------------------------------------------------------ | --------------------------- |
 | ESP32-CAM-MB (D0WD-V3) | GPIO12 (TDI), GPIO13 (TCK), GPIO14 (TMS), GPIO15 (TDO) | ESP-Prog or FT2232H adapter |
-| ESP32 DevKit (D0WDQ6) | Same GPIO pins | ESP-Prog or FT2232H adapter |
+| ESP32 DevKit (D0WDQ6)  | Same GPIO pins                                         | ESP-Prog or FT2232H adapter |
 
 **Important caveat:** On the ESP32-CAM-MB, GPIO12-15 are likely shared with the camera or SD card interface, making JTAG potentially conflicting with camera operation.
 
 The ESP32 (Xtensa) has additional debug capabilities not available on RISC-V:
 
-| Capability | Status |
-|---|---|
-| **TRAX trace memory** | Yes -- dedicated on-chip trace buffer for instruction flow recording |
-| **Hardware breakpoints** | 2 instruction + 2 data (fewer than ESP32-C3's RISC-V) |
-| **Dual-core debug** | Yes -- can halt/step each core independently |
-| **OpenOCD config** | `board/esp32-wrover-kit-1.8v.cfg` (with adapter) |
+| Capability               | Status                                                               |
+| ------------------------ | -------------------------------------------------------------------- |
+| **TRAX trace memory**    | Yes -- dedicated on-chip trace buffer for instruction flow recording |
+| **Hardware breakpoints** | 2 instruction + 2 data (fewer than ESP32-C3's RISC-V)                |
+| **Dual-core debug**      | Yes -- can halt/step each core independently                         |
+| **OpenOCD config**       | `board/esp32-wrover-kit-1.8v.cfg` (with adapter)                     |
 
 **TRAX** is particularly relevant: it's an Xtensa-specific on-chip trace buffer that can record instruction execution flow without halting the CPU. Key details:
 - Records branch decisions and uninferable PC discontinuities (interrupts, exceptions, indirect jumps)
@@ -136,15 +136,15 @@ For comparing hardware vs emulation, we need to know which memory-mapped registe
 
 ### What Can Be Traced on the ESP32-C3
 
-| Trace Type | Mechanism | Speed Impact | Completeness |
-|---|---|---|---|
-| UART output | Serial monitor | None | Application output only |
-| App-level trace data | esp_app_trace via JTAG | Low (~1-2%) | Custom data points |
-| SystemView (RTOS) | SEGGER via JTAG/UART | Low | Task/ISR/event timeline |
-| Source coverage (gcov) | esp_gcov via JTAG | Low-Medium | Line/branch coverage |
-| PC trace (instruction flow) | Not available on RV32 | N/A | N/A (no TRAX on RISC-V) |
-| Register watchpoints | OpenOCD triggers | High (halts on hit) | 8 addresses at a time |
-| Full MMIO trace | esp32-open-mac QEMU fork | N/A (runs in QEMU) | Complete |
+| Trace Type                  | Mechanism                | Speed Impact        | Completeness            |
+| --------------------------- | ------------------------ | ------------------- | ----------------------- |
+| UART output                 | Serial monitor           | None                | Application output only |
+| App-level trace data        | esp_app_trace via JTAG   | Low (~1-2%)         | Custom data points      |
+| SystemView (RTOS)           | SEGGER via JTAG/UART     | Low                 | Task/ISR/event timeline |
+| Source coverage (gcov)      | esp_gcov via JTAG        | Low-Medium          | Line/branch coverage    |
+| PC trace (instruction flow) | Not available on RV32    | N/A                 | N/A (no TRAX on RISC-V) |
+| Register watchpoints        | OpenOCD triggers         | High (halts on hit) | 8 addresses at a time   |
+| Full MMIO trace             | esp32-open-mac QEMU fork | N/A (runs in QEMU)  | Complete                |
 
 ---
 
@@ -247,13 +247,13 @@ Hook variables include: `self` (peripheral), `sysbus`, `machine`, `value`, `offs
 
 ### Python Hooks
 
-| Hook Type | API | Use Case |
-|---|---|---|
-| **System bus hooks** | `SetHookAfterPeripheralRead/Write` | Intercept/record all register access |
-| **CPU hooks** | `cpu AddHook address "script"` | Break at specific PCs |
-| **Watchpoint hooks** | Trigger on specific address patterns | Data-dependent breakpoints |
-| **UART hooks** | React to specific output lines | Detect boot milestones |
-| **Packet interception** | Intercept network TX/RX | Validate networking behaviour |
+| Hook Type               | API                                  | Use Case                             |
+| ----------------------- | ------------------------------------ | ------------------------------------ |
+| **System bus hooks**    | `SetHookAfterPeripheralRead/Write`   | Intercept/record all register access |
+| **CPU hooks**           | `cpu AddHook address "script"`       | Break at specific PCs                |
+| **Watchpoint hooks**    | Trigger on specific address patterns | Data-dependent breakpoints           |
+| **UART hooks**          | React to specific output lines       | Detect boot milestones               |
+| **Packet interception** | Intercept network TX/RX              | Validate networking behaviour        |
 
 ### State Save/Restore (Snapshot Support)
 

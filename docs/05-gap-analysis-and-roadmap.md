@@ -74,18 +74,18 @@ These are required to boot ESP-IDF firmware and run basic applications:
 
 ### Estimated Effort
 
-| Work Item | Complexity | Notes |
-|---|---|---|
-| ESP32-C3 platform (.repl) | Medium | RISC-V core already works; need memory map + peripherals |
-| ESP32 platform (.repl) | High | Xtensa config needs ESP32-specific tuning |
-| Interrupt matrix | Medium-High | Custom to ESP32, well-documented in TRM |
-| Timer groups + SysTimer | Medium | Well-documented, straightforward register model |
-| Flash SPI + MMU | High | Complex memory mapping, XIP |
-| GPIO + pin mux | Medium | Register model, boot strapping |
-| WiFi (HAL intercept) | Very High | Proprietary blob, would need API-level interception |
-| WiFi (virtual Ethernet) | Medium | Follow QEMU's OpenCores approach |
-| BLE (HCI level) | High | Could leverage existing BLEMedium |
-| 802.15.4 | Medium-High | Could leverage existing IEEE802_15_4Medium |
+| Work Item                 | Complexity  | Notes                                                    |
+| ------------------------- | ----------- | -------------------------------------------------------- |
+| ESP32-C3 platform (.repl) | Medium      | RISC-V core already works; need memory map + peripherals |
+| ESP32 platform (.repl)    | High        | Xtensa config needs ESP32-specific tuning                |
+| Interrupt matrix          | Medium-High | Custom to ESP32, well-documented in TRM                  |
+| Timer groups + SysTimer   | Medium      | Well-documented, straightforward register model          |
+| Flash SPI + MMU           | High        | Complex memory mapping, XIP                              |
+| GPIO + pin mux            | Medium      | Register model, boot strapping                           |
+| WiFi (HAL intercept)      | Very High   | Proprietary blob, would need API-level interception      |
+| WiFi (virtual Ethernet)   | Medium      | Follow QEMU's OpenCores approach                         |
+| BLE (HCI level)           | High        | Could leverage existing BLEMedium                        |
+| 802.15.4                  | Medium-High | Could leverage existing IEEE802_15_4Medium               |
 
 ### Recommended Priority Path
 
@@ -148,30 +148,30 @@ These are required to boot ESP-IDF firmware and run basic applications:
 
 #### WiFi Emulation Strategies (in order of feasibility)
 
-| Strategy | Complexity | Fidelity | Approach |
-|---|---|---|---|
-| **Virtual Ethernet** | Low | Low | Replace WiFi with fake Ethernet MAC (QEMU's approach). TCP/IP works, WiFi APIs don't. |
-| **API-level interception** | Medium | Medium | Hook `esp_wifi_*()` API functions in the emulator. Simulate scanning, association, etc. |
-| **OS adapter interception** | Medium | Medium-High | Hook the `wifi_os_adapter` callback table. The blob calls these for OS services. |
-| **Register-level emulation** | High | High | Use esp32-open-mac's register knowledge to model the WiFi hardware. Most faithful but most effort. |
-| **Hybrid** | Medium-High | High | Use esp32-open-mac's open-source WiFi driver instead of the blob, modeling only the hardware primitives it uses. |
+| Strategy                     | Complexity  | Fidelity    | Approach                                                                                                         |
+| ---------------------------- | ----------- | ----------- | ---------------------------------------------------------------------------------------------------------------- |
+| **Virtual Ethernet**         | Low         | Low         | Replace WiFi with fake Ethernet MAC (QEMU's approach). TCP/IP works, WiFi APIs don't.                            |
+| **API-level interception**   | Medium      | Medium      | Hook `esp_wifi_*()` API functions in the emulator. Simulate scanning, association, etc.                          |
+| **OS adapter interception**  | Medium      | Medium-High | Hook the `wifi_os_adapter` callback table. The blob calls these for OS services.                                 |
+| **Register-level emulation** | High        | High        | Use esp32-open-mac's register knowledge to model the WiFi hardware. Most faithful but most effort.               |
+| **Hybrid**                   | Medium-High | High        | Use esp32-open-mac's open-source WiFi driver instead of the blob, modeling only the hardware primitives it uses. |
 
 **Recommended:** Start with Virtual Ethernet (quick win), then pursue the **Hybrid** approach -- using esp32-open-mac's open WiFi stack means the emulator only needs to model the hardware primitives (DMA, interrupts, filters) that the open stack uses, rather than reverse-engineering the entire register space that the proprietary blob accesses.
 
 #### BLE Emulation Strategy
 
-| Strategy | Complexity | Fidelity |
-|---|---|---|
-| **VHCI interception** | Medium | High |
-| **Register-level emulation** | Very High | Very High |
+| Strategy                     | Complexity | Fidelity  |
+| ---------------------------- | ---------- | --------- |
+| **VHCI interception**        | Medium     | High      |
+| **Register-level emulation** | Very High  | Very High |
 
 **Recommended:** VHCI interception. Implement a virtual BLE controller that speaks standard HCI. The host stack (NimBLE/Bluedroid) communicates via VHCI, so intercepting at this level gives high fidelity without reverse engineering the radio hardware. Combined with Renode's existing `BLEMedium`, this could enable multi-node BLE simulation.
 
 #### IEEE 802.15.4 Emulation Strategy
 
-| Strategy | Complexity | Fidelity |
-|---|---|---|
-| **Register-level emulation** | Medium | Very High |
+| Strategy                     | Complexity | Fidelity  |
+| ---------------------------- | ---------- | --------- |
+| **Register-level emulation** | Medium     | Very High |
 
 **Recommended:** Direct register-level emulation. The hardware is fully documented in ESP-IDF. The register definitions in `ieee802154_reg.h` / `ieee802154_struct.h` can be directly translated into an emulator peripheral model. Combined with Renode's existing `IEEE802_15_4Medium`, this enables full Thread/Zigbee simulation.
 
@@ -256,12 +256,12 @@ Set up automated testing:
 
 ### Hardware Needed
 
-| Item | Purpose | Priority | Est. Cost |
-|---|---|---|---|
-| **ESP-Prog** | JTAG for ESP32 DevKit + CAM-MB | High | ~$15 |
-| **ESP32-C6 dev board** | 802.15.4 testing + Thread validation | High | ~$10 |
-| **ESP32-H2 dev board** | Pure 802.15.4 + BLE device | Medium | ~$10 |
-| **ESP32-S3 dev board** | QEMU-supported Xtensa target | Low | ~$10 |
+| Item                   | Purpose                              | Priority | Est. Cost |
+| ---------------------- | ------------------------------------ | -------- | --------- |
+| **ESP-Prog**           | JTAG for ESP32 DevKit + CAM-MB       | High     | ~$15      |
+| **ESP32-C6 dev board** | 802.15.4 testing + Thread validation | High     | ~$10      |
+| **ESP32-H2 dev board** | Pure 802.15.4 + BLE device           | Medium   | ~$10      |
+| **ESP32-S3 dev board** | QEMU-supported Xtensa target         | Low      | ~$10      |
 
 
 ---

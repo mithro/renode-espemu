@@ -50,43 +50,43 @@ As of early 2026, Renode's ESP32 support is **extremely minimal**. The Renode te
 
 ### ESP-Specific Peripheral Support in Renode
 
-| Peripheral | Renode Status | Source File |
-|---|---|---|
-| **UART** | **Implemented** (v1.16.0, Aug 2025; co-authored by Sean "xobs" Cross) | `ESP32_UART.cs` |
-| GPIO | Not implemented | -- |
-| SPI / SPI Flash | Not implemented | -- |
-| I2C | Not implemented | -- |
-| I2S | Not implemented | -- |
-| Timer Groups | Not implemented | -- |
-| System Timer | Not implemented | -- |
-| Watchdog | Not implemented | -- |
-| Interrupt Matrix | Not implemented | -- |
-| DMA (PDMA/GDMA) | Not implemented | -- |
-| WiFi | Not implemented | -- |
-| Bluetooth / BLE | Not implemented | -- |
-| IEEE 802.15.4 | Not implemented | -- |
-| ADC / DAC | Not implemented | -- |
-| eFuse | Not implemented | -- |
-| RNG | Not implemented | -- |
-| AES / SHA / RSA | Not implemented | -- |
-| HMAC / DS | Not implemented | -- |
-| Flash Encryption | Not implemented | -- |
-| USB OTG | Not implemented | -- |
-| USB Serial/JTAG | Not implemented | -- |
-| RMT | Not implemented | -- |
-| LEDC / PWM | Not implemented | -- |
-| MCPWM | Not implemented | -- |
-| TWAI / CAN | Not implemented | -- |
-| Touch Sensor | Not implemented | -- |
-| Camera Interface | Not implemented | -- |
-| LCD Interface | Not implemented | -- |
-| SDIO / SD Host | Not implemented | -- |
-| RTC Control | Not implemented | -- |
-| DPORT / System registers | Not implemented | -- |
-| Cache / MMU | Not implemented | -- |
-| Brownout Detector | Not implemented | -- |
-| Power Management | Not implemented | -- |
-| Clock Control | Not implemented | -- |
+| Peripheral               | Renode Status                                                         | Source File     |
+| ------------------------ | --------------------------------------------------------------------- | --------------- |
+| **UART**                 | **Implemented** (v1.16.0, Aug 2025; co-authored by Sean "xobs" Cross) | `ESP32_UART.cs` |
+| GPIO                     | Not implemented                                                       | --              |
+| SPI / SPI Flash          | Not implemented                                                       | --              |
+| I2C                      | Not implemented                                                       | --              |
+| I2S                      | Not implemented                                                       | --              |
+| Timer Groups             | Not implemented                                                       | --              |
+| System Timer             | Not implemented                                                       | --              |
+| Watchdog                 | Not implemented                                                       | --              |
+| Interrupt Matrix         | Not implemented                                                       | --              |
+| DMA (PDMA/GDMA)          | Not implemented                                                       | --              |
+| WiFi                     | Not implemented                                                       | --              |
+| Bluetooth / BLE          | Not implemented                                                       | --              |
+| IEEE 802.15.4            | Not implemented                                                       | --              |
+| ADC / DAC                | Not implemented                                                       | --              |
+| eFuse                    | Not implemented                                                       | --              |
+| RNG                      | Not implemented                                                       | --              |
+| AES / SHA / RSA          | Not implemented                                                       | --              |
+| HMAC / DS                | Not implemented                                                       | --              |
+| Flash Encryption         | Not implemented                                                       | --              |
+| USB OTG                  | Not implemented                                                       | --              |
+| USB Serial/JTAG          | Not implemented                                                       | --              |
+| RMT                      | Not implemented                                                       | --              |
+| LEDC / PWM               | Not implemented                                                       | --              |
+| MCPWM                    | Not implemented                                                       | --              |
+| TWAI / CAN               | Not implemented                                                       | --              |
+| Touch Sensor             | Not implemented                                                       | --              |
+| Camera Interface         | Not implemented                                                       | --              |
+| LCD Interface            | Not implemented                                                       | --              |
+| SDIO / SD Host           | Not implemented                                                       | --              |
+| RTC Control              | Not implemented                                                       | --              |
+| DPORT / System registers | Not implemented                                                       | --              |
+| Cache / MMU              | Not implemented                                                       | --              |
+| Brownout Detector        | Not implemented                                                       | --              |
+| Power Management         | Not implemented                                                       | --              |
+| Clock Control            | Not implemented                                                       | --              |
 
 **Summary: 1 out of ~35 key peripherals implemented (UART only).**
 
@@ -116,58 +116,58 @@ Espressif maintains a fork of QEMU at [github.com/espressif/qemu](https://github
 
 ### Supported Chips
 
-| Chip | CPU Emulation | SoC Emulation |
-|---|---|---|
-| **ESP32** | Xtensa (full) | Yes |
-| **ESP32-S3** | Xtensa (full) | Yes |
-| **ESP32-C3** | RISC-V (full) | Yes |
-| ESP32-S2 | Not supported | Not supported |
-| ESP32-C2 | Not supported | Not supported |
-| ESP32-C5 | Not supported | Not supported |
-| ESP32-C6 | Not supported | Not supported |
-| ESP32-H2 | Not supported | Not supported |
-| ESP32-P4 | Not supported | Not supported |
+| Chip         | CPU Emulation | SoC Emulation |
+| ------------ | ------------- | ------------- |
+| **ESP32**    | Xtensa (full) | Yes           |
+| **ESP32-S3** | Xtensa (full) | Yes           |
+| **ESP32-C3** | RISC-V (full) | Yes           |
+| ESP32-S2     | Not supported | Not supported |
+| ESP32-C2     | Not supported | Not supported |
+| ESP32-C5     | Not supported | Not supported |
+| ESP32-C6     | Not supported | Not supported |
+| ESP32-H2     | Not supported | Not supported |
+| ESP32-P4     | Not supported | Not supported |
 
 ### Peripheral Support Matrix (Espressif QEMU)
 
-| Peripheral | ESP32 | ESP32-S3 | ESP32-C3 |
-|---|---|---|---|
-| **Dual-Core CPU** | Yes | Yes | N/A (single) |
-| **UART** | Yes | Yes | Yes |
-| **Interrupt Matrix** | Yes | Yes | Yes |
-| **GPIO Strap** | Yes | Yes | Yes |
-| **NOR Flash (SPI)** | Yes | Yes | Yes |
-| **NOR Flash (MMU)** | Yes | Yes* | Yes |
-| **Flash Encryption** | Yes | Yes | Yes |
-| **PSRAM (QPI)** | Yes | Yes | N/A |
-| **PSRAM (OPI)** | Yes* | Yes | N/A |
-| **PSRAM (MMU)** | N/A | Yes* | N/A |
-| **eFuse** | Yes | Yes | Yes |
-| **RNG** | Yes | Yes | Yes |
-| **GDMA** | N/A | Yes | Yes |
-| **AES** | Yes | Yes | Yes |
-| **SHA** | Yes | Yes | Yes |
-| **RSA** | Yes | Yes | Yes |
-| **HMAC** | N/A | Yes | Yes |
-| **Digital Signature** | N/A | Yes | Yes |
-| **SysTimer** | N/A | Yes | Yes |
-| **Timer Groups** | Yes | Yes | Yes |
-| **TWAI/CAN** | Yes | Yes | Yes |
-| **SD/MMC** | Yes | -- | N/A |
-| **LEDC** | Yes | -- | -- |
-| **Ethernet** | Yes* | Yes* | Yes* |
-| **WiFi** | **No** | **No** | **No** |
-| **Bluetooth** | **No** | **No** | **No** |
-| **USB** | **No** | **No** | **No** |
-| **RMT** | **No** | **No** | **No** |
-| **GP SPI** | **No** | **No** | **No** |
-| **I2C** | **No** | **No** | **No** |
-| **ADC** | **No** | **No** | **No** |
-| **DAC** | **No** | **No** | N/A |
-| **I2S** | **No** | **No** | **No** |
-| **PCNT** | **No** | **No** | **No** |
-| **MCPWM** | **No** | **No** | N/A |
-| **Touch Sensor** | **No** | N/A | N/A |
+| Peripheral            | ESP32  | ESP32-S3 | ESP32-C3     |
+| --------------------- | ------ | -------- | ------------ |
+| **Dual-Core CPU**     | Yes    | Yes      | N/A (single) |
+| **UART**              | Yes    | Yes      | Yes          |
+| **Interrupt Matrix**  | Yes    | Yes      | Yes          |
+| **GPIO Strap**        | Yes    | Yes      | Yes          |
+| **NOR Flash (SPI)**   | Yes    | Yes      | Yes          |
+| **NOR Flash (MMU)**   | Yes    | Yes*     | Yes          |
+| **Flash Encryption**  | Yes    | Yes      | Yes          |
+| **PSRAM (QPI)**       | Yes    | Yes      | N/A          |
+| **PSRAM (OPI)**       | Yes*   | Yes      | N/A          |
+| **PSRAM (MMU)**       | N/A    | Yes*     | N/A          |
+| **eFuse**             | Yes    | Yes      | Yes          |
+| **RNG**               | Yes    | Yes      | Yes          |
+| **GDMA**              | N/A    | Yes      | Yes          |
+| **AES**               | Yes    | Yes      | Yes          |
+| **SHA**               | Yes    | Yes      | Yes          |
+| **RSA**               | Yes    | Yes      | Yes          |
+| **HMAC**              | N/A    | Yes      | Yes          |
+| **Digital Signature** | N/A    | Yes      | Yes          |
+| **SysTimer**          | N/A    | Yes      | Yes          |
+| **Timer Groups**      | Yes    | Yes      | Yes          |
+| **TWAI/CAN**          | Yes    | Yes      | Yes          |
+| **SD/MMC**            | Yes    | --       | N/A          |
+| **LEDC**              | Yes    | --       | --           |
+| **Ethernet**          | Yes*   | Yes*     | Yes*         |
+| **WiFi**              | **No** | **No**   | **No**       |
+| **Bluetooth**         | **No** | **No**   | **No**       |
+| **USB**               | **No** | **No**   | **No**       |
+| **RMT**               | **No** | **No**   | **No**       |
+| **GP SPI**            | **No** | **No**   | **No**       |
+| **I2C**               | **No** | **No**   | **No**       |
+| **ADC**               | **No** | **No**   | **No**       |
+| **DAC**               | **No** | **No**   | N/A          |
+| **I2S**               | **No** | **No**   | **No**       |
+| **PCNT**              | **No** | **No**   | **No**       |
+| **MCPWM**             | **No** | **No**   | N/A          |
+| **Touch Sensor**      | **No** | N/A      | N/A          |
 
 Notes:
 - `*` = Emulated with caveats (e.g., uses host MMU for flash mapping, or uses OpenCores Ethernet instead of real ESP Ethernet MAC)
@@ -274,77 +274,77 @@ This table compares what each open-source emulator supports for the **most popul
 
 ### ESP32 (Xtensa LX6, Dual-Core)
 
-| Peripheral | Renode | QEMU (Espressif) | Wokwi |
-|---|---|---|---|
-| CPU (Xtensa LX6) | Partial | **Full** | **Full** |
-| Dual-Core SMP | No | **Yes** | **Yes** |
-| UART | **Yes** (1 model) | **Yes** | **Yes** |
-| GPIO | No | **Yes** | **Yes** |
-| SPI | No | **Yes** (flash only) | **Yes** |
-| I2C | No | **Yes** | **Yes** |
-| Timer Groups | No | **Yes** | **Yes** |
-| Interrupt Matrix | No | **Yes** | **Yes** |
-| eFuse | No | **Yes** | Partial |
-| Flash SPI + MMU | No | **Yes** | **Yes** |
-| Flash Encryption | No | **Yes** | No |
-| PSRAM | No | **Yes** | **Yes** |
-| AES/SHA/RSA | No | **Yes** | No |
-| RNG | No | **Yes** | **Yes** |
-| DMA | No | N/A (PDMA) | Partial |
-| TWAI/CAN | No | **Yes** | **Yes** |
-| SD/MMC | No | **Yes** | No |
-| LEDC | No | **Yes** | **Yes** |
-| DPORT | No | **Yes** | Unknown |
-| RTC Control | No | **Yes** | Partial |
-| **WiFi** | **No** | **No** | **Yes** |
-| **Bluetooth** | **No** | **No** | **No** |
-| ADC | No | No | **Yes** |
-| DAC | No | No | Partial |
-| I2S | No | No | Partial |
-| RMT | No | No | **Yes** |
-| Touch | No | No | **Yes** |
-| USB | N/A | N/A | N/A |
-| Ethernet (real) | No | No | No |
+| Peripheral       | Renode            | QEMU (Espressif)     | Wokwi    |
+| ---------------- | ----------------- | -------------------- | -------- |
+| CPU (Xtensa LX6) | Partial           | **Full**             | **Full** |
+| Dual-Core SMP    | No                | **Yes**              | **Yes**  |
+| UART             | **Yes** (1 model) | **Yes**              | **Yes**  |
+| GPIO             | No                | **Yes**              | **Yes**  |
+| SPI              | No                | **Yes** (flash only) | **Yes**  |
+| I2C              | No                | **Yes**              | **Yes**  |
+| Timer Groups     | No                | **Yes**              | **Yes**  |
+| Interrupt Matrix | No                | **Yes**              | **Yes**  |
+| eFuse            | No                | **Yes**              | Partial  |
+| Flash SPI + MMU  | No                | **Yes**              | **Yes**  |
+| Flash Encryption | No                | **Yes**              | No       |
+| PSRAM            | No                | **Yes**              | **Yes**  |
+| AES/SHA/RSA      | No                | **Yes**              | No       |
+| RNG              | No                | **Yes**              | **Yes**  |
+| DMA              | No                | N/A (PDMA)           | Partial  |
+| TWAI/CAN         | No                | **Yes**              | **Yes**  |
+| SD/MMC           | No                | **Yes**              | No       |
+| LEDC             | No                | **Yes**              | **Yes**  |
+| DPORT            | No                | **Yes**              | Unknown  |
+| RTC Control      | No                | **Yes**              | Partial  |
+| **WiFi**         | **No**            | **No**               | **Yes**  |
+| **Bluetooth**    | **No**            | **No**               | **No**   |
+| ADC              | No                | No                   | **Yes**  |
+| DAC              | No                | No                   | Partial  |
+| I2S              | No                | No                   | Partial  |
+| RMT              | No                | No                   | **Yes**  |
+| Touch            | No                | No                   | **Yes**  |
+| USB              | N/A               | N/A                  | N/A      |
+| Ethernet (real)  | No                | No                   | No       |
 
 ### ESP32-C3 (RISC-V, Single-Core)
 
-| Peripheral | Renode | QEMU (Espressif) | Wokwi |
-|---|---|---|---|
-| CPU (RV32IMC) | **Yes** (core) | **Full** | **Full** |
-| UART | **Yes** (model) | **Yes** | **Yes** |
-| GPIO | No | **Yes** | **Yes** |
-| SPI | No | **Yes** | **Yes** |
-| I2C | No | No | **Yes** |
-| Timer Groups | No | **Yes** | **Yes** |
-| System Timer | No | **Yes** | **Yes** |
-| Interrupt Matrix | No | **Yes** | **Yes** |
-| eFuse | No | **Yes** | Partial |
-| Flash SPI + MMU | No | **Yes** | **Yes** |
-| Flash Encryption | No | **Yes** | No |
-| AES/SHA/RSA | No | **Yes** | No |
-| HMAC/DS | No | **Yes** | No |
-| GDMA | No | **Yes** | Partial |
-| RNG | No | **Yes** | **Yes** |
-| TWAI/CAN | No | **Yes** | **Yes** |
-| RTC Control | No | **Yes** | Partial |
-| USB Serial/JTAG | No | No | Partial |
-| **WiFi** | **No** | **No** | **Yes** |
-| **Bluetooth** | **No** | **No** | **No** |
-| ADC | No | No | **Yes** |
-| I2S | No | No | Partial |
-| RMT | No | No | **Yes** |
-| LEDC | No | No | **Yes** |
+| Peripheral       | Renode          | QEMU (Espressif) | Wokwi    |
+| ---------------- | --------------- | ---------------- | -------- |
+| CPU (RV32IMC)    | **Yes** (core)  | **Full**         | **Full** |
+| UART             | **Yes** (model) | **Yes**          | **Yes**  |
+| GPIO             | No              | **Yes**          | **Yes**  |
+| SPI              | No              | **Yes**          | **Yes**  |
+| I2C              | No              | No               | **Yes**  |
+| Timer Groups     | No              | **Yes**          | **Yes**  |
+| System Timer     | No              | **Yes**          | **Yes**  |
+| Interrupt Matrix | No              | **Yes**          | **Yes**  |
+| eFuse            | No              | **Yes**          | Partial  |
+| Flash SPI + MMU  | No              | **Yes**          | **Yes**  |
+| Flash Encryption | No              | **Yes**          | No       |
+| AES/SHA/RSA      | No              | **Yes**          | No       |
+| HMAC/DS          | No              | **Yes**          | No       |
+| GDMA             | No              | **Yes**          | Partial  |
+| RNG              | No              | **Yes**          | **Yes**  |
+| TWAI/CAN         | No              | **Yes**          | **Yes**  |
+| RTC Control      | No              | **Yes**          | Partial  |
+| USB Serial/JTAG  | No              | No               | Partial  |
+| **WiFi**         | **No**          | **No**           | **Yes**  |
+| **Bluetooth**    | **No**          | **No**           | **No**   |
+| ADC              | No              | No               | **Yes**  |
+| I2S              | No              | No               | Partial  |
+| RMT              | No              | No               | **Yes**  |
+| LEDC             | No              | No               | **Yes**  |
 
 ### ESP32-C6 (RISC-V, HP+LP cores, WiFi 6 + 802.15.4)
 
-| Peripheral | Renode | QEMU (Espressif) | Wokwi |
-|---|---|---|---|
-| CPU (RV32IMAC) | **Yes** (core) | Not supported | **Yes** |
-| LP Core | No | Not supported | Unknown |
-| UART | Likely works | Not supported | **Yes** |
-| GPIO | No | Not supported | **Yes** |
-| **WiFi 6** | **No** | **No** | **Yes** |
-| **BLE 5.3** | **No** | **No** | **No** |
-| **802.15.4** | **No** | **No** | **Yes** |
-| All others | No | Not supported | Partial-Yes |
+| Peripheral     | Renode         | QEMU (Espressif) | Wokwi       |
+| -------------- | -------------- | ---------------- | ----------- |
+| CPU (RV32IMAC) | **Yes** (core) | Not supported    | **Yes**     |
+| LP Core        | No             | Not supported    | Unknown     |
+| UART           | Likely works   | Not supported    | **Yes**     |
+| GPIO           | No             | Not supported    | **Yes**     |
+| **WiFi 6**     | **No**         | **No**           | **Yes**     |
+| **BLE 5.3**    | **No**         | **No**           | **No**      |
+| **802.15.4**   | **No**         | **No**           | **Yes**     |
+| All others     | No             | Not supported    | Partial-Yes |
 

@@ -306,29 +306,29 @@ Espressif Systems produces several families of WiFi/Bluetooth-capable SoCs. The 
 
 ## 2. ESP Family Comparison Table
 
-| Feature | ESP8266 | ESP32 | ESP32-S2 | ESP32-S3 | ESP32-C2 | ESP32-C3 | ESP32-C5 | ESP32-C6 | ESP32-C61 | ESP32-H2 | ESP32-P4 |
-|---|---|---|---|---|---|---|---|---|---|---|---|
-| **CPU** | L106 | Xtensa LX6 | Xtensa LX7 | Xtensa LX7 | RV32IMAC | RV32IMC | RV32IMAC | RV32IMAC | RV32IMAC | RV32IMAC | RV32IMAFC |
-| **Cores** | 1 | 1 or 2 | 1 | 2 | 1 | 1 | 1 | 1+LP | 1 | 1 | 2+LP |
-| **Max Freq** | 160 MHz | 240 MHz | 240 MHz | 240 MHz | 120 MHz | 160 MHz | 240 MHz | 160 MHz | 160 MHz | 96 MHz | 400 MHz |
-| **SRAM** | 80 KiB | 520 KiB | 320 KiB | 512 KiB | 272 KiB | 400 KiB | 384 KiB | 512 KiB | 320 KiB | 256 KiB | 768 KiB |
-| **WiFi** | b/g/n | b/g/n | b/g/n | b/g/n | b/g/n | b/g/n | b/g/n/ac/ax | b/g/n/ax | b/g/n/ax | -- | -- |
-| **Bluetooth** | -- | 4.2+BR/EDR | -- | 5.0 LE | 5.0 LE | 5.0 LE | 5.0 LE | 5.3 LE | 6.0 LE | 5.3 LE | -- |
-| **802.15.4** | -- | -- | -- | -- | -- | -- | Yes | Yes | -- | Yes | -- |
-| **GPIO** | 16 | 34 | 43 | 45 | 20 | 22 | ~30 | 30 | 30 | 26 | 50 |
-| **UART** | 2 | 3 | 2 | 3 | 2 | 2 | 3 | 3 | -- | 2 | 2 |
-| **SPI** | 2 | 4 | 4 | 4 | 2 | 3 | 3 | 3 | -- | 2 | 3 |
-| **I2C** | 1 | 2 | 1 | 2 | 1 | 1 | 2 | 2 | -- | 2 | 2 |
-| **I2S** | 1 | 2 | 1 | 2 | -- | 1 | 1 | 1 | -- | 1 | 3 |
-| **USB** | -- | -- | OTG | OTG+JTAG | -- | Serial/JTAG | Serial/JTAG | Serial/JTAG | -- | Serial/JTAG | OTG 2.0 HS |
-| **ADC** | 1x10-bit | 2x12-bit | 2x13-bit | 2x12-bit | 1x12-bit | 2x12-bit | 1x12-bit | 1x12-bit | -- | 1x12-bit | -- |
-| **DAC** | -- | 2x8-bit | 2x8-bit | -- | -- | -- | -- | -- | -- | -- | -- |
-| **Ethernet** | -- | MAC+RMII | -- | -- | -- | -- | -- | -- | -- | -- | MAC+RMII |
-| **TWAI/CAN** | -- | Yes | -- | Yes | -- | Yes | -- | Yes | -- | Yes | Yes |
-| **Touch** | -- | 10 ch | 14 ch | 14 ch | -- | -- | -- | -- | -- | -- | -- |
-| **Temp Sensor** | -- | -- | -- | Yes | -- | Yes | -- | Yes | -- | Yes | Yes |
-| **DMA** | -- | PDMA | GDMA | GDMA | GDMA | GDMA | GDMA | GDMA+UHCI | -- | GDMA | GDMA |
-| **Crypto HW** | -- | AES/SHA/RSA | Full | Full | AES/SHA | Full | Full | Full | -- | Full+ECC | Full+ECC |
+| Feature         | ESP8266  | ESP32       | ESP32-S2   | ESP32-S3   | ESP32-C2 | ESP32-C3    | ESP32-C5    | ESP32-C6    | ESP32-C61 | ESP32-H2    | ESP32-P4   |
+| --------------- | -------- | ----------- | ---------- | ---------- | -------- | ----------- | ----------- | ----------- | --------- | ----------- | ---------- |
+| **CPU**         | L106     | Xtensa LX6  | Xtensa LX7 | Xtensa LX7 | RV32IMAC | RV32IMC     | RV32IMAC    | RV32IMAC    | RV32IMAC  | RV32IMAC    | RV32IMAFC  |
+| **Cores**       | 1        | 1 or 2      | 1          | 2          | 1        | 1           | 1           | 1+LP        | 1         | 1           | 2+LP       |
+| **Max Freq**    | 160 MHz  | 240 MHz     | 240 MHz    | 240 MHz    | 120 MHz  | 160 MHz     | 240 MHz     | 160 MHz     | 160 MHz   | 96 MHz      | 400 MHz    |
+| **SRAM**        | 80 KiB   | 520 KiB     | 320 KiB    | 512 KiB    | 272 KiB  | 400 KiB     | 384 KiB     | 512 KiB     | 320 KiB   | 256 KiB     | 768 KiB    |
+| **WiFi**        | b/g/n    | b/g/n       | b/g/n      | b/g/n      | b/g/n    | b/g/n       | b/g/n/ac/ax | b/g/n/ax    | b/g/n/ax  | --          | --         |
+| **Bluetooth**   | --       | 4.2+BR/EDR  | --         | 5.0 LE     | 5.0 LE   | 5.0 LE      | 5.0 LE      | 5.3 LE      | 6.0 LE    | 5.3 LE      | --         |
+| **802.15.4**    | --       | --          | --         | --         | --       | --          | Yes         | Yes         | --        | Yes         | --         |
+| **GPIO**        | 16       | 34          | 43         | 45         | 20       | 22          | ~30         | 30          | 30        | 26          | 50         |
+| **UART**        | 2        | 3           | 2          | 3          | 2        | 2           | 3           | 3           | --        | 2           | 2          |
+| **SPI**         | 2        | 4           | 4          | 4          | 2        | 3           | 3           | 3           | --        | 2           | 3          |
+| **I2C**         | 1        | 2           | 1          | 2          | 1        | 1           | 2           | 2           | --        | 2           | 2          |
+| **I2S**         | 1        | 2           | 1          | 2          | --       | 1           | 1           | 1           | --        | 1           | 3          |
+| **USB**         | --       | --          | OTG        | OTG+JTAG   | --       | Serial/JTAG | Serial/JTAG | Serial/JTAG | --        | Serial/JTAG | OTG 2.0 HS |
+| **ADC**         | 1x10-bit | 2x12-bit    | 2x13-bit   | 2x12-bit   | 1x12-bit | 2x12-bit    | 1x12-bit    | 1x12-bit    | --        | 1x12-bit    | --         |
+| **DAC**         | --       | 2x8-bit     | 2x8-bit    | --         | --       | --          | --          | --          | --        | --          | --         |
+| **Ethernet**    | --       | MAC+RMII    | --         | --         | --       | --          | --          | --          | --        | --          | MAC+RMII   |
+| **TWAI/CAN**    | --       | Yes         | --         | Yes        | --       | Yes         | --          | Yes         | --        | Yes         | Yes        |
+| **Touch**       | --       | 10 ch       | 14 ch      | 14 ch      | --       | --          | --          | --          | --        | --          | --         |
+| **Temp Sensor** | --       | --          | --         | Yes        | --       | Yes         | --          | Yes         | --        | Yes         | Yes        |
+| **DMA**         | --       | PDMA        | GDMA       | GDMA       | GDMA     | GDMA        | GDMA        | GDMA+UHCI   | --        | GDMA        | GDMA       |
+| **Crypto HW**   | --       | AES/SHA/RSA | Full       | Full       | AES/SHA  | Full        | Full        | Full        | --        | Full+ECC    | Full+ECC   |
 
 Legend: "Full" crypto = AES + SHA + RSA + HMAC + Digital Signature + XTS-AES + RNG. "--" = not present/not applicable.
 
@@ -338,19 +338,19 @@ Legend: "Full" crypto = AES + SHA + RSA + HMAC + Digital Signature + XTS-AES + R
 
 ### Wireless Connectivity Summary
 
-| Chip | WiFi Standard | WiFi Bands | Bluetooth | 802.15.4 (Zigbee/Thread) | Matter Support |
-|---|---|---|---|---|---|
-| ESP8266 | 802.11 b/g/n | 2.4 GHz | -- | -- | -- |
-| ESP32 | 802.11 b/g/n | 2.4 GHz | 4.2 Classic+LE | -- | Via WiFi only |
-| ESP32-S2 | 802.11 b/g/n | 2.4 GHz | -- | -- | Via WiFi only |
-| ESP32-S3 | 802.11 b/g/n | 2.4 GHz | 5.0 LE | -- | Via WiFi or BLE |
-| ESP32-C2 | 802.11 b/g/n | 2.4 GHz | 5.0 LE | -- | Via WiFi or BLE |
-| ESP32-C3 | 802.11 b/g/n | 2.4 GHz | 5.0 LE | -- | Via WiFi or BLE |
-| ESP32-C5 | 802.11 b/g/n/ac/ax | **2.4+5 GHz** | 5.0 LE | **Yes** | **WiFi + Thread** |
-| ESP32-C6 | 802.11 b/g/n/ax | 2.4 GHz | 5.3 LE | **Yes** | **WiFi + Thread** |
-| ESP32-C61 | 802.11 b/g/n/ax | 2.4 GHz | 6.0 LE | -- | Via WiFi or BLE |
-| ESP32-H2 | -- | -- | 5.3 LE | **Yes** | **Thread only** |
-| ESP32-P4 | -- | -- | -- | -- | Via co-processor |
+| Chip      | WiFi Standard      | WiFi Bands    | Bluetooth      | 802.15.4 (Zigbee/Thread) | Matter Support    |
+| --------- | ------------------ | ------------- | -------------- | ------------------------ | ----------------- |
+| ESP8266   | 802.11 b/g/n       | 2.4 GHz       | --             | --                       | --                |
+| ESP32     | 802.11 b/g/n       | 2.4 GHz       | 4.2 Classic+LE | --                       | Via WiFi only     |
+| ESP32-S2  | 802.11 b/g/n       | 2.4 GHz       | --             | --                       | Via WiFi only     |
+| ESP32-S3  | 802.11 b/g/n       | 2.4 GHz       | 5.0 LE         | --                       | Via WiFi or BLE   |
+| ESP32-C2  | 802.11 b/g/n       | 2.4 GHz       | 5.0 LE         | --                       | Via WiFi or BLE   |
+| ESP32-C3  | 802.11 b/g/n       | 2.4 GHz       | 5.0 LE         | --                       | Via WiFi or BLE   |
+| ESP32-C5  | 802.11 b/g/n/ac/ax | **2.4+5 GHz** | 5.0 LE         | **Yes**                  | **WiFi + Thread** |
+| ESP32-C6  | 802.11 b/g/n/ax    | 2.4 GHz       | 5.3 LE         | **Yes**                  | **WiFi + Thread** |
+| ESP32-C61 | 802.11 b/g/n/ax    | 2.4 GHz       | 6.0 LE         | --                       | Via WiFi or BLE   |
+| ESP32-H2  | --                 | --            | 5.3 LE         | **Yes**                  | **Thread only**   |
+| ESP32-P4  | --                 | --            | --             | --                       | Via co-processor  |
 
 ### Key Peripheral Groups by Use Case
 
@@ -392,13 +392,13 @@ Legend: "Full" crypto = AES + SHA + RSA + HMAC + Digital Signature + XTS-AES + R
 
 The ESP32 RISC-V chips use different ISA extension combinations:
 
-| Chip | ISA | Extensions | Notes |
-|---|---|---|---|
-| ESP32-C2 | RV32IMAC | Integer + Multiply + Atomic + Compressed | |
-| ESP32-C3 | RV32IMC | Integer + Multiply + Compressed | No Atomic extension |
-| ESP32-C5 | RV32IMAC | Integer + Multiply + Atomic + Compressed | |
-| ESP32-C6 | RV32IMAC | Integer + Multiply + Atomic + Compressed | HP core; LP core also RV32IMAC |
-| ESP32-C61 | RV32IMAC | Integer + Multiply + Atomic + Compressed | |
-| ESP32-H2 | RV32IMAC | Integer + Multiply + Atomic + Compressed | |
-| ESP32-P4 | RV32IMAFC | Integer + Multiply + Atomic + Float + Compressed | Only ESP with HW float in RISC-V |
+| Chip      | ISA       | Extensions                                       | Notes                            |
+| --------- | --------- | ------------------------------------------------ | -------------------------------- |
+| ESP32-C2  | RV32IMAC  | Integer + Multiply + Atomic + Compressed         |                                  |
+| ESP32-C3  | RV32IMC   | Integer + Multiply + Compressed                  | No Atomic extension              |
+| ESP32-C5  | RV32IMAC  | Integer + Multiply + Atomic + Compressed         |                                  |
+| ESP32-C6  | RV32IMAC  | Integer + Multiply + Atomic + Compressed         | HP core; LP core also RV32IMAC   |
+| ESP32-C61 | RV32IMAC  | Integer + Multiply + Atomic + Compressed         |                                  |
+| ESP32-H2  | RV32IMAC  | Integer + Multiply + Atomic + Compressed         |                                  |
+| ESP32-P4  | RV32IMAFC | Integer + Multiply + Atomic + Float + Compressed | Only ESP with HW float in RISC-V |
 

@@ -14,12 +14,12 @@ WiFi, Bluetooth/BLE, and IEEE 802.15.4 hardware internals — what's documented,
 
 The openness of ESP32 wireless hardware documentation varies **dramatically** by technology:
 
-| Technology | Documentation Level | Source |
-|---|---|---|
-| **IEEE 802.15.4** (Thread/Zigbee) | **Fully documented** -- complete register maps in ESP-IDF | Espressif (open source) |
-| **WiFi MAC/PHY** | **Partially reverse-engineered** -- active open-source effort | esp32-open-mac project |
-| **Bluetooth/BLE controller** | **Opaque** -- binary blob with VHCI interface | Espressif (closed source) |
-| **RF PHY calibration** | **Opaque** -- binary blob | Espressif (closed source) |
+| Technology                        | Documentation Level                                           | Source                    |
+| --------------------------------- | ------------------------------------------------------------- | ------------------------- |
+| **IEEE 802.15.4** (Thread/Zigbee) | **Fully documented** -- complete register maps in ESP-IDF     | Espressif (open source)   |
+| **WiFi MAC/PHY**                  | **Partially reverse-engineered** -- active open-source effort | esp32-open-mac project    |
+| **Bluetooth/BLE controller**      | **Opaque** -- binary blob with VHCI interface                 | Espressif (closed source) |
+| **RF PHY calibration**            | **Opaque** -- binary blob                                     | Espressif (closed source) |
 
 The critical finding is that **IEEE 802.15.4 is the lowest-hanging fruit** for emulation -- Espressif publishes complete register-level documentation. WiFi is being actively reverse-engineered by the esp32-open-mac project, which has achieved functional TX/RX/association. BLE remains the most opaque. See [Gap Analysis and Roadmap](05-gap-analysis-and-roadmap.md) for emulation strategies by wireless technology.
 
@@ -151,21 +151,21 @@ The project has noted that the WiFi hardware appears to be **similar across ESP3
 
 ### Blog Post Timeline
 
-| Date | Title | Key Content |
-|---|---|---|
+| Date       | Title                                                                                                                | Key Content                                  |
+| ---------- | -------------------------------------------------------------------------------------------------------------------- | -------------------------------------------- |
 | 2023-12-06 | [Unveiling secrets: creating an open-source MAC Layer](https://zeus.ugent.be/blog/23-24/open-source-esp32-wifi-mac/) | Initial RE methodology, sending first packet |
-| 2023-12-07 | [Part 2: Continued RE](https://zeus.ugent.be/blog/23-24/esp32-reverse-engineering-continued/) | Receiving packets, DMA details |
-| 2023-12-23 | [Building a Faraday cage](https://esp32-open-mac.be/posts/0003-faraday-cage/) | Test infrastructure |
-| 2024-03-29 | [Connecting lwIP stack](https://esp32-open-mac.be/posts/0004-connecting-to-lwip/) | Full TCP/IP integration |
-| 2024-05-24 | [The road ahead](https://esp32-open-mac.be/posts/0005-the-road-ahead/) | Future plans |
-| 2024-05-30 | [Talk at GPN22](https://esp32-open-mac.be/posts/0006-talk-at-gpn22/) | Public presentation |
-| 2024-08-06 | [Talk at RIOT Summit 2024](https://esp32-open-mac.be/posts/0007-talk-at-riot-summit/) | Public presentation |
-| 2024-09-26 | [MAC RX filter](https://esp32-open-mac.be/posts/0008-rx-filter/) | Hardware filtering details |
-| 2024-12-27 | [Talk at 38C3](https://esp32-open-mac.be/posts/0009-talk-at-38c3/) | "Liberating Wi-Fi on the ESP32" |
-| 2025-01-14 | [Eliminating FreeRTOS dependency](https://esp32-open-mac.be/posts/0010-no-more-freertos-dependency/) | Architectural improvement |
-| 2025-03-07 | [RE WPA crypto acceleration](https://esp32-open-mac.be/posts/0010-wpa/) | Hardware crypto for WPA |
-| 2025-08-18 | [Standards-compliant meshing](https://esp32-open-mac.be/posts/0011-mesh-networking/) | First exclusive open-source feature |
-| 2025-11-24 | [Year in review: 2025](https://esp32-open-mac.be/posts/0011-year-in-review/) | Progress summary |
+| 2023-12-07 | [Part 2: Continued RE](https://zeus.ugent.be/blog/23-24/esp32-reverse-engineering-continued/)                        | Receiving packets, DMA details               |
+| 2023-12-23 | [Building a Faraday cage](https://esp32-open-mac.be/posts/0003-faraday-cage/)                                        | Test infrastructure                          |
+| 2024-03-29 | [Connecting lwIP stack](https://esp32-open-mac.be/posts/0004-connecting-to-lwip/)                                    | Full TCP/IP integration                      |
+| 2024-05-24 | [The road ahead](https://esp32-open-mac.be/posts/0005-the-road-ahead/)                                               | Future plans                                 |
+| 2024-05-30 | [Talk at GPN22](https://esp32-open-mac.be/posts/0006-talk-at-gpn22/)                                                 | Public presentation                          |
+| 2024-08-06 | [Talk at RIOT Summit 2024](https://esp32-open-mac.be/posts/0007-talk-at-riot-summit/)                                | Public presentation                          |
+| 2024-09-26 | [MAC RX filter](https://esp32-open-mac.be/posts/0008-rx-filter/)                                                     | Hardware filtering details                   |
+| 2024-12-27 | [Talk at 38C3](https://esp32-open-mac.be/posts/0009-talk-at-38c3/)                                                   | "Liberating Wi-Fi on the ESP32"              |
+| 2025-01-14 | [Eliminating FreeRTOS dependency](https://esp32-open-mac.be/posts/0010-no-more-freertos-dependency/)                 | Architectural improvement                    |
+| 2025-03-07 | [RE WPA crypto acceleration](https://esp32-open-mac.be/posts/0010-wpa/)                                              | Hardware crypto for WPA                      |
+| 2025-08-18 | [Standards-compliant meshing](https://esp32-open-mac.be/posts/0011-mesh-networking/)                                 | First exclusive open-source feature          |
+| 2025-11-24 | [Year in review: 2025](https://esp32-open-mac.be/posts/0011-year-in-review/)                                         | Progress summary                             |
 
 ---
 
@@ -199,13 +199,13 @@ The ESP32 Technical Reference Manual (TRM) documents the following wireless-adja
 
 The following header files provide **minimal** register definitions for radio hardware:
 
-| File | Content | Chips | Completeness |
-|---|---|---|---|
-| `soc/*/bb_reg.h` | Baseband power up/down bits | ESP32, S2, S3, C2, C3 | **Minimal** -- only PD/PU control for FFT, DC_EST |
-| `soc/*/fe_reg.h` | RF frontend power up/down bits | ESP32, S2, S3, C2, C3 | **Minimal** -- only PD/PU for IQ_EST, TX_INF |
-| `soc/*/regi2c_bbpll.h` | BBPLL I2C register configuration | All chips | Moderate -- PLL tuning params |
-| `soc/*/ieee802154_reg.h` | IEEE 802.15.4 registers | C5, C6, H2, H4 | **Complete** |
-| `soc/*/ieee802154_struct.h` | IEEE 802.15.4 C structs | C5, C6, H2, H4 | **Complete** |
+| File                        | Content                          | Chips                 | Completeness                                      |
+| --------------------------- | -------------------------------- | --------------------- | ------------------------------------------------- |
+| `soc/*/bb_reg.h`            | Baseband power up/down bits      | ESP32, S2, S3, C2, C3 | **Minimal** -- only PD/PU control for FFT, DC_EST |
+| `soc/*/fe_reg.h`            | RF frontend power up/down bits   | ESP32, S2, S3, C2, C3 | **Minimal** -- only PD/PU for IQ_EST, TX_INF      |
+| `soc/*/regi2c_bbpll.h`      | BBPLL I2C register configuration | All chips             | Moderate -- PLL tuning params                     |
+| `soc/*/ieee802154_reg.h`    | IEEE 802.15.4 registers          | C5, C6, H2, H4        | **Complete**                                      |
+| `soc/*/ieee802154_struct.h` | IEEE 802.15.4 C structs          | C5, C6, H2, H4        | **Complete**                                      |
 
 **Key observation:** `bb_reg.h` and `fe_reg.h` only contain ~5-10 register fields each, all related to power management. The vast majority of WiFi hardware registers are undocumented. In contrast, the IEEE 802.15.4 registers are comprehensively documented.
 
@@ -231,14 +231,14 @@ The WiFi functionality relies on precompiled binary libraries distributed in two
 
 The following parts of the WiFi stack ARE open source:
 
-| Component | Path | Description |
-|---|---|---|
-| WiFi API | `components/esp_wifi/include/esp_wifi.h` | Public WiFi API |
-| OS adapter | `components/esp_wifi/*/esp_adapter.c` | OS abstraction layer between ESP-IDF and WiFi blob |
-| Private API | `components/esp_wifi/include/esp_private/wifi.h` | Internal WiFi API (called by the blob) |
-| OS adapter interface | `components/esp_wifi/include/esp_private/wifi_os_adapter.h` | Function table the blob calls back into |
-| WPA supplicant | `components/wpa_supplicant/` | Full WPA2/WPA3 supplicant (open source) |
-| Network interface | `components/esp_netif/` | Network interface layer |
+| Component            | Path                                                        | Description                                        |
+| -------------------- | ----------------------------------------------------------- | -------------------------------------------------- |
+| WiFi API             | `components/esp_wifi/include/esp_wifi.h`                    | Public WiFi API                                    |
+| OS adapter           | `components/esp_wifi/*/esp_adapter.c`                       | OS abstraction layer between ESP-IDF and WiFi blob |
+| Private API          | `components/esp_wifi/include/esp_private/wifi.h`            | Internal WiFi API (called by the blob)             |
+| OS adapter interface | `components/esp_wifi/include/esp_private/wifi_os_adapter.h` | Function table the blob calls back into            |
+| WPA supplicant       | `components/wpa_supplicant/`                                | Full WPA2/WPA3 supplicant (open source)            |
+| Network interface    | `components/esp_netif/`                                     | Network interface layer                            |
 
 ### The Blob Boundary
 
@@ -262,11 +262,11 @@ The `wifi_os_adapter.h` defines the callback table that the blob uses to interac
 
 ### Bluetooth Blobs
 
-| Library | Description | Chips |
-|---|---|---|
-| `libbtdm_app.a` | Bluetooth dual-mode (Classic+BLE) controller | ESP32 |
-| `libbtbb.a` | Bluetooth baseband | ESP32-C2, C3, C6, H2 |
-| `libbt.a` | BLE controller | Various |
+| Library         | Description                                  | Chips                |
+| --------------- | -------------------------------------------- | -------------------- |
+| `libbtdm_app.a` | Bluetooth dual-mode (Classic+BLE) controller | ESP32                |
+| `libbtbb.a`     | Bluetooth baseband                           | ESP32-C2, C3, C6, H2 |
+| `libbt.a`       | BLE controller                               | Various              |
 
 ---
 
@@ -278,53 +278,53 @@ From ESP-IDF `reg_base.h` and reverse engineering:
 
 **ESP32 (original):**
 
-| Define | Address | Purpose |
-|---|---|---|
-| DR_REG_FE2_BASE | 0x3FF45000 | RF Front-End 2 |
-| DR_REG_FE_BASE | 0x3FF46000 | RF Front-End |
-| DR_REG_BT_BASE | 0x3FF51000 | Bluetooth |
-| (BTDM peripheral) | 0x3FF71000 | Bluetooth Dual-Mode (from Tarlogic RE) |
-| (WiFi MAC) | 0x3FF73000-0x3FF75FFF | WiFi MAC peripheral (from esp32-open-mac RE) |
-| DR_REG_NRX_BASE | 0x3FF5CC00 | WiFi NRX (receiver) |
-| DR_REG_BB_BASE | 0x3FF5D000 | WiFi Baseband |
-| DR_REG_EMAC_BASE | 0x3FF69000 | Ethernet MAC |
+| Define            | Address               | Purpose                                      |
+| ----------------- | --------------------- | -------------------------------------------- |
+| DR_REG_FE2_BASE   | 0x3FF45000            | RF Front-End 2                               |
+| DR_REG_FE_BASE    | 0x3FF46000            | RF Front-End                                 |
+| DR_REG_BT_BASE    | 0x3FF51000            | Bluetooth                                    |
+| (BTDM peripheral) | 0x3FF71000            | Bluetooth Dual-Mode (from Tarlogic RE)       |
+| (WiFi MAC)        | 0x3FF73000-0x3FF75FFF | WiFi MAC peripheral (from esp32-open-mac RE) |
+| DR_REG_NRX_BASE   | 0x3FF5CC00            | WiFi NRX (receiver)                          |
+| DR_REG_BB_BASE    | 0x3FF5D000            | WiFi Baseband                                |
+| DR_REG_EMAC_BASE  | 0x3FF69000            | Ethernet MAC                                 |
 
 **ESP32-C3:**
 
-| Address Range | Purpose | Source |
-|---|---|---|
+| Address Range         | Purpose                    | Source                                  |
+| --------------------- | -------------------------- | --------------------------------------- |
 | 0x60033000-0x60035FFF | WiFi MAC/control registers | arXiv:2501.17684 (Saarland/Ghent paper) |
 
 ### From ESP-IDF Headers (Official, Minimal)
 
 **Baseband registers** (`DR_REG_BB_BASE`):
 
-| Offset | Register | Known Fields |
-|---|---|---|
+| Offset | Register  | Known Fields                              |
+| ------ | --------- | ----------------------------------------- |
 | 0x0054 | BBPD_CTRL | BB_FFT_FORCE_PU/PD, BB_DC_EST_FORCE_PU/PD |
 
 **RF Frontend registers** (`DR_REG_FE_BASE`, `DR_REG_FE2_BASE`):
 
-| Offset | Register | Known Fields |
-|---|---|---|
-| FE+0x0090 | FE_GEN_CTRL | FE_IQ_EST_FORCE_PU/PD |
+| Offset     | Register           | Known Fields           |
+| ---------- | ------------------ | ---------------------- |
+| FE+0x0090  | FE_GEN_CTRL        | FE_IQ_EST_FORCE_PU/PD  |
 | FE2+0x00F0 | FE2_TX_INTERP_CTRL | FE2_TX_INF_FORCE_PU/PD |
 
 ### From Academic Research (ESP32-C3 WiFi Registers)
 
 An academic paper ([arXiv:2501.17684](https://arxiv.org/abs/2501.17684), Saarland University + Ghent University, 2025) titled "Reverse Engineering the ESP32-C3 Wi-Fi Drivers for Static Worst-Case Analysis" documented key ESP32-C3 WiFi registers:
 
-| Address | Purpose |
-|---|---|
-| 0x60033000 | MAC address configuration |
-| 0x60033084 | Enable/disable RX |
-| 0x60033088 | Base DMA linked list address |
-| 0x60033CA0 | Power up/down WiFi module |
+| Address    | Purpose                                 |
+| ---------- | --------------------------------------- |
+| 0x60033000 | MAC address configuration               |
+| 0x60033084 | Enable/disable RX                       |
+| 0x60033088 | Base DMA linked list address            |
+| 0x60033CA0 | Power up/down WiFi module               |
 | 0x60033D08 | Configure TX DMA + trigger transmission |
-| 0x60033C3C | Get interrupt reason |
-| 0x60033C40 | Clear interrupt |
-| 0x60033CAC | Clear TX slot |
-| 0x600C2000 | Undocumented interrupt source register |
+| 0x60033C3C | Get interrupt reason                    |
+| 0x60033C40 | Clear interrupt                         |
+| 0x60033CAC | Clear TX slot                           |
+| 0x600C2000 | Undocumented interrupt source register  |
 
 ### From esp32-open-mac Reverse Engineering (Extensive, Growing)
 
@@ -476,13 +476,13 @@ Unlike WiFi and Bluetooth, the IEEE 802.15.4 radio hardware on ESP32-C5, ESP32-C
 
 ### Source Files
 
-| File | Description |
-|---|---|
-| `components/soc/esp32c6/register/soc/ieee802154_reg.h` | Complete register map with bit field definitions |
-| `components/soc/esp32c6/register/soc/ieee802154_struct.h` | C struct overlay for register access |
-| `components/esp_hal_ieee802154/esp32c6/include/hal/ieee802154_ll.h` | Low-level HAL (register read/write functions) |
-| `components/esp_hal_ieee802154/include/hal/ieee802154_common_ll.h` | Common LL functions across chips |
-| `components/esp_hal_ieee802154/esp32c6/ieee802154_periph.c` | Peripheral configuration (interrupts, etc.) |
+| File                                                                | Description                                      |
+| ------------------------------------------------------------------- | ------------------------------------------------ |
+| `components/soc/esp32c6/register/soc/ieee802154_reg.h`              | Complete register map with bit field definitions |
+| `components/soc/esp32c6/register/soc/ieee802154_struct.h`           | C struct overlay for register access             |
+| `components/esp_hal_ieee802154/esp32c6/include/hal/ieee802154_ll.h` | Low-level HAL (register read/write functions)    |
+| `components/esp_hal_ieee802154/include/hal/ieee802154_common_ll.h`  | Common LL functions across chips                 |
+| `components/esp_hal_ieee802154/esp32c6/ieee802154_periph.c`         | Peripheral configuration (interrupts, etc.)      |
 
 Equivalent files exist for ESP32-C5, ESP32-H2, and ESP32-H4.
 
@@ -496,35 +496,35 @@ The `ieee802154_reg.h` files contain **complete register-level documentation**, 
 
 Key registers at `IEEE802154_REG_BASE + offset`:
 
-| Offset | Register | Description |
-|---|---|---|
-| 0x0000 | COMMAND | Opcode for operations (see command table below) |
-| 0x0004 | CTRL_CFG | Promiscuous mode, auto-ACK, PAN coordinator, frame filtering, coex |
-| 0x0008-0x0044 | Multi-PAN tables | 4 PAN interfaces, each with short addr, PAN ID, extended addr |
-| 0x0048 | CHANNEL | Frequency/channel selection |
-| 0x004C | TX_POWER | Transmit power level |
-| 0x0050 | ED_SCAN_DURATION | Energy detection scan duration |
-| 0x0054 | ED_SCAN_CFG | CCA mode, ED threshold, RSSI |
-| 0x0058 | IFS | LIFS/SIFS interframe spacing |
-| 0x005C | ACK_TIMEOUT | ACK wait timeout |
-| 0x0060 | EVENT_EN | 13 event type enables |
-| 0x0064 | EVENT_STATUS | Event status flags |
-| 0x0068 | RX_ABORT_INTR_CTRL | RX abort interrupt control |
-| 0x0070 | COEX_PTI | Coexistence priority/type indicator |
-| 0x0078 | TX_ABORT_EVENT_EN | TX abort event enables |
-| 0x0080 | RX_STATUS | rx_state, filter_fail_reason, rx_abort_reason, preamble/SFD match |
-| 0x0084 | TX_STATUS | tx_state, tx_abort_reason |
+| Offset        | Register           | Description                                                        |
+| ------------- | ------------------ | ------------------------------------------------------------------ |
+| 0x0000        | COMMAND            | Opcode for operations (see command table below)                    |
+| 0x0004        | CTRL_CFG           | Promiscuous mode, auto-ACK, PAN coordinator, frame filtering, coex |
+| 0x0008-0x0044 | Multi-PAN tables   | 4 PAN interfaces, each with short addr, PAN ID, extended addr      |
+| 0x0048        | CHANNEL            | Frequency/channel selection                                        |
+| 0x004C        | TX_POWER           | Transmit power level                                               |
+| 0x0050        | ED_SCAN_DURATION   | Energy detection scan duration                                     |
+| 0x0054        | ED_SCAN_CFG        | CCA mode, ED threshold, RSSI                                       |
+| 0x0058        | IFS                | LIFS/SIFS interframe spacing                                       |
+| 0x005C        | ACK_TIMEOUT        | ACK wait timeout                                                   |
+| 0x0060        | EVENT_EN           | 13 event type enables                                              |
+| 0x0064        | EVENT_STATUS       | Event status flags                                                 |
+| 0x0068        | RX_ABORT_INTR_CTRL | RX abort interrupt control                                         |
+| 0x0070        | COEX_PTI           | Coexistence priority/type indicator                                |
+| 0x0078        | TX_ABORT_EVENT_EN  | TX abort event enables                                             |
+| 0x0080        | RX_STATUS          | rx_state, filter_fail_reason, rx_abort_reason, preamble/SFD match  |
+| 0x0084        | TX_STATUS          | tx_state, tx_abort_reason                                          |
 
 Hardware command opcodes (from `ieee802154_common_ll.h`):
 
-| Command | Opcode | Description |
-|---|---|---|
-| TX_START | 0x41 | Begin transmission |
-| RX_START | 0x42 | Begin reception |
-| CCA_TX_START | 0x43 | Clear channel assessment, then transmit |
-| ED_START | 0x44 | Energy detection scan |
-| STOP | 0x45 | Stop current operation |
-| (+ timer/test commands) | 0x46+ | Timer and test mode operations |
+| Command                 | Opcode | Description                             |
+| ----------------------- | ------ | --------------------------------------- |
+| TX_START                | 0x41   | Begin transmission                      |
+| RX_START                | 0x42   | Begin reception                         |
+| CCA_TX_START            | 0x43   | Clear channel assessment, then transmit |
+| ED_START                | 0x44   | Energy detection scan                   |
+| STOP                    | 0x45   | Stop current operation                  |
+| (+ timer/test commands) | 0x46+  | Timer and test mode operations          |
 
 The `ieee802154_struct.h` files provide C struct overlays that make register access straightforward.
 
@@ -614,22 +614,22 @@ Security researchers have analyzed ESP32 wireless internals, sometimes revealing
 
 ### Known Security Research and CVEs
 
-| CVE | Year | Researcher | Detail |
-|---|---|---|---|
-| CVE-2019-12586/87/88 | 2019 | [Matheus Garbelini](https://github.com/Matheus-Garbelini/esp32_esp8266_attacks) | Zero PMK installation, EAP client crash, beacon frame crash |
-| CVE-2025-27840 | 2025 | Tarlogic Security | 29 undocumented BT HCI vendor commands, MAC spoofing, RAM/Flash R/W |
-| CVE-2025-55297 | 2025 | NCC Group | BluFi memory corruption, arbitrary code execution via BT |
+| CVE                  | Year | Researcher                                                                      | Detail                                                              |
+| -------------------- | ---- | ------------------------------------------------------------------------------- | ------------------------------------------------------------------- |
+| CVE-2019-12586/87/88 | 2019 | [Matheus Garbelini](https://github.com/Matheus-Garbelini/esp32_esp8266_attacks) | Zero PMK installation, EAP client crash, beacon frame crash         |
+| CVE-2025-27840       | 2025 | Tarlogic Security                                                               | 29 undocumented BT HCI vendor commands, MAC spoofing, RAM/Flash R/W |
+| CVE-2025-55297       | 2025 | NCC Group                                                                       | BluFi memory corruption, arbitrary code execution via BT            |
 
 ### Key Talks and Presentations
 
-| Date | Title | Event | Speaker | Content |
-|---|---|---|---|---|
-| 2021-11 | Reverse engineering ESP32 WiFi | Remoticon 2021 | Uri Shaked (Wokwi) | Got WiFi working in simulation using Ghidra + GDB + JTAG |
-| 2024-05-30 | Reversing the ESP32 Wi-Fi hardware | GPN22 | Jasper Devreker | WiFi MAC RE methodology |
-| 2024-08-06 | Reverse engineering ESP32 Wi-Fi hardware | RIOT Summit 2024 | Jasper Devreker | WiFi MAC RE progress |
-| 2024-12-27 | [Liberating Wi-Fi on the ESP32](https://media.ccc.de/v/38c3-liberating-wi-fi-on-the-esp32) | 38C3 | Jasper Devreker | WiFi peripheral details: 5 TX slots, DMA linked lists, MMIO layout |
-| 2025-03 | Hidden HCI vendor commands | RootedCON 2025 | Tarlogic Security | 29 undocumented BT HCI commands |
-| 2025-12-27 | [Liberating Bluetooth on the ESP32](https://media.ccc.de/v/39c3-liberating-bluetooth-on-the-esp32) | 39C3 | Antonio Vazquez Blanco (Tarlogic) | BTDM register map, 40+ registers documented |
+| Date       | Title                                                                                              | Event            | Speaker                           | Content                                                            |
+| ---------- | -------------------------------------------------------------------------------------------------- | ---------------- | --------------------------------- | ------------------------------------------------------------------ |
+| 2021-11    | Reverse engineering ESP32 WiFi                                                                     | Remoticon 2021   | Uri Shaked (Wokwi)                | Got WiFi working in simulation using Ghidra + GDB + JTAG           |
+| 2024-05-30 | Reversing the ESP32 Wi-Fi hardware                                                                 | GPN22            | Jasper Devreker                   | WiFi MAC RE methodology                                            |
+| 2024-08-06 | Reverse engineering ESP32 Wi-Fi hardware                                                           | RIOT Summit 2024 | Jasper Devreker                   | WiFi MAC RE progress                                               |
+| 2024-12-27 | [Liberating Wi-Fi on the ESP32](https://media.ccc.de/v/38c3-liberating-wi-fi-on-the-esp32)         | 38C3             | Jasper Devreker                   | WiFi peripheral details: 5 TX slots, DMA linked lists, MMIO layout |
+| 2025-03    | Hidden HCI vendor commands                                                                         | RootedCON 2025   | Tarlogic Security                 | 29 undocumented BT HCI commands                                    |
+| 2025-12-27 | [Liberating Bluetooth on the ESP32](https://media.ccc.de/v/39c3-liberating-bluetooth-on-the-esp32) | 39C3             | Antonio Vazquez Blanco (Tarlogic) | BTDM register map, 40+ registers documented                        |
 
 ### ESP32 Bluetooth Undocumented HCI Commands (2025)
 
@@ -641,14 +641,14 @@ In March 2025, researchers from Tarlogic Security (presented at RootedCON 2025) 
 
 ### Notable Researchers
 
-| Researcher/Team | Affiliation | Focus | Key Output |
-|---|---|---|---|
-| Jasper Devreker | Ghent University / Zeus WPI | WiFi MAC | esp32-open-mac, QEMU fork, FoA, NLnet-funded |
-| Antonio Vazquez Blanco | Tarlogic Security | Bluetooth | BTDM register map (40+), SVD patches, 39C3 talk |
-| Uri Shaked | Wokwi | WiFi simulation | Full WiFi emulation in Wokwi simulator |
-| Mudraje et al. | Saarland U + Ghent U | WiFi RE | ESP32-C3 register map, academic paper (arXiv:2501.17684) |
-| Matheus Garbelini | ASSET Research Group | WiFi security | CVE-2019-12586/87/88 |
-| Olof Astrand | Independent | Ghidra tooling | Blog series on BT/WiFi RE with Ghidra (2025-2026) |
+| Researcher/Team        | Affiliation                 | Focus           | Key Output                                               |
+| ---------------------- | --------------------------- | --------------- | -------------------------------------------------------- |
+| Jasper Devreker        | Ghent University / Zeus WPI | WiFi MAC        | esp32-open-mac, QEMU fork, FoA, NLnet-funded             |
+| Antonio Vazquez Blanco | Tarlogic Security           | Bluetooth       | BTDM register map (40+), SVD patches, 39C3 talk          |
+| Uri Shaked             | Wokwi                       | WiFi simulation | Full WiFi emulation in Wokwi simulator                   |
+| Mudraje et al.         | Saarland U + Ghent U        | WiFi RE         | ESP32-C3 register map, academic paper (arXiv:2501.17684) |
+| Matheus Garbelini      | ASSET Research Group        | WiFi security   | CVE-2019-12586/87/88                                     |
+| Olof Astrand           | Independent                 | Ghidra tooling  | Blog series on BT/WiFi RE with Ghidra (2025-2026)        |
 
 
 ---
@@ -657,51 +657,51 @@ In March 2025, researchers from Tarlogic Security (presented at RootedCON 2025) 
 
 ### Primary Sources
 
-| Resource | URL | Relevance |
-|---|---|---|
-| esp32-open-mac | https://github.com/esp32-open-mac/esp32-open-mac | WiFi register RE, open WiFi stack |
-| esp32-open-mac website | https://esp32-open-mac.be/ | Blog posts documenting RE process |
-| esp32-open-mac QEMU fork | https://github.com/esp32-open-mac/qemu | Instrumented QEMU for register logging |
-| Ferris-on-Air (FoA) | https://github.com/esp32-open-mac/FoA | Pure Rust WiFi implementation |
-| Zeus WPI blog (Part 1) | https://zeus.ugent.be/blog/23-24/open-source-esp32-wifi-mac/ | Detailed RE methodology |
-| Zeus WPI blog (Part 2) | https://zeus.ugent.be/blog/23-24/esp32-reverse-engineering-continued/ | Continued RE details |
-| ESP-IDF source | https://github.com/espressif/esp-idf | Official SDK, HAL, register headers |
-| esp32-wifi-lib | https://github.com/espressif/esp32-wifi-lib | WiFi binary blob repository |
-| esp-hosted | https://github.com/espressif/esp-hosted | WiFi co-processor protocol |
-| esp-wifi-sys (Rust) | https://github.com/esp-rs/esp-wifi-sys | Rust WiFi/BT blob bindings |
-| Tarlogic BT Reversing | https://github.com/TarlogicSecurity/ESP32-Bluetooth-Reversing | BTDM register map, 40+ registers |
-| Tarlogic SVD patches | https://github.com/TarlogicSecurity/esp-pacs | Machine-readable BT register definitions |
-| esp-rs/esp-ieee802154 | https://github.com/esp-rs/esp-ieee802154 | Open-source Rust 802.15.4 driver |
-| esp-wifi-hal | https://github.com/esp32-open-mac/esp-wifi-hal | Experimental full-Rust WiFi HAL |
-| esp-rom-elfs | https://github.com/espressif/esp-rom-elfs | ROM binaries with function names (RE aid) |
-| espressif/svd | https://github.com/espressif/svd | Official SVD files (incomplete, no WiFi/BT) |
-| esp-rs/esp-pacs | https://github.com/esp-rs/esp-pacs | Rust PACs from patched SVDs, incl. IEEE802154 |
-| Academic paper | https://arxiv.org/abs/2501.17684 | ESP32-C3 WiFi register map (Saarland/Ghent) |
-| BlackVS/ESP32-reversing | https://github.com/BlackVS/ESP32-reversing | Curated RE resource list |
-| NLnet project page | https://nlnet.nl/project/ESP32-opendrivers/ | esp32-open-mac funding |
+| Resource                 | URL                                                                   | Relevance                                     |
+| ------------------------ | --------------------------------------------------------------------- | --------------------------------------------- |
+| esp32-open-mac           | https://github.com/esp32-open-mac/esp32-open-mac                      | WiFi register RE, open WiFi stack             |
+| esp32-open-mac website   | https://esp32-open-mac.be/                                            | Blog posts documenting RE process             |
+| esp32-open-mac QEMU fork | https://github.com/esp32-open-mac/qemu                                | Instrumented QEMU for register logging        |
+| Ferris-on-Air (FoA)      | https://github.com/esp32-open-mac/FoA                                 | Pure Rust WiFi implementation                 |
+| Zeus WPI blog (Part 1)   | https://zeus.ugent.be/blog/23-24/open-source-esp32-wifi-mac/          | Detailed RE methodology                       |
+| Zeus WPI blog (Part 2)   | https://zeus.ugent.be/blog/23-24/esp32-reverse-engineering-continued/ | Continued RE details                          |
+| ESP-IDF source           | https://github.com/espressif/esp-idf                                  | Official SDK, HAL, register headers           |
+| esp32-wifi-lib           | https://github.com/espressif/esp32-wifi-lib                           | WiFi binary blob repository                   |
+| esp-hosted               | https://github.com/espressif/esp-hosted                               | WiFi co-processor protocol                    |
+| esp-wifi-sys (Rust)      | https://github.com/esp-rs/esp-wifi-sys                                | Rust WiFi/BT blob bindings                    |
+| Tarlogic BT Reversing    | https://github.com/TarlogicSecurity/ESP32-Bluetooth-Reversing         | BTDM register map, 40+ registers              |
+| Tarlogic SVD patches     | https://github.com/TarlogicSecurity/esp-pacs                          | Machine-readable BT register definitions      |
+| esp-rs/esp-ieee802154    | https://github.com/esp-rs/esp-ieee802154                              | Open-source Rust 802.15.4 driver              |
+| esp-wifi-hal             | https://github.com/esp32-open-mac/esp-wifi-hal                        | Experimental full-Rust WiFi HAL               |
+| esp-rom-elfs             | https://github.com/espressif/esp-rom-elfs                             | ROM binaries with function names (RE aid)     |
+| espressif/svd            | https://github.com/espressif/svd                                      | Official SVD files (incomplete, no WiFi/BT)   |
+| esp-rs/esp-pacs          | https://github.com/esp-rs/esp-pacs                                    | Rust PACs from patched SVDs, incl. IEEE802154 |
+| Academic paper           | https://arxiv.org/abs/2501.17684                                      | ESP32-C3 WiFi register map (Saarland/Ghent)   |
+| BlackVS/ESP32-reversing  | https://github.com/BlackVS/ESP32-reversing                            | Curated RE resource list                      |
+| NLnet project page       | https://nlnet.nl/project/ESP32-opendrivers/                           | esp32-open-mac funding                        |
 
 ### Register Documentation Sources
 
-| Source | Content | Format |
-|---|---|---|
-| `components/soc/esp32/include/soc/bb_reg.h` | Baseband power registers | C headers |
-| `components/soc/esp32/include/soc/fe_reg.h` | RF frontend power registers | C headers |
-| `components/soc/*/regi2c_bbpll.h` | PLL configuration | C headers |
-| `components/soc/esp32*/register/soc/ieee802154_reg.h` | 802.15.4 full register map | C headers |
-| `components/soc/esp32*/register/soc/ieee802154_struct.h` | 802.15.4 register structs | C headers |
-| `components/esp_hal_ieee802154/*/include/hal/ieee802154_ll.h` | 802.15.4 low-level HAL | C headers |
-| `components/soc/esp32/register/soc/reg_base.h` | All peripheral base addresses | C headers |
-| [TarlogicSecurity/esp-pacs](https://github.com/TarlogicSecurity/esp-pacs) | BTDM register bitfields | SVD/YAML patches |
-| [arXiv:2501.17684](https://arxiv.org/abs/2501.17684) | ESP32-C3 WiFi register addresses | Academic paper |
-| esp32-open-mac source | WiFi MAC DMA/interrupt/filter registers | C/Rust source |
+| Source                                                                    | Content                                 | Format           |
+| ------------------------------------------------------------------------- | --------------------------------------- | ---------------- |
+| `components/soc/esp32/include/soc/bb_reg.h`                               | Baseband power registers                | C headers        |
+| `components/soc/esp32/include/soc/fe_reg.h`                               | RF frontend power registers             | C headers        |
+| `components/soc/*/regi2c_bbpll.h`                                         | PLL configuration                       | C headers        |
+| `components/soc/esp32*/register/soc/ieee802154_reg.h`                     | 802.15.4 full register map              | C headers        |
+| `components/soc/esp32*/register/soc/ieee802154_struct.h`                  | 802.15.4 register structs               | C headers        |
+| `components/esp_hal_ieee802154/*/include/hal/ieee802154_ll.h`             | 802.15.4 low-level HAL                  | C headers        |
+| `components/soc/esp32/register/soc/reg_base.h`                            | All peripheral base addresses           | C headers        |
+| [TarlogicSecurity/esp-pacs](https://github.com/TarlogicSecurity/esp-pacs) | BTDM register bitfields                 | SVD/YAML patches |
+| [arXiv:2501.17684](https://arxiv.org/abs/2501.17684)                      | ESP32-C3 WiFi register addresses        | Academic paper   |
+| esp32-open-mac source                                                     | WiFi MAC DMA/interrupt/filter registers | C/Rust source    |
 
 ### Talks and Presentations
 
-| Date | Title | Event |
-|---|---|---|
-| 2021-11 | Reversing the ESP32 WiFi | Remoticon 2021 (Uri Shaked / Wokwi) |
-| 2024-05-30 | Reversing the ESP32 Wi-Fi hardware | Gulaschprogrammiernacht 22 (GPN22) |
-| 2024-08-06 | Reverse engineering the ESP32 Wi-Fi hardware | RIOT Summit 2024 |
-| 2024-12-27 | Liberating Wi-Fi on the ESP32 | 38th Chaos Communication Congress (38C3) |
-| 2025-03 | Hidden HCI vendor commands | RootedCON 2025 (Tarlogic) |
-| 2025-12-27 | Liberating Bluetooth on the ESP32 | 39th Chaos Communication Congress (39C3) |
+| Date       | Title                                        | Event                                    |
+| ---------- | -------------------------------------------- | ---------------------------------------- |
+| 2021-11    | Reversing the ESP32 WiFi                     | Remoticon 2021 (Uri Shaked / Wokwi)      |
+| 2024-05-30 | Reversing the ESP32 Wi-Fi hardware           | Gulaschprogrammiernacht 22 (GPN22)       |
+| 2024-08-06 | Reverse engineering the ESP32 Wi-Fi hardware | RIOT Summit 2024                         |
+| 2024-12-27 | Liberating Wi-Fi on the ESP32                | 38th Chaos Communication Congress (38C3) |
+| 2025-03    | Hidden HCI vendor commands                   | RootedCON 2025 (Tarlogic)                |
+| 2025-12-27 | Liberating Bluetooth on the ESP32            | 39th Chaos Communication Congress (39C3) |
