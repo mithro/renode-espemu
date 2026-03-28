@@ -125,4 +125,25 @@ Analysed QEMU's `esp32c3_intmatrix.c` to understand interrupt delivery:
 - Mapping, priority, threshold, pending state management
 - MIE-enabled callback to fire pending interrupts
 
-Next step: Write `ESP32C3_InterruptMatrix.cs` C# peripheral for Renode.
+### 2026-03-29 01:00 - C# Interrupt Matrix Built
+
+- Wrote `peripherals/interrupt-matrix/ESP32C3_InterruptMatrix.cs` (259 lines)
+- Compiles and loads via `include @` in Renode
+- Implements: 64 source mapping registers, CPU_INT_ENABLE, CPU_INT_TYPE,
+  CPU_INT_CLEAR, CPU_INT_EIP_STATUS, CPU_INT_PRI_0-31, CPU_INT_THRESH
+- GPIO outputs wired to CPU interrupt lines [1-31]
+- GPIO inputs accept OnGPIO(source, level) from peripherals
+- Replaces Python stub_intmatrix in esp32c3.repl
+
+Firmware state after boot with C# interrupt matrix:
+- CPU_INT_ENABLE = 0x06000004 (lines 2, 25, 26 enabled)
+- Source 36/61 → int 25 (pri 4), Source 56-58 → int 26 (pri 4), Source 27 → int 2 (pri 1)
+- Source 50 (FROM_CPU_INTR0) NOT mapped (cross-core int not yet configured)
+- Source 39 (SYSTIMER_TARGET2) NOT mapped (timer tick not yet configured)
+
+**Current blocker:** The FreeRTOS idle task runs but main_task never scheduled.
+Need C# SYSTIMER peripheral that fires alarm interrupts through the interrupt
+matrix. The systimer alarm → intmatrix.OnGPIO(39) → CPU int line → FreeRTOS
+tick handler → task switch → main_task → app_main → "Hello world!".
+
+Boot progress: **4/5** (scheduler running, awaiting timer interrupt for task switch)
