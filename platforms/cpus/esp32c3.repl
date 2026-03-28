@@ -31,12 +31,15 @@ null_guard: Memory.MappedMemory @ sysbus 0x0
 // === MEMORY REGIONS ===
 
 // Internal SRAM (used as both IRAM and DRAM)
-// DRAM: 0x3FC80000 - 0x3FCE0000 (384 KB)
+// DRAM: 0x3FC70000 - 0x3FCE0000 (448 KB -- extended below nominal 0x3FC80000 to catch stack)
+// IRAM: 0x40370000 - 0x403E0000 (mapped as alias of DRAM)
+// The ESP32-C3 physical SRAM is 400KB; we over-provision slightly to avoid
+// stack underflow crashes. The firmware's linker may set SP above our nominal boundary.
 dram: Memory.MappedMemory @ {
-        sysbus 0x3FC80000;
-        sysbus 0x40380000
+        sysbus 0x3FC70000;
+        sysbus 0x40370000
     }
-    size: 0x60000
+    size: 0x70000
 
 // Internal ROM (boot ROM)
 // 0x3FF00000 - 0x3FF1FFFF (128 KB, data view)
@@ -95,7 +98,7 @@ stub_gpio: Python.PythonPeripheral @ sysbus 0x60004000
 stub_rtc: Python.PythonPeripheral @ sysbus 0x60008000
     size: 0x800
     initable: true
-    filename: "platforms/scripts/stub_rtc.py"
+    filename: "/home/tim/github/mithro/renode-espemu/platforms/scripts/stub_rtc.py"
 
 // eFuse at 0x60008800
 stub_efuse: Python.PythonPeripheral @ sysbus 0x60008800
