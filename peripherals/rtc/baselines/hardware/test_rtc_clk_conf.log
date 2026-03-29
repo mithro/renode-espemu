@@ -1,4 +1,4 @@
-I (120) esp_image: segment 4: paddr=00036638 vaddr=40386128 sizeESP-ROM:esp32c3-api1-20210207
+I (120) esp_image: segment 4: paddr=00036620 vaddr=40386170 sizeESP-ROM:esp32c3-api1-20210207
 Build:Feb  7 2021
 rst:0x15 (USB_UART_CHIP_RESET),boot:0xd (SPI_FAST_FLASH_BOOT)
 Saved PC:0x40382856
@@ -9,7 +9,7 @@ load:0x403cc710,len:0xc30
 load:0x403ce710,len:0x2f64
 entry 0x403cc71a
 I (24) boot: ESP-IDF v5.4.1 2nd stage bootloader
-I (24) boot: compile time Mar 29 2026 19:02:27
+I (24) boot: compile time Mar 29 2026 19:18:21
 I (24) boot: chip revision: v0.4
 I (25) boot: efuse block revision: v1.3
 I (28) boot.esp32c3: SPI Speed      : 80MHz
@@ -22,29 +22,29 @@ I (53) boot:  0 nvs              WiFi data        01 02 00009000 00006000
 I (59) boot:  1 phy_init         RF data          01 01 0000f000 00001000
 I (66) boot:  2 factory          factory app      00 00 00010000 00100000
 I (72) boot: End of partition table
-I (76) esp_image: segment 0: paddr=00010020 vaddr=3c020020 size=08c34h ( 35892) map
-I (89) esp_image: segment 1: paddr=00018c5c vaddr=3fc8ba00 size=0128ch (  4748) load
-I (91) esp_image: segment 2: paddr=00019ef0 vaddr=40380000 size=06128h ( 24872) load
-I (102) esp_image: segment 3: paddr=00020020 vaddr=42000020 size=16610h ( 91664) map
-I (120) esp_image: segment 4: paddr=00036638 vaddr=40386128 size=056dch ( 22236) load
-I (124) esp_image: segment 5: paddr=0003bd1c vaddr=50000200 size=0001ch (    28) load
+I (76) esp_image: segment 0: paddr=00010020 vaddr=3c020020 size=08bech ( 35820) map
+I (89) esp_image: segment 1: paddr=00018c14 vaddr=3fc8ba00 size=0128ch (  4748) load
+I (91) esp_image: segment 2: paddr=00019ea8 vaddr=40380000 size=06170h ( 24944) load
+I (102) esp_image: segment 3: paddr=00020020 vaddr=42000020 size=165f8h ( 91640) map
+I (120) esp_image: segment 4: paddr=00036620 vaddr=40386170 size=05694h ( 22164) load
+I (124) esp_image: segment 5: paddr=0003bcbc vaddr=50000200 size=0001ch (    28) load
 I (128) boot: Loaded app from partition at offset 0x10000
 I (129) boot: Disabling RNG early entropy source...
 I (145) cpu_start: Unicore app
 I (153) cpu_start: Pro cpu start user code
 I (153) cpu_start: cpu freq: 160000000 Hz
 I (154) app_init: Application information:
-I (154) app_init: Project name:     test_extmem_autoload
-I (159) app_init: App version:      57a353f
-I (162) app_init: Compile time:     Mar 29 2026 19:02:19
-I (167) app_init: ELF file SHA256:  fefa4160d...
+I (154) app_init: Project name:     test_rtc_clk_conf
+I (158) app_init: App version:      57a353f
+I (162) app_init: Compile time:     Mar 29 2026 19:18:13
+I (167) app_init: ELF file SHA256:  3474c8314...
 I (172) app_init: ESP-IDF:          v5.4.1
-I (176) efuse_init: Min chip rev:     v0.3
+I (175) efuse_init: Min chip rev:     v0.3
 I (179) efuse_init: Max chip rev:     v1.99 
 I (183) efuse_init: Chip rev:         v0.4
 I (187) heap_init: Initializing. RAM available for dynamic allocation:
-I (194) heap_init: At 3FC8DB40 len 000324C0 (201 KiB): RAM
-I (199) heap_init: At 3FCC0000 len 0001C710 (113 KiB): Retention RAM
+I (193) heap_init: At 3FC8DB40 len 000324C0 (201 KiB): RAM
+I (198) heap_init: At 3FCC0000 len 0001C710 (113 KiB): Retention RAM
 I (205) heap_init: At 3FCDC710 len 00002950 (10 KiB): Retention RAM
 I (211) heap_init: At 5000021C len 00001DCC (7 KiB): RTCRAM
 I (217) spi_flash: detected chip: generic
@@ -53,11 +53,10 @@ I (223) sleep_gpio: Configure to isolate all GPIO pins in sleep state
 I (229) sleep_gpio: Enable automatic switching of GPIO sleep configuration
 I (236) main_task: Started on CPU0
 I (236) main_task: Calling app_main()
-[EXTMEM] === test_extmem_autoload ===
-[EXTMEM] REG_READ  addr=0x600c4040 val=0x00000008  EXTMEM_ICACHE_AUTOLOAD_CTRL_REG
-[EXTMEM] REG_READ  addr=0x600c4044 val=0x00000000  EXTMEM_ICACHE_AUTOLOAD_SCT0_ADDR_REG
-[EXTMEM] REG_READ  addr=0x600c4048 val=0x00000000  EXTMEM_ICACHE_AUTOLOAD_SCT0_SIZE_REG
-[EXTMEM] REG_READ  addr=0x600c404c val=0x00000000  EXTMEM_ICACHE_AUTOLOAD_SCT1_ADDR_REG
-[EXTMEM] REG_READ  addr=0x600c4050 val=0x00000000  EXTMEM_ICACHE_AUTOLOAD_SCT1_SIZE_REG
-[EXTMEM] TEST_PASS
-[EXTMEM] === Done ===
+[RTC] === test_rtc_clk_conf ===
+[RTC] REG_READ  addr=0x60008070 val=0x30c80298  RTC_CNTL_CLK_CONF_REG
+[RTC] REG_READ  addr=0x60008074 val=0x00400000  RTC_CNTL_SLOW_CLK_CONF_REG
+[RTC] CLK_CONF reset value = 0x30c80298
+[RTC] SLOW_CLK_CONF reset value = 0x00400000
+[RTC] TEST_PASS
+[RTC] === Done ===
