@@ -1,16 +1,20 @@
 // ESP32-C3 Interrupt Matrix for Renode
 //
-// Routes peripheral interrupt sources (64 inputs) to CPU interrupt lines (32 outputs).
+// Routes peripheral interrupt sources (62 inputs) to CPU interrupt lines (32 outputs).
 // Based on QEMU's esp32c3_intmatrix.c implementation.
 //
 // Register layout at DR_REG_INTERRUPT_CORE0_BASE (0x600C2000):
-//   0x000-0x0FF: Source mapping registers (one per peripheral, 5 bits = CPU int line)
+//   0x000-0x0F4: Source mapping registers (62 peripherals, 5 bits = CPU int line)
+//   0x0F8: INTR_STATUS_0 (read-only, source level status bits 0-31)
+//   0x0FC: INTR_STATUS_1 (read-only, source level status bits 32-61)
+//   0x100: CLOCK_GATE (bit 0 = CLK_EN, default 1)
 //   0x104: CPU_INT_ENABLE (bitmask of enabled CPU interrupt lines)
 //   0x108: CPU_INT_TYPE (0=level, 1=edge per line)
 //   0x10C: CPU_INT_CLEAR (write-1-to-clear edge interrupts)
 //   0x110: CPU_INT_EIP_STATUS (pending interrupt status)
 //   0x114-0x190: CPU_INT_PRI_0 through CPU_INT_PRI_31 (4-bit priority per line)
 //   0x194: CPU_INT_THRESH (priority threshold)
+//   0x7FC: INTERRUPT_DATE (version register, default 0x2007210)
 
 using System;
 using System.Collections.Generic;
@@ -26,7 +30,7 @@ namespace Antmicro.Renode.Peripherals.IRQControllers
     {
         public ESP32C3_InterruptMatrix(Machine machine) : base(machine)
         {
-            // Initialize interrupt source mapping (64 sources, each maps to a CPU int line 0-31)
+            // Initialize interrupt source mapping (62 sources, each maps to a CPU int line 0-31)
             sourceMapping = new uint[NumSources];
 
             // Initialize CPU interrupt state
@@ -36,6 +40,8 @@ namespace Antmicro.Renode.Peripherals.IRQControllers
             cpuIntThreshold = 0;
             irqPending = 0;
             sourceLevel = new bool[NumSources];
+            clockGateClkEn = true;
+            interruptDate = 0x2007210;
 
             // Create GPIO outputs for CPU interrupt lines
             var dict = new Dictionary<int, IGPIO>();
@@ -58,6 +64,8 @@ namespace Antmicro.Renode.Peripherals.IRQControllers
             cpuIntThreshold = 0;
             irqPending = 0;
             Array.Clear(sourceLevel, 0, sourceLevel.Length);
+            clockGateClkEn = true;
+            interruptDate = 0x2007210;
         }
 
         // IGPIOReceiver: called when a peripheral asserts/deasserts an interrupt source
@@ -93,7 +101,7 @@ namespace Antmicro.Renode.Peripherals.IRQControllers
         // INumberedGPIOOutput
         public IReadOnlyDictionary<int, IGPIO> Connections { get; }
 
-        public long Size => 0x200;
+        public long Size => 0x800;
 
         private void TryDeliverInterrupt(uint line)
         {
@@ -163,7 +171,7 @@ namespace Antmicro.Renode.Peripherals.IRQControllers
 
         private void DefineRegisters()
         {
-            // Source mapping registers: 0x000-0x0FF (64 sources * 4 bytes)
+            // Source mapping registers: 0x000-0x0F4 (62 sources * 4 bytes)
             for (int src = 0; src < NumSources; src++)
             {
                 int srcCapture = src;
@@ -179,6 +187,41 @@ namespace Antmicro.Renode.Peripherals.IRQControllers
                         },
                         valueProviderCallback: _ => sourceMapping[srcCapture]);
             }
+
+            // INTR_STATUS_0: 0x0F8 (read-only, interrupt source level status bits 0-31)
+            Registers.IntrStatus0.Define(this)
+                .WithValueField(0, 32, mode: FieldMode.Read, name: "INTR_STATUS_0",
+                    valueProviderCallback: _ =>
+                    {
+                        uint status = 0;
+                        for (int i = 0; i < 32 && i < NumSources; i++)
+                        {
+                            if (sourceLevel[i])
+                                status |= 1u << i;
+                        }
+                        return status;
+                    });
+
+            // INTR_STATUS_1: 0x0FC (read-only, interrupt source level status bits 32-61)
+            Registers.IntrStatus1.Define(this)
+                .WithValueField(0, 32, mode: FieldMode.Read, name: "INTR_STATUS_1",
+                    valueProviderCallback: _ =>
+                    {
+                        uint status = 0;
+                        for (int i = 32; i < NumSources; i++)
+                        {
+                            if (sourceLevel[i])
+                                status |= 1u << (i - 32);
+                        }
+                        return status;
+                    });
+
+            // CLOCK_GATE: 0x100 (bit 0 = CLK_EN, default 1)
+            Registers.ClockGate.Define(this, 0x1)
+                .WithFlag(0, name: "CLK_EN",
+                    writeCallback: (_, value) => clockGateClkEn = value,
+                    valueProviderCallback: _ => clockGateClkEn)
+                .WithReservedBits(1, 31);
 
             // CPU_INT_ENABLE: 0x104
             Registers.CpuIntEnable.Define(this)
@@ -268,6 +311,13 @@ namespace Antmicro.Renode.Peripherals.IRQControllers
                         }
                     },
                     valueProviderCallback: _ => cpuIntThreshold);
+
+            // INTERRUPT_DATE: 0x7FC (version/date register, 28 bits, default 0x2007210)
+            Registers.InterruptDate.Define(this, 0x2007210)
+                .WithValueField(0, 28, name: "INTERRUPT_DATE",
+                    writeCallback: (_, value) => interruptDate = (uint)value,
+                    valueProviderCallback: _ => interruptDate)
+                .WithReservedBits(28, 4);
         }
 
         private uint[] sourceMapping;
@@ -279,6 +329,8 @@ namespace Antmicro.Renode.Peripherals.IRQControllers
         private bool[] sourceLevel;
 
         private bool meipAsserted;
+        private bool clockGateClkEn;
+        private uint interruptDate;
 
         /// <summary>
         /// The mcause value that should be set when the CPU takes this interrupt.
@@ -287,19 +339,23 @@ namespace Antmicro.Renode.Peripherals.IRQControllers
         public uint PendingMcause { get { return pendingMcause; } }
         private uint pendingMcause;
 
-        private const int NumSources = 64;
+        private const int NumSources = 62;
         private const int NumCpuInterrupts = 32;
         private const int MeipLine = 11; // Machine External Interrupt Pending
 
         private enum Registers : long
         {
-            // Source mappings at 0x000-0x0FC (defined dynamically)
+            // Source mappings at 0x000-0x0F4 (defined dynamically, 62 sources)
+            IntrStatus0 = 0x0F8,
+            IntrStatus1 = 0x0FC,
+            ClockGate = 0x100,
             CpuIntEnable = 0x104,
             CpuIntType = 0x108,
             CpuIntClear = 0x10C,
             CpuIntEipStatus = 0x110,
             // CPU_INT_PRI_0-31 at 0x114-0x190 (defined dynamically)
             CpuIntThresh = 0x194,
+            InterruptDate = 0x7FC,
         }
     }
 }

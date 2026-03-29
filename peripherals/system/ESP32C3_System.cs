@@ -185,6 +185,90 @@ namespace Antmicro.Renode.Peripherals.Miscellaneous
                 .WithFlag(19, mode: FieldMode.Read, name: "CLK_DIV_EN")
                 .WithReservedBits(20, 12);
 
+            // 0x5C: MEM_PVT_REG
+            // [23:22] MEM_VT_SEL (R/W, 0), [21:6] MEM_TIMING_ERR_CNT (RO, 0),
+            // [5] MEM_PVT_MONITOR_EN (R/W, 0), [4] MEM_ERR_CNT_CLR (WO, 0), [3:0] MEM_PATH_LEN (R/W, default 3)
+            Registers.MemPvt.Define(this, 0x00000003)
+                .WithValueField(0, 32, name: "MEM_PVT");
+
+            // 0x60: COMB_PVT_LVT_CONF_REG
+            // [6] COMB_PVT_MONITOR_EN_LVT (R/W, 0), [5] COMB_ERR_CNT_CLR_LVT (WO, 0),
+            // [4:0] COMB_PATH_LEN_LVT (R/W, default 3)
+            Registers.CombPvtLvtConf.Define(this, 0x00000003)
+                .WithValueField(0, 32, name: "COMB_PVT_LVT_CONF");
+
+            // 0x64: COMB_PVT_NVT_CONF_REG
+            // [6] COMB_PVT_MONITOR_EN_NVT (R/W, 0), [5] COMB_ERR_CNT_CLR_NVT (WO, 0),
+            // [4:0] COMB_PATH_LEN_NVT (R/W, default 3)
+            Registers.CombPvtNvtConf.Define(this, 0x00000003)
+                .WithValueField(0, 32, name: "COMB_PVT_NVT_CONF");
+
+            // 0x68: COMB_PVT_HVT_CONF_REG
+            // [6] COMB_PVT_MONITOR_EN_HVT (R/W, 0), [5] COMB_ERR_CNT_CLR_HVT (WO, 0),
+            // [4:0] COMB_PATH_LEN_HVT (R/W, default 3)
+            Registers.CombPvtHvtConf.Define(this, 0x00000003)
+                .WithValueField(0, 32, name: "COMB_PVT_HVT_CONF");
+
+            // 0x6C: COMB_PVT_ERR_LVT_SITE0_REG (read-only)
+            // [15:0] COMB_TIMING_ERR_CNT_LVT_SITE0 (RO, default 0)
+            Registers.CombPvtErrLvtSite0.Define(this, 0x00000000)
+                .WithValueField(0, 32, mode: FieldMode.Read, name: "COMB_PVT_ERR_LVT_SITE0");
+
+            // 0x70: COMB_PVT_ERR_NVT_SITE0_REG (read-only)
+            // [15:0] COMB_TIMING_ERR_CNT_NVT_SITE0 (RO, default 0)
+            Registers.CombPvtErrNvtSite0.Define(this, 0x00000000)
+                .WithValueField(0, 32, mode: FieldMode.Read, name: "COMB_PVT_ERR_NVT_SITE0");
+
+            // 0x74: COMB_PVT_ERR_HVT_SITE0_REG (read-only)
+            // [15:0] COMB_TIMING_ERR_CNT_HVT_SITE0 (RO, default 0)
+            Registers.CombPvtErrHvtSite0.Define(this, 0x00000000)
+                .WithValueField(0, 32, mode: FieldMode.Read, name: "COMB_PVT_ERR_HVT_SITE0");
+
+            // 0x78: COMB_PVT_ERR_LVT_SITE1_REG (read-only)
+            // [15:0] COMB_TIMING_ERR_CNT_LVT_SITE1 (RO, default 0)
+            Registers.CombPvtErrLvtSite1.Define(this, 0x00000000)
+                .WithValueField(0, 32, mode: FieldMode.Read, name: "COMB_PVT_ERR_LVT_SITE1");
+
+            // 0x7C: COMB_PVT_ERR_NVT_SITE1_REG (read-only)
+            // [15:0] COMB_TIMING_ERR_CNT_NVT_SITE1 (RO, default 0)
+            Registers.CombPvtErrNvtSite1.Define(this, 0x00000000)
+                .WithValueField(0, 32, mode: FieldMode.Read, name: "COMB_PVT_ERR_NVT_SITE1");
+
+            // 0x80: COMB_PVT_ERR_HVT_SITE1_REG (read-only)
+            // [15:0] COMB_TIMING_ERR_CNT_HVT_SITE1 (RO, default 0)
+            Registers.CombPvtErrHvtSite1.Define(this, 0x00000000)
+                .WithValueField(0, 32, mode: FieldMode.Read, name: "COMB_PVT_ERR_HVT_SITE1");
+
+            // 0x84: COMB_PVT_ERR_LVT_SITE2_REG (read-only)
+            // [15:0] COMB_TIMING_ERR_CNT_LVT_SITE2 (RO, default 0)
+            Registers.CombPvtErrLvtSite2.Define(this, 0x00000000)
+                .WithValueField(0, 32, mode: FieldMode.Read, name: "COMB_PVT_ERR_LVT_SITE2");
+
+            // 0x88: COMB_PVT_ERR_NVT_SITE2_REG (read-only)
+            // [15:0] COMB_TIMING_ERR_CNT_NVT_SITE2 (RO, default 0)
+            Registers.CombPvtErrNvtSite2.Define(this, 0x00000000)
+                .WithValueField(0, 32, mode: FieldMode.Read, name: "COMB_PVT_ERR_NVT_SITE2");
+
+            // 0x8C: COMB_PVT_ERR_HVT_SITE2_REG (read-only)
+            // [15:0] COMB_TIMING_ERR_CNT_HVT_SITE2 (RO, default 0)
+            Registers.CombPvtErrHvtSite2.Define(this, 0x00000000)
+                .WithValueField(0, 32, mode: FieldMode.Read, name: "COMB_PVT_ERR_HVT_SITE2");
+
+            // 0x90: COMB_PVT_ERR_LVT_SITE3_REG (read-only)
+            // [15:0] COMB_TIMING_ERR_CNT_LVT_SITE3 (RO, default 0)
+            Registers.CombPvtErrLvtSite3.Define(this, 0x00000000)
+                .WithValueField(0, 32, mode: FieldMode.Read, name: "COMB_PVT_ERR_LVT_SITE3");
+
+            // 0x94: COMB_PVT_ERR_NVT_SITE3_REG (read-only)
+            // [15:0] COMB_TIMING_ERR_CNT_NVT_SITE3 (RO, default 0)
+            Registers.CombPvtErrNvtSite3.Define(this, 0x00000000)
+                .WithValueField(0, 32, mode: FieldMode.Read, name: "COMB_PVT_ERR_NVT_SITE3");
+
+            // 0x98: COMB_PVT_ERR_HVT_SITE3_REG (read-only)
+            // [15:0] COMB_TIMING_ERR_CNT_HVT_SITE3 (RO, default 0)
+            Registers.CombPvtErrHvtSite3.Define(this, 0x00000000)
+                .WithValueField(0, 32, mode: FieldMode.Read, name: "COMB_PVT_ERR_HVT_SITE3");
+
             // 0xFFC: DATE_REG
             // [27:0] DATE (default 0x2007150)
             Registers.Date.Define(this, 0x02007150)
@@ -220,6 +304,22 @@ namespace Antmicro.Renode.Peripherals.Miscellaneous
             RedundantEcoCtrl = 0x50,
             ClockGate = 0x54,
             SysclkConf = 0x58,
+            MemPvt = 0x5C,
+            CombPvtLvtConf = 0x60,
+            CombPvtNvtConf = 0x64,
+            CombPvtHvtConf = 0x68,
+            CombPvtErrLvtSite0 = 0x6C,
+            CombPvtErrNvtSite0 = 0x70,
+            CombPvtErrHvtSite0 = 0x74,
+            CombPvtErrLvtSite1 = 0x78,
+            CombPvtErrNvtSite1 = 0x7C,
+            CombPvtErrHvtSite1 = 0x80,
+            CombPvtErrLvtSite2 = 0x84,
+            CombPvtErrNvtSite2 = 0x88,
+            CombPvtErrHvtSite2 = 0x8C,
+            CombPvtErrLvtSite3 = 0x90,
+            CombPvtErrNvtSite3 = 0x94,
+            CombPvtErrHvtSite3 = 0x98,
             Date = 0xFFC,
         }
     }

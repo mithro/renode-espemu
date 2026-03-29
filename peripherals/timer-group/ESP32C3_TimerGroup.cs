@@ -198,15 +198,35 @@ namespace Antmicro.Renode.Peripherals.Timers
                         this.Log(LogLevel.Debug, "Timer 0 reloaded to 0x{0:X}", timerCounter);
                     });
 
-            // --- Watchdog Timer registers (stubbed) ---
+            // --- Watchdog Timer registers ---
 
             // WDTCONFIG0: 0x48
-            Registers.WdtConfig0.Define(this)
-                .WithValueField(0, 32, name: "WDTCONFIG0");
+            // [12]=APPCPU_RESET_EN, [13]=PROCPU_RESET_EN, [14]=FLASHBOOT_MOD_EN,
+            // [17:15]=SYS_RESET_LENGTH, [20:18]=CPU_RESET_LENGTH, [21]=USE_XTAL,
+            // [22]=CONF_UPDATE_EN, [24:23]=STG3, [26:25]=STG2, [28:27]=STG1,
+            // [30:29]=STG0, [31]=EN
+            Registers.WdtConfig0.Define(this, 0x0004C000) // FLASHBOOT_MOD_EN=1, SYS_RESET_LENGTH=1, CPU_RESET_LENGTH=1
+                .WithValueField(0, 12, name: "WDTCONFIG0_RESERVED_0_11")
+                .WithFlag(12, name: "WDT_APPCPU_RESET_EN")
+                .WithFlag(13, name: "WDT_PROCPU_RESET_EN")
+                .WithFlag(14, name: "WDT_FLASHBOOT_MOD_EN")
+                .WithValueField(15, 3, name: "WDT_SYS_RESET_LENGTH")
+                .WithValueField(18, 3, name: "WDT_CPU_RESET_LENGTH")
+                .WithFlag(21, name: "WDT_USE_XTAL")
+                .WithFlag(22, mode: FieldMode.Write, name: "WDT_CONF_UPDATE_EN")
+                .WithValueField(23, 2, name: "WDT_STG3")
+                .WithValueField(25, 2, name: "WDT_STG2")
+                .WithValueField(27, 2, name: "WDT_STG1")
+                .WithValueField(29, 2, name: "WDT_STG0")
+                .WithFlag(31, name: "WDT_EN");
 
             // WDTCONFIG1: 0x4C
-            Registers.WdtConfig1.Define(this)
-                .WithValueField(0, 32, name: "WDTCONFIG1");
+            // [0]=DIVCNT_RST(WT), [15:1]=reserved, [31:16]=CLK_PRESCALE
+            Registers.WdtConfig1.Define(this, 0x00010000) // CLK_PRESCALE=1
+                .WithFlag(0, mode: FieldMode.Write, name: "WDT_DIVCNT_RST",
+                    writeCallback: (_, value) => { if (value) this.Log(LogLevel.Debug, "WDT divider counter reset"); })
+                .WithValueField(1, 15, name: "WDTCONFIG1_RESERVED_1_15")
+                .WithValueField(16, 16, name: "WDT_CLK_PRESCALE");
 
             // WDTCONFIG2: 0x50 (stage 0 timeout, default 26000000)
             Registers.WdtConfig2.Define(this, 0x018CBA80)

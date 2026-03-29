@@ -1,26 +1,32 @@
 // ESP32-C3 GPIO Controller for Renode
 //
-// Controls GPIO pins 0-21: output levels, output enable, input, interrupts,
+// Controls GPIO pins 0-25: output levels, output enable, input, interrupts,
 // and function muxing (input/output signal selection).
 //
 // Base: DR_REG_GPIO_BASE = 0x60004000, Size: 0x1000
 //
 // Register groups:
-//   0x00:       BT_SELECT
-//   0x04-0x0C:  OUT / OUT_W1TS / OUT_W1TC (output level)
-//   0x1C:       SDIO_SELECT
-//   0x20-0x28:  ENABLE / ENABLE_W1TS / ENABLE_W1TC (output enable)
-//   0x38:       STRAP (read-only, boot strapping pins)
-//   0x3C:       IN (read-only, input level)
-//   0x44-0x4C:  STATUS / STATUS_W1TS / STATUS_W1TC (interrupt status)
-//   0x5C:       PCPU_INT (read-only, pro CPU interrupt status)
-//   0x60:       PCPU_NMI_INT (read-only)
-//   0x64:       CPUSDIO_INT (read-only)
-//   0x74-0xCC:  PIN0-PIN21 (per-pin config: int type, wakeup, pad driver)
+//   0x00:        BT_SELECT
+//   0x04-0x0C:   OUT / OUT_W1TS / OUT_W1TC (output level, bits [25:0])
+//   0x10-0x18:   OUT1 / OUT1_W1TS / OUT1_W1TC (stub, no extra pins on C3)
+//   0x1C:        SDIO_SELECT
+//   0x20-0x28:   ENABLE / ENABLE_W1TS / ENABLE_W1TC (output enable, bits [25:0])
+//   0x2C-0x34:   ENABLE1 / ENABLE1_W1TS / ENABLE1_W1TC (stub)
+//   0x38:        STRAP (read-only, boot strapping pins)
+//   0x3C:        IN (read-only, input level, bits [25:0])
+//   0x40:        IN1 (stub)
+//   0x44-0x4C:   STATUS / STATUS_W1TS / STATUS_W1TC (interrupt status, bits [25:0])
+//   0x50-0x58:   STATUS1 / STATUS1_W1TS / STATUS1_W1TC (stub)
+//   0x5C:        PCPU_INT (read-only, pro CPU interrupt status)
+//   0x60:        PCPU_NMI_INT (read-only)
+//   0x64:        CPUSDIO_INT (read-only)
+//   0x74-0xD8:   PIN0-PIN25 (per-pin config: int type, wakeup, pad driver)
+//   0x14C:       STATUS_NEXT (read-only, next interrupt status)
+//   0x150:       STATUS_NEXT1 (stub)
 //   0x154-0x350: FUNC0-127_IN_SEL_CFG (input function mux)
-//   0x554-0x5A8: FUNC0-21_OUT_SEL_CFG (output function mux)
-//   0x62C:      CLOCK_GATE
-//   0x6FC:      DATE (version register)
+//   0x554-0x5B8: FUNC0-25_OUT_SEL_CFG (output function mux)
+//   0x62C:       CLOCK_GATE
+//   0x6FC:       DATE (version register)
 //
 // W1TS/W1TC semantics: writing a 1 sets/clears the corresponding bit in
 // the data register; reads always return 0.
@@ -79,19 +85,32 @@ namespace Antmicro.Renode.Peripherals.GPIOPort
 
             // GPIO_OUT_REG: 0x04 (output level, bits [25:0])
             Registers.Out.Define(this)
-                .WithValueField(0, 22, name: "OUT_DATA",
+                .WithValueField(0, 26, name: "OUT_DATA",
                     writeCallback: (_, value) => outData = (uint)value & PinMask,
                     valueProviderCallback: _ => outData);
 
             // GPIO_OUT_W1TS_REG: 0x08 (write-1-to-set output)
             Registers.OutW1ts.Define(this)
-                .WithValueField(0, 22, mode: FieldMode.Write, name: "OUT_W1TS",
+                .WithValueField(0, 26, mode: FieldMode.Write, name: "OUT_W1TS",
                     writeCallback: (_, value) => outData |= (uint)value & PinMask);
 
             // GPIO_OUT_W1TC_REG: 0x0C (write-1-to-clear output)
             Registers.OutW1tc.Define(this)
-                .WithValueField(0, 22, mode: FieldMode.Write, name: "OUT_W1TC",
+                .WithValueField(0, 26, mode: FieldMode.Write, name: "OUT_W1TC",
                     writeCallback: (_, value) => outData &= ~((uint)value & PinMask));
+
+            // GPIO_OUT1_REG: 0x10 (stub, ESP32-C3 has no pins >25)
+            Registers.Out1.Define(this)
+                .WithValueField(0, 26, name: "OUT1_DATA",
+                    valueProviderCallback: _ => 0u);
+
+            // GPIO_OUT1_W1TS_REG: 0x14 (stub)
+            Registers.Out1W1ts.Define(this)
+                .WithValueField(0, 26, mode: FieldMode.Write, name: "OUT1_W1TS");
+
+            // GPIO_OUT1_W1TC_REG: 0x18 (stub)
+            Registers.Out1W1tc.Define(this)
+                .WithValueField(0, 26, mode: FieldMode.Write, name: "OUT1_W1TC");
 
             // SDIO_SELECT: 0x1C
             Registers.SdioSelect.Define(this)
@@ -99,19 +118,32 @@ namespace Antmicro.Renode.Peripherals.GPIOPort
 
             // GPIO_ENABLE_REG: 0x20 (output enable, bits [25:0])
             Registers.Enable.Define(this)
-                .WithValueField(0, 22, name: "ENABLE_DATA",
+                .WithValueField(0, 26, name: "ENABLE_DATA",
                     writeCallback: (_, value) => enableData = (uint)value & PinMask,
                     valueProviderCallback: _ => enableData);
 
             // GPIO_ENABLE_W1TS_REG: 0x24
             Registers.EnableW1ts.Define(this)
-                .WithValueField(0, 22, mode: FieldMode.Write, name: "ENABLE_W1TS",
+                .WithValueField(0, 26, mode: FieldMode.Write, name: "ENABLE_W1TS",
                     writeCallback: (_, value) => enableData |= (uint)value & PinMask);
 
             // GPIO_ENABLE_W1TC_REG: 0x28
             Registers.EnableW1tc.Define(this)
-                .WithValueField(0, 22, mode: FieldMode.Write, name: "ENABLE_W1TC",
+                .WithValueField(0, 26, mode: FieldMode.Write, name: "ENABLE_W1TC",
                     writeCallback: (_, value) => enableData &= ~((uint)value & PinMask));
+
+            // GPIO_ENABLE1_REG: 0x2C (stub, ESP32-C3 has no pins >25)
+            Registers.Enable1.Define(this)
+                .WithValueField(0, 26, name: "ENABLE1_DATA",
+                    valueProviderCallback: _ => 0u);
+
+            // GPIO_ENABLE1_W1TS_REG: 0x30 (stub)
+            Registers.Enable1W1ts.Define(this)
+                .WithValueField(0, 26, mode: FieldMode.Write, name: "ENABLE1_W1TS");
+
+            // GPIO_ENABLE1_W1TC_REG: 0x34 (stub)
+            Registers.Enable1W1tc.Define(this)
+                .WithValueField(0, 26, mode: FieldMode.Write, name: "ENABLE1_W1TC");
 
             // GPIO_STRAP_REG: 0x38 (read-only, boot strapping)
             Registers.Strap.Define(this)
@@ -121,47 +153,75 @@ namespace Antmicro.Renode.Peripherals.GPIOPort
             // GPIO_IN_REG: 0x3C (read-only, input level)
             // For emulation: returns output data (loopback, independent of enable)
             Registers.In.Define(this)
-                .WithValueField(0, 22, mode: FieldMode.Read, name: "IN_DATA",
+                .WithValueField(0, 26, mode: FieldMode.Read, name: "IN_DATA",
                     valueProviderCallback: _ => outData);
+
+            // GPIO_IN1_REG: 0x40 (stub, ESP32-C3 has no pins >25)
+            Registers.In1.Define(this)
+                .WithValueField(0, 26, mode: FieldMode.Read, name: "IN1_DATA",
+                    valueProviderCallback: _ => 0u);
 
             // GPIO_STATUS_REG: 0x44 (interrupt status, bits [25:0])
             Registers.Status.Define(this)
-                .WithValueField(0, 22, name: "STATUS_INT",
+                .WithValueField(0, 26, name: "STATUS_INT",
                     writeCallback: (_, value) => statusInt = (uint)value & PinMask,
                     valueProviderCallback: _ => statusInt);
 
             // GPIO_STATUS_W1TS_REG: 0x48
             Registers.StatusW1ts.Define(this)
-                .WithValueField(0, 22, mode: FieldMode.Write, name: "STATUS_W1TS",
+                .WithValueField(0, 26, mode: FieldMode.Write, name: "STATUS_W1TS",
                     writeCallback: (_, value) => statusInt |= (uint)value & PinMask);
 
             // GPIO_STATUS_W1TC_REG: 0x4C
             Registers.StatusW1tc.Define(this)
-                .WithValueField(0, 22, mode: FieldMode.Write, name: "STATUS_W1TC",
+                .WithValueField(0, 26, mode: FieldMode.Write, name: "STATUS_W1TC",
                     writeCallback: (_, value) => statusInt &= ~((uint)value & PinMask));
+
+            // GPIO_STATUS1_REG: 0x50 (stub, ESP32-C3 has no pins >25)
+            Registers.Status1.Define(this)
+                .WithValueField(0, 26, name: "STATUS1_INT",
+                    valueProviderCallback: _ => 0u);
+
+            // GPIO_STATUS1_W1TS_REG: 0x54 (stub)
+            Registers.Status1W1ts.Define(this)
+                .WithValueField(0, 26, mode: FieldMode.Write, name: "STATUS1_W1TS");
+
+            // GPIO_STATUS1_W1TC_REG: 0x58 (stub)
+            Registers.Status1W1tc.Define(this)
+                .WithValueField(0, 26, mode: FieldMode.Write, name: "STATUS1_W1TC");
 
             // PCPU_INT: 0x5C (read-only, pro CPU interrupt status)
             Registers.PcpuInt.Define(this)
-                .WithValueField(0, 22, mode: FieldMode.Read, name: "PROCPU_INT",
+                .WithValueField(0, 26, mode: FieldMode.Read, name: "PROCPU_INT",
                     valueProviderCallback: _ => 0u);
 
             // PCPU_NMI_INT: 0x60 (read-only)
             Registers.PcpuNmiInt.Define(this)
-                .WithValueField(0, 22, mode: FieldMode.Read, name: "PROCPU_NMI_INT",
+                .WithValueField(0, 26, mode: FieldMode.Read, name: "PROCPU_NMI_INT",
                     valueProviderCallback: _ => 0u);
 
             // CPUSDIO_INT: 0x64 (read-only)
             Registers.CpuSdioInt.Define(this)
-                .WithValueField(0, 22, mode: FieldMode.Read, name: "SDIO_INT",
+                .WithValueField(0, 26, mode: FieldMode.Read, name: "SDIO_INT",
                     valueProviderCallback: _ => 0u);
 
-            // GPIO_PINn_REG: 0x74 + n*4, for n = 0..21
+            // GPIO_PINn_REG: 0x74 + n*4, for n = 0..25
             // Fields: [17:13]=INT_ENA, [12:11]=CONFIG, [10]=WAKEUP_ENABLE,
             //         [9:7]=INT_TYPE, [4:3]=SYNC1_BYPASS, [2]=PAD_DRIVER, [1:0]=SYNC2_BYPASS
             for (int i = 0; i < NumberOfPins; i++)
             {
                 DefinePinRegister(i);
             }
+
+            // GPIO_STATUS_NEXT_REG: 0x14C (read-only, next interrupt status)
+            Registers.StatusNext.Define(this)
+                .WithValueField(0, 26, mode: FieldMode.Read, name: "STATUS_INTERRUPT_NEXT",
+                    valueProviderCallback: _ => statusInt);
+
+            // GPIO_STATUS_NEXT1_REG: 0x150 (stub, ESP32-C3 has no pins >25)
+            Registers.StatusNext1.Define(this)
+                .WithValueField(0, 26, mode: FieldMode.Read, name: "STATUS_INTERRUPT_NEXT1",
+                    valueProviderCallback: _ => 0u);
 
             // GPIO_FUNCn_IN_SEL_CFG_REG: 0x154 + n*4, for n = 0..127
             // Fields: [6]=SIG_IN_SEL, [5]=FUNC_IN_INV_SEL, [4:0]=FUNC_IN_SEL
@@ -170,7 +230,7 @@ namespace Antmicro.Renode.Peripherals.GPIOPort
                 DefineFuncInSelRegister(i);
             }
 
-            // GPIO_FUNCn_OUT_SEL_CFG_REG: 0x554 + n*4, for n = 0..21
+            // GPIO_FUNCn_OUT_SEL_CFG_REG: 0x554 + n*4, for n = 0..25
             // Fields: [10]=OEN_INV_SEL, [9]=OEN_SEL, [8]=OUT_INV_SEL, [7:0]=OUT_SEL
             for (int i = 0; i < NumberOfPins; i++)
             {
@@ -313,9 +373,9 @@ namespace Antmicro.Renode.Peripherals.GPIOPort
                     valueProviderCallback: _ => (funcOutSelCfg[idx] & (1u << 10)) != 0);
         }
 
-        private const int NumberOfPins = 22;
+        private const int NumberOfPins = 26;
         private const int NumberOfInputSignals = 128;
-        private const uint PinMask = 0x003FFFFF; // bits [21:0] for 22 GPIOs
+        private const uint PinMask = 0x03FFFFFF; // bits [25:0] for 26 GPIOs
 
         private uint outData;
         private uint enableData;
@@ -330,21 +390,33 @@ namespace Antmicro.Renode.Peripherals.GPIOPort
             Out          = 0x04,
             OutW1ts      = 0x08,
             OutW1tc      = 0x0C,
+            Out1         = 0x10,
+            Out1W1ts     = 0x14,
+            Out1W1tc     = 0x18,
             SdioSelect   = 0x1C,
             Enable       = 0x20,
             EnableW1ts   = 0x24,
             EnableW1tc   = 0x28,
+            Enable1      = 0x2C,
+            Enable1W1ts  = 0x30,
+            Enable1W1tc  = 0x34,
             Strap        = 0x38,
             In           = 0x3C,
+            In1          = 0x40,
             Status       = 0x44,
             StatusW1ts   = 0x48,
             StatusW1tc   = 0x4C,
+            Status1      = 0x50,
+            Status1W1ts  = 0x54,
+            Status1W1tc  = 0x58,
             PcpuInt      = 0x5C,
             PcpuNmiInt   = 0x60,
             CpuSdioInt   = 0x64,
-            // PIN0-PIN21: 0x74 + n*4 (defined dynamically)
+            // PIN0-PIN25: 0x74 + n*4 (defined dynamically)
+            StatusNext   = 0x14C,
+            StatusNext1  = 0x150,
             // FUNC0-127_IN_SEL_CFG: 0x154 + n*4 (defined dynamically)
-            // FUNC0-21_OUT_SEL_CFG: 0x554 + n*4 (defined dynamically)
+            // FUNC0-25_OUT_SEL_CFG: 0x554 + n*4 (defined dynamically)
             ClockGate    = 0x62C,
             Date         = 0x6FC,
         }

@@ -17,9 +17,18 @@
 //   0x0FC-0x118: RD_KEY3_DATA0-7 (BLK7)
 //   0x11C-0x138: RD_KEY4_DATA0-7 (BLK8)
 //   0x13C-0x158: RD_KEY5_DATA0-7 (BLK9)
-//   0x15C-0x168: RD_SYS_PART2_DATA0-7 (BLK10)
-//   0x1CC:       STATUS
-//   0x1D0:       CMD
+//   0x15C-0x178: RD_SYS_PART2_DATA0-7 (BLK10)
+//   0x17C-0x190: RD_REPEAT_ERR0-4 (programming error flags)
+//   0x1C0-0x1C4: RD_RS_ERR0-1 (RS decoding error records)
+//   0x1C8:       CLK
+//   0x1CC:       CONF
+//   0x1D0:       STATUS
+//   0x1D4:       CMD
+//   0x1D8-0x1E4: INT_RAW, INT_ST, INT_ENA, INT_CLR
+//   0x1E8:       DAC_CONF
+//   0x1EC:       RD_TIM_CONF
+//   0x1F0:       WR_TIM_CONF1
+//   0x1F4:       WR_TIM_CONF2
 //   0x1FC:       DATE
 
 using System;
@@ -132,21 +141,23 @@ namespace Antmicro.Renode.Peripherals.Miscellaneous
                     .WithValueField(0, 32, name: $"PGM_DATA_{offset / 4}");
             }
 
-            // STATUS register: 0x1CC
-            Registers.Status.Define(this)
-                .WithValueField(0, 32, mode: FieldMode.Read, name: "STATUS",
-                    valueProviderCallback: _ => 0); // idle
+            // Read repeat error registers: 0x17C-0x190 (read-only, all zeros = no errors)
+            for (int offset = 0x17C; offset <= 0x190; offset += 4)
+            {
+                int errIdx = (offset - 0x17C) / 4;
+                ((Registers)(offset)).Define(this)
+                    .WithValueField(0, 32, mode: FieldMode.Read,
+                        name: $"RD_REPEAT_ERR{errIdx}",
+                        valueProviderCallback: _ => 0);
+            }
 
-            // CMD register: 0x1D0
-            Registers.Cmd.Define(this)
-                .WithValueField(0, 32, name: "CMD",
-                    writeCallback: (_, value) =>
-                    {
-                        if ((value & 0x1) != 0)
-                            this.Log(LogLevel.Info, "eFuse read command (ignored in emulation)");
-                        if ((value & 0x2) != 0)
-                            this.Log(LogLevel.Warning, "eFuse program command (not supported)");
-                    });
+            // RS error registers: 0x1C0-0x1C4 (read-only, all zeros = no errors)
+            Registers.RdRsErr0.Define(this)
+                .WithValueField(0, 32, mode: FieldMode.Read, name: "RD_RS_ERR0",
+                    valueProviderCallback: _ => 0);
+            Registers.RdRsErr1.Define(this)
+                .WithValueField(0, 32, mode: FieldMode.Read, name: "RD_RS_ERR1",
+                    valueProviderCallback: _ => 0);
 
             // CLK register: 0x1C8
             Registers.Clk.Define(this)
@@ -156,10 +167,21 @@ namespace Antmicro.Renode.Peripherals.Miscellaneous
             Registers.Conf.Define(this)
                 .WithValueField(0, 32, name: "CONF");
 
-            // DATE register: 0x1FC
-            Registers.Date.Define(this)
-                .WithValueField(0, 32, mode: FieldMode.Read, name: "DATE",
-                    valueProviderCallback: _ => efuseData[127]);
+            // STATUS register: 0x1D0
+            Registers.Status.Define(this)
+                .WithValueField(0, 32, mode: FieldMode.Read, name: "STATUS",
+                    valueProviderCallback: _ => 0); // idle
+
+            // CMD register: 0x1D4
+            Registers.Cmd.Define(this)
+                .WithValueField(0, 32, name: "CMD",
+                    writeCallback: (_, value) =>
+                    {
+                        if ((value & 0x1) != 0)
+                            this.Log(LogLevel.Info, "eFuse read command (ignored in emulation)");
+                        if ((value & 0x2) != 0)
+                            this.Log(LogLevel.Warning, "eFuse program command (not supported)");
+                    });
 
             // INT registers
             Registers.IntRaw.Define(this)
@@ -172,6 +194,35 @@ namespace Antmicro.Renode.Peripherals.Miscellaneous
                 .WithValueField(0, 32, name: "INT_ENA");
             Registers.IntClr.Define(this)
                 .WithValueField(0, 32, mode: FieldMode.Write, name: "INT_CLR");
+
+            // DAC_CONF register: 0x1E8 (reset: DAC_CLK_DIV=28, DAC_NUM=255)
+            Registers.DacConf.Define(this, resetValue: 0x0001FE1C)
+                .WithValueField(0, 8, name: "DAC_CLK_DIV")
+                .WithFlag(8, name: "DAC_CLK_PAD_SEL")
+                .WithValueField(9, 8, name: "DAC_NUM")
+                .WithFlag(17, name: "OE_CLR")
+                .WithReservedBits(18, 14);
+
+            // RD_TIM_CONF register: 0x1EC (reset: READ_INIT_NUM=18)
+            Registers.RdTimConf.Define(this, resetValue: 0x12000000)
+                .WithReservedBits(0, 24)
+                .WithValueField(24, 8, name: "READ_INIT_NUM");
+
+            // WR_TIM_CONF1 register: 0x1F0 (reset: PWR_ON_NUM=10368)
+            Registers.WrTimConf1.Define(this, resetValue: 0x00288000)
+                .WithReservedBits(0, 8)
+                .WithValueField(8, 16, name: "PWR_ON_NUM")
+                .WithReservedBits(24, 8);
+
+            // WR_TIM_CONF2 register: 0x1F4 (reset: PWR_OFF_NUM=400)
+            Registers.WrTimConf2.Define(this, resetValue: 0x00000190)
+                .WithValueField(0, 16, name: "PWR_OFF_NUM")
+                .WithReservedBits(16, 16);
+
+            // DATE register: 0x1FC
+            Registers.Date.Define(this)
+                .WithValueField(0, 32, mode: FieldMode.Read, name: "DATE",
+                    valueProviderCallback: _ => efuseData[127]);
         }
 
         private uint[] efuseData;
@@ -188,6 +239,9 @@ namespace Antmicro.Renode.Peripherals.Miscellaneous
         {
             // Read data at 0x2C-0x178 defined dynamically
             // Programming at 0x00-0x28 defined dynamically
+            // Read repeat error at 0x17C-0x190 defined dynamically
+            RdRsErr0 = 0x1C0,
+            RdRsErr1 = 0x1C4,
             Clk = 0x1C8,
             Conf = 0x1CC,
             Status = 0x1D0,
@@ -196,6 +250,10 @@ namespace Antmicro.Renode.Peripherals.Miscellaneous
             IntSt = 0x1DC,
             IntEna = 0x1E0,
             IntClr = 0x1E4,
+            DacConf = 0x1E8,
+            RdTimConf = 0x1EC,
+            WrTimConf1 = 0x1F0,
+            WrTimConf2 = 0x1F4,
             Date = 0x1FC,
         }
     }

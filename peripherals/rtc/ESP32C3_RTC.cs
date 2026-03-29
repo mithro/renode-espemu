@@ -99,24 +99,25 @@ namespace Antmicro.Renode.Peripherals.Miscellaneous
                 .WithValueField(0, 32, name: "STATE0");
 
             // TIMER1-6: 0x1C-0x30
-            Registers.Timer1.Define(this).WithValueField(0, 32, name: "TIMER1");
-            Registers.Timer2.Define(this).WithValueField(0, 32, name: "TIMER2");
-            Registers.Timer3.Define(this).WithValueField(0, 32, name: "TIMER3");
-            Registers.Timer4.Define(this).WithValueField(0, 32, name: "TIMER4");
-            Registers.Timer5.Define(this).WithValueField(0, 32, name: "TIMER5");
-            Registers.Timer6.Define(this).WithValueField(0, 32, name: "TIMER6");
+            Registers.Timer1.Define(this, 0x28140403).WithValueField(0, 32, name: "TIMER1");
+            Registers.Timer2.Define(this, 0x01000000).WithValueField(0, 32, name: "TIMER2");
+            Registers.Timer3.Define(this, 0x0A080A08).WithValueField(0, 32, name: "TIMER3");
+            Registers.Timer4.Define(this, 0x10200A08).WithValueField(0, 32, name: "TIMER4");
+            Registers.Timer5.Define(this, 0x00008000).WithValueField(0, 32, name: "TIMER5");
+            Registers.Timer6.Define(this, 0x0A080000).WithValueField(0, 32, name: "TIMER6");
 
             // ANA_CONF: 0x34
-            Registers.AnaConf.Define(this)
+            Registers.AnaConf.Define(this, 0x00C40000)
                 .WithValueField(0, 32, name: "ANA_CONF");
 
             // RESET_STATE: 0x38 (reset reason for CPU)
             // Bits [5:0] = RESET_CAUSE_PROCPU (1 = POWERON_RESET)
-            Registers.ResetState.Define(this, 0x00000001)
+            // Header default is 0x3000 but we override bit 0 for POWERON_RESET
+            Registers.ResetState.Define(this, 0x00003001)
                 .WithValueField(0, 32, name: "RESET_STATE");
 
             // WAKEUP_STATE: 0x3C
-            Registers.WakeupState.Define(this)
+            Registers.WakeupState.Define(this, 0x00060000)
                 .WithValueField(0, 32, name: "WAKEUP_STATE");
 
             // INT_ENA: 0x40
@@ -146,8 +147,8 @@ namespace Antmicro.Renode.Peripherals.Miscellaneous
             DefineStoreRegister(Registers.Store2, 2);
             DefineStoreRegister(Registers.Store3, 3);
 
-            // SLP_REJECT_CONF through CPU_PERIOD_CONF: 0x60-0x6C
-            Registers.SlpWakeupConf.Define(this).WithValueField(0, 32, name: "SLP_WAKEUP_CONF");
+            // EXT_XTL_CONF through CPU_PERIOD_CONF: 0x60-0x6C
+            Registers.ExtXtlConf.Define(this, 0x00066C80).WithValueField(0, 32, name: "EXT_XTL_CONF");
             Registers.ExtWakeupConf.Define(this).WithValueField(0, 32, name: "EXT_WAKEUP_CONF");
             Registers.SlpRejectConf.Define(this).WithValueField(0, 32, name: "SLP_REJECT_CONF");
             Registers.CpuPeriodConf.Define(this).WithValueField(0, 32, name: "CPU_PERIOD_CONF");
@@ -157,41 +158,37 @@ namespace Antmicro.Renode.Peripherals.Miscellaneous
                 .WithValueField(0, 32, name: "CLK_CONF");
 
             // SLOW_CLK_CONF: 0x74
-            Registers.SlowClkConf.Define(this)
+            Registers.SlowClkConf.Define(this, 0x00400000)
                 .WithValueField(0, 32, name: "SLOW_CLK_CONF");
 
             // SDIO_CONF: 0x78
-            Registers.SdioConf.Define(this)
+            Registers.SdioConf.Define(this, 0x0AB0BE0A)
                 .WithValueField(0, 32, name: "SDIO_CONF");
 
             // BIAS_CONF: 0x7C
-            Registers.BiasConf.Define(this)
+            Registers.BiasConf.Define(this, 0xA0010800)
                 .WithValueField(0, 32, name: "BIAS_CONF");
 
-            // REG (regulator): 0x80
-            Registers.Reg.Define(this)
-                .WithValueField(0, 32, name: "REG");
-
-            // PWC: 0x84
+            // PWC: 0x84 (no register at 0x80 per header)
             Registers.Pwc.Define(this)
                 .WithValueField(0, 32, name: "PWC");
 
             // DIG registers: 0x88-0x8C
-            Registers.DigPwc.Define(this).WithValueField(0, 32, name: "DIG_PWC");
-            Registers.DigIsoReg.Define(this).WithValueField(0, 32, name: "DIG_ISO");
+            Registers.DigPwc.Define(this, 0x00555010).WithValueField(0, 32, name: "DIG_PWC");
+            Registers.DigIsoReg.Define(this, 0xAA805080).WithValueField(0, 32, name: "DIG_ISO");
 
             // RTC WDT registers: 0x90-0xA8 (accept writes silently, firmware configures WDT)
-            Registers.Wdtconfig0.Define(this).WithValueField(0, 32, name: "WDTCONFIG0");
-            Registers.Wdtconfig1.Define(this).WithValueField(0, 32, name: "WDTCONFIG1");
-            Registers.Wdtconfig2.Define(this).WithValueField(0, 32, name: "WDTCONFIG2");
-            Registers.Wdtconfig3.Define(this).WithValueField(0, 32, name: "WDTCONFIG3");
-            Registers.Wdtconfig4.Define(this).WithValueField(0, 32, name: "WDTCONFIG4");
+            Registers.Wdtconfig0.Define(this, 0x00013214).WithValueField(0, 32, name: "WDTCONFIG0");
+            Registers.Wdtconfig1.Define(this, 0x00030D40).WithValueField(0, 32, name: "WDTCONFIG1");
+            Registers.Wdtconfig2.Define(this, 0x00013880).WithValueField(0, 32, name: "WDTCONFIG2");
+            Registers.Wdtconfig3.Define(this, 0x00000FFF).WithValueField(0, 32, name: "WDTCONFIG3");
+            Registers.Wdtconfig4.Define(this, 0x00000FFF).WithValueField(0, 32, name: "WDTCONFIG4");
             Registers.Wdtfeed.Define(this).WithValueField(0, 32, name: "WDTFEED");
-            Registers.Wdtwprotect.Define(this).WithValueField(0, 32, name: "WDTWPROTECT");
+            Registers.Wdtwprotect.Define(this, 0x50D83AA1).WithValueField(0, 32, name: "WDTWPROTECT");
 
             // SWD (super watchdog): 0xAC-0xB0
-            Registers.SwdConf.Define(this).WithValueField(0, 32, name: "SWD_CONF");
-            Registers.SwdWprotect.Define(this).WithValueField(0, 32, name: "SWD_WPROTECT");
+            Registers.SwdConf.Define(this, 0x04B00000).WithValueField(0, 32, name: "SWD_CONF");
+            Registers.SwdWprotect.Define(this, 0x8F1D312A).WithValueField(0, 32, name: "SWD_WPROTECT");
 
             // SW_CPU_STALL: 0xB4
             Registers.SwCpuStall.Define(this).WithValueField(0, 32, name: "SW_CPU_STALL");
@@ -202,19 +199,105 @@ namespace Antmicro.Renode.Peripherals.Miscellaneous
             DefineStoreRegister(Registers.Store6, 6);
             DefineStoreRegister(Registers.Store7, 7);
 
+            // LOW_POWER_ST: 0xC8
+            Registers.LowPowerSt.Define(this)
+                .WithValueField(0, 32, name: "LOW_POWER_ST");
+
+            // DIAG0: 0xCC
+            Registers.Diag0.Define(this)
+                .WithValueField(0, 32, name: "DIAG0");
+
+            // PAD_HOLD: 0xD0
+            Registers.PadHold.Define(this)
+                .WithValueField(0, 32, name: "PAD_HOLD");
+
+            // DIG_PAD_HOLD: 0xD4
+            Registers.DigPadHold.Define(this)
+                .WithValueField(0, 32, name: "DIG_PAD_HOLD");
+
             // BROWN_OUT: 0xD8
-            // Bit 30 = brownout enable, bit 31 = brownout detected
-            // Default: enabled but not detected
-            Registers.BrownOut.Define(this, 0x40000000)
+            Registers.BrownOut.Define(this, 0x43FF0010)
                 .WithValueField(0, 32, name: "BROWN_OUT");
+
+            // TIME_LOW1: 0xDC
+            Registers.TimeLow1.Define(this)
+                .WithValueField(0, 32, name: "TIME_LOW1");
+
+            // TIME_HIGH1: 0xE0
+            Registers.TimeHigh1.Define(this)
+                .WithValueField(0, 32, name: "TIME_HIGH1");
+
+            // XTAL32K_CLK_FACTOR: 0xE4
+            Registers.Xtal32kClkFactor.Define(this)
+                .WithValueField(0, 32, name: "XTAL32K_CLK_FACTOR");
+
+            // XTAL32K_CONF: 0xE8
+            Registers.Xtal32kConf.Define(this, 0x0FF00000)
+                .WithValueField(0, 32, name: "XTAL32K_CONF");
+
+            // USB_CONF: 0xEC
+            Registers.UsbConf.Define(this)
+                .WithValueField(0, 32, name: "USB_CONF");
+
+            // SLP_REJECT_CAUSE: 0xF0
+            Registers.SlpRejectCause.Define(this)
+                .WithValueField(0, 32, name: "SLP_REJECT_CAUSE");
+
+            // OPTION1: 0xF4
+            Registers.Option1.Define(this)
+                .WithValueField(0, 32, name: "OPTION1");
+
+            // SLP_WAKEUP_CAUSE: 0xF8
+            Registers.SlpWakeupCause.Define(this)
+                .WithValueField(0, 32, name: "SLP_WAKEUP_CAUSE");
+
+            // ULP_CP_TIMER_1: 0xFC
+            Registers.UlpCpTimer1.Define(this, 0x0000C800)
+                .WithValueField(0, 32, name: "ULP_CP_TIMER_1");
+
+            // INT_ENA_W1TS: 0x100
+            Registers.IntEnaW1ts.Define(this)
+                .WithValueField(0, 32, name: "INT_ENA_W1TS");
+
+            // INT_ENA_W1TC: 0x104
+            Registers.IntEnaW1tc.Define(this)
+                .WithValueField(0, 32, name: "INT_ENA_W1TC");
+
+            // RETENTION_CTRL: 0x108
+            Registers.RetentionCtrl.Define(this, 0xA0D00000)
+                .WithValueField(0, 32, name: "RETENTION_CTRL");
 
             // FIB_SEL: 0x10C (firmware integrity boot select)
             Registers.FibSel.Define(this, 0x00000007)
                 .WithValueField(0, 32, name: "FIB_SEL");
 
-            // SENSOR_CTRL: 0x11C (sensor control)
+            // GPIO_WAKEUP: 0x110
+            Registers.GpioWakeup.Define(this)
+                .WithValueField(0, 32, name: "GPIO_WAKEUP");
+
+            // DBG_SEL: 0x114
+            Registers.DbgSel.Define(this)
+                .WithValueField(0, 32, name: "DBG_SEL");
+
+            // DBG_MAP: 0x118
+            Registers.DbgMap.Define(this)
+                .WithValueField(0, 32, name: "DBG_MAP");
+
+            // SENSOR_CTRL: 0x11C
             Registers.SensorCtrl.Define(this)
                 .WithValueField(0, 32, name: "SENSOR_CTRL");
+
+            // DBG_SAR_SEL: 0x120
+            Registers.DbgSarSel.Define(this)
+                .WithValueField(0, 32, name: "DBG_SAR_SEL");
+
+            // PG_CTRL: 0x124
+            Registers.PgCtrl.Define(this)
+                .WithValueField(0, 32, name: "PG_CTRL");
+
+            // DATE: 0x1FC
+            Registers.Date.Define(this, 0x02007270)
+                .WithValueField(0, 32, name: "DATE");
         }
 
         private void DefineStoreRegister(Registers reg, int index)
@@ -263,7 +346,7 @@ namespace Antmicro.Renode.Peripherals.Miscellaneous
             Store1 = 0x54,
             Store2 = 0x58,
             Store3 = 0x5C,
-            SlpWakeupConf = 0x60,
+            ExtXtlConf = 0x60,
             ExtWakeupConf = 0x64,
             SlpRejectConf = 0x68,
             CpuPeriodConf = 0x6C,
@@ -271,7 +354,6 @@ namespace Antmicro.Renode.Peripherals.Miscellaneous
             SlowClkConf = 0x74,
             SdioConf = 0x78,
             BiasConf = 0x7C,
-            Reg = 0x80,
             Pwc = 0x84,
             DigPwc = 0x88,
             DigIsoReg = 0x8C,
@@ -289,9 +371,31 @@ namespace Antmicro.Renode.Peripherals.Miscellaneous
             Store5 = 0xBC,
             Store6 = 0xC0,
             Store7 = 0xC4,
+            LowPowerSt = 0xC8,
+            Diag0 = 0xCC,
+            PadHold = 0xD0,
+            DigPadHold = 0xD4,
             BrownOut = 0xD8,
+            TimeLow1 = 0xDC,
+            TimeHigh1 = 0xE0,
+            Xtal32kClkFactor = 0xE4,
+            Xtal32kConf = 0xE8,
+            UsbConf = 0xEC,
+            SlpRejectCause = 0xF0,
+            Option1 = 0xF4,
+            SlpWakeupCause = 0xF8,
+            UlpCpTimer1 = 0xFC,
+            IntEnaW1ts = 0x100,
+            IntEnaW1tc = 0x104,
+            RetentionCtrl = 0x108,
             FibSel = 0x10C,
+            GpioWakeup = 0x110,
+            DbgSel = 0x114,
+            DbgMap = 0x118,
             SensorCtrl = 0x11C,
+            DbgSarSel = 0x120,
+            PgCtrl = 0x124,
+            Date = 0x1FC,
         }
     }
 }
