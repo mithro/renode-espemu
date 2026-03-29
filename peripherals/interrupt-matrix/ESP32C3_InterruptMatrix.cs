@@ -18,6 +18,7 @@ using Antmicro.Renode.Core;
 using Antmicro.Renode.Core.Structure.Registers;
 using Antmicro.Renode.Logging;
 using Antmicro.Renode.Peripherals.Bus;
+using Antmicro.Renode.Peripherals.CPU;
 
 namespace Antmicro.Renode.Peripherals.IRQControllers
 {
@@ -114,15 +115,21 @@ namespace Antmicro.Renode.Peripherals.IRQControllers
                 return;
             }
 
-            // Fire the interrupt
+            // Fire the interrupt via MEIP (GPIO output 11).
+            // We set mcause on the CPU to the correct line number before
+            // triggering, so the vectored handler dispatches to the right entry.
             irqPending |= lineBit;
-            Connections[(int)line].Set(true);
 
-            // For edge-type interrupts, auto-deassert
-            if ((cpuIntType & lineBit) != 0)
-            {
-                Connections[(int)line].Set(false);
-            }
+            // Store mcause for the Python hook to read.
+            // Standard RISC-V sets mcause=0x8000000B for MEIP, but ESP32-C3
+            // firmware expects mcause = 0x80000000 | cpu_line_number.
+            pendingMcause = 0x80000000u | line;
+
+            // Assert MEIP and keep it high until firmware clears the interrupt
+            Connections[MeipLine].Set(true);
+            meipAsserted = true;
+
+            this.Log(LogLevel.Info, "Asserted MEIP for CPU line {0}", line);
         }
 
         private void ClearPendingForLine(uint line)
@@ -164,6 +171,10 @@ namespace Antmicro.Renode.Peripherals.IRQControllers
                     .WithValueField(0, 5, name: $"SOURCE_{srcCapture}_MAP",
                         writeCallback: (_, value) =>
                         {
+                            if (value != 0)
+                            {
+                                this.Log(LogLevel.Info, "Source {0} mapped to CPU int {1}", srcCapture, value & 0x1F);
+                            }
                             sourceMapping[srcCapture] = (uint)value;
                         },
                         valueProviderCallback: _ => sourceMapping[srcCapture]);
@@ -174,6 +185,7 @@ namespace Antmicro.Renode.Peripherals.IRQControllers
                 .WithValueField(0, 32, name: "CPU_INT_ENABLE",
                     writeCallback: (_, value) =>
                     {
+                        this.Log(LogLevel.Info, "CPU_INT_ENABLE = 0x{0:X8}", value);
                         cpuIntEnable = (uint)value;
                         CheckPendingInterrupts();
                     },
@@ -191,7 +203,14 @@ namespace Antmicro.Renode.Peripherals.IRQControllers
                     writeCallback: (_, value) =>
                     {
                         irqPending &= ~(uint)value;
-                        // Deassert cleared interrupt lines
+                        // Deassert MEIP if all pending interrupts cleared
+                        if (meipAsserted && (irqPending & cpuIntEnable) == 0)
+                        {
+                            Connections[MeipLine].Set(false);
+                            meipAsserted = false;
+                            this.Log(LogLevel.Info, "Deasserted MEIP");
+                        }
+                        // Also deassert individual lines (for GPIO wiring)
                         for (int i = 0; i < NumCpuInterrupts; i++)
                         {
                             if (((uint)value & (1u << i)) != 0)
@@ -221,9 +240,30 @@ namespace Antmicro.Renode.Peripherals.IRQControllers
                 .WithValueField(0, 4, name: "CPU_INT_THRESH",
                     writeCallback: (_, value) =>
                     {
-                        if (value != cpuIntThreshold)
+                        cpuIntThreshold = (uint)value;
+                        // When threshold rises (ISR entry), deassert MEIP to prevent re-entry.
+                        // When threshold drops (ISR exit), check pending and maybe re-assert.
+                        if (meipAsserted)
                         {
-                            cpuIntThreshold = (uint)value;
+                            // Check if any pending interrupt still meets the new threshold
+                            bool anyAboveThresh = false;
+                            for (int i = 1; i < NumCpuInterrupts; i++)
+                            {
+                                uint bit = 1u << i;
+                                if ((irqPending & cpuIntEnable & bit) != 0 && cpuIntPriority[i] >= cpuIntThreshold)
+                                {
+                                    anyAboveThresh = true;
+                                    break;
+                                }
+                            }
+                            if (!anyAboveThresh)
+                            {
+                                Connections[MeipLine].Set(false);
+                                meipAsserted = false;
+                            }
+                        }
+                        else
+                        {
                             CheckPendingInterrupts();
                         }
                     },
@@ -238,8 +278,18 @@ namespace Antmicro.Renode.Peripherals.IRQControllers
         private uint irqPending;
         private bool[] sourceLevel;
 
+        private bool meipAsserted;
+
+        /// <summary>
+        /// The mcause value that should be set when the CPU takes this interrupt.
+        /// Format: 0x80000000 | cpu_line_number
+        /// </summary>
+        public uint PendingMcause { get { return pendingMcause; } }
+        private uint pendingMcause;
+
         private const int NumSources = 64;
         private const int NumCpuInterrupts = 32;
+        private const int MeipLine = 11; // Machine External Interrupt Pending
 
         private enum Registers : long
         {
