@@ -70,6 +70,9 @@ namespace Antmicro.Renode.Peripherals.Timers
             innerTimer.LimitReached += OnTimerTick;
 
             DefineRegisters();
+
+            // Enable timer if default CONF has any unit/target work-enabled
+            UpdateTimerEnabled();
         }
 
         public override void Reset()
@@ -386,10 +389,15 @@ namespace Antmicro.Renode.Peripherals.Timers
                     },
                     valueProviderCallback: _ => intEna);
 
-            // 0x68: SYSTIMER_INT_RAW_REG (3 bits, read-only from software perspective;
-            //        set by hardware on alarm match)
+            // 0x68: SYSTIMER_INT_RAW_REG (3 bits, set by hardware on alarm match)
+            // Also accepts writes to OR in bits (for external trigger from .resc scripts)
             Registers.IntRaw.Define(this)
-                .WithValueField(0, 3, mode: FieldMode.Read, name: "INT_RAW",
+                .WithValueField(0, 3, name: "INT_RAW",
+                    writeCallback: (_, value) =>
+                    {
+                        intRaw |= (uint)value & 0x7;
+                        UpdateAllInterrupts();
+                    },
                     valueProviderCallback: _ => intRaw);
 
             // 0x6C: SYSTIMER_INT_CLR_REG (write-1-to-clear)
