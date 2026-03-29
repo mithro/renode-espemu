@@ -175,12 +175,15 @@ namespace Antmicro.Renode.Peripherals.Miscellaneous
                 .WithValueField(0, 32, name: "CLOCK_GATE");
 
             // 0x58: SYSCLK_CONF_REG
-            // [19] CLK_DIV_EN (RO, 0), [18:12] CLK_XTAL_FREQ (40 = 0x28),
-            // [11:10] SOC_CLK_SEL (0 = XTAL), [9:0] PRE_DIV_CNT (default 1)
-            // After ROM boot, firmware expects PLL at 160MHz: SOC_CLK_SEL=1 (PLL)
-            // Default with XTAL=40MHz: 0x28 << 12 | 0x01 = 0x00028001
+            // [19] CLK_DIV_EN (RO, 0), [18:12] CLK_XTAL_FREQ (RO, 40 = 0x28),
+            // [11:10] SOC_CLK_SEL (R/W, 0 = XTAL), [9:0] PRE_DIV_CNT (R/W, default 1)
             Registers.SysclkConf.Define(this, 0x00028001)
-                .WithValueField(0, 32, name: "SYSCLK_CONF");
+                .WithValueField(0, 10, name: "PRE_DIV_CNT")
+                .WithValueField(10, 2, name: "SOC_CLK_SEL")
+                .WithValueField(12, 7, mode: FieldMode.Read, name: "CLK_XTAL_FREQ",
+                    valueProviderCallback: _ => 40) // 40 MHz, read-only
+                .WithFlag(19, mode: FieldMode.Read, name: "CLK_DIV_EN")
+                .WithReservedBits(20, 12);
 
             // 0xFFC: DATE_REG
             // [27:0] DATE (default 0x2007150)

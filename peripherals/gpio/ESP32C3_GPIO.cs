@@ -79,18 +79,18 @@ namespace Antmicro.Renode.Peripherals.GPIOPort
 
             // GPIO_OUT_REG: 0x04 (output level, bits [25:0])
             Registers.Out.Define(this)
-                .WithValueField(0, 26, name: "OUT_DATA",
+                .WithValueField(0, 22, name: "OUT_DATA",
                     writeCallback: (_, value) => outData = (uint)value & PinMask,
                     valueProviderCallback: _ => outData);
 
             // GPIO_OUT_W1TS_REG: 0x08 (write-1-to-set output)
             Registers.OutW1ts.Define(this)
-                .WithValueField(0, 26, mode: FieldMode.Write, name: "OUT_W1TS",
+                .WithValueField(0, 22, mode: FieldMode.Write, name: "OUT_W1TS",
                     writeCallback: (_, value) => outData |= (uint)value & PinMask);
 
             // GPIO_OUT_W1TC_REG: 0x0C (write-1-to-clear output)
             Registers.OutW1tc.Define(this)
-                .WithValueField(0, 26, mode: FieldMode.Write, name: "OUT_W1TC",
+                .WithValueField(0, 22, mode: FieldMode.Write, name: "OUT_W1TC",
                     writeCallback: (_, value) => outData &= ~((uint)value & PinMask));
 
             // SDIO_SELECT: 0x1C
@@ -99,18 +99,18 @@ namespace Antmicro.Renode.Peripherals.GPIOPort
 
             // GPIO_ENABLE_REG: 0x20 (output enable, bits [25:0])
             Registers.Enable.Define(this)
-                .WithValueField(0, 26, name: "ENABLE_DATA",
+                .WithValueField(0, 22, name: "ENABLE_DATA",
                     writeCallback: (_, value) => enableData = (uint)value & PinMask,
                     valueProviderCallback: _ => enableData);
 
             // GPIO_ENABLE_W1TS_REG: 0x24
             Registers.EnableW1ts.Define(this)
-                .WithValueField(0, 26, mode: FieldMode.Write, name: "ENABLE_W1TS",
+                .WithValueField(0, 22, mode: FieldMode.Write, name: "ENABLE_W1TS",
                     writeCallback: (_, value) => enableData |= (uint)value & PinMask);
 
             // GPIO_ENABLE_W1TC_REG: 0x28
             Registers.EnableW1tc.Define(this)
-                .WithValueField(0, 26, mode: FieldMode.Write, name: "ENABLE_W1TC",
+                .WithValueField(0, 22, mode: FieldMode.Write, name: "ENABLE_W1TC",
                     writeCallback: (_, value) => enableData &= ~((uint)value & PinMask));
 
             // GPIO_STRAP_REG: 0x38 (read-only, boot strapping)
@@ -121,38 +121,38 @@ namespace Antmicro.Renode.Peripherals.GPIOPort
             // GPIO_IN_REG: 0x3C (read-only, input level)
             // For emulation: returns output data (loopback, independent of enable)
             Registers.In.Define(this)
-                .WithValueField(0, 26, mode: FieldMode.Read, name: "IN_DATA",
+                .WithValueField(0, 22, mode: FieldMode.Read, name: "IN_DATA",
                     valueProviderCallback: _ => outData);
 
             // GPIO_STATUS_REG: 0x44 (interrupt status, bits [25:0])
             Registers.Status.Define(this)
-                .WithValueField(0, 26, name: "STATUS_INT",
+                .WithValueField(0, 22, name: "STATUS_INT",
                     writeCallback: (_, value) => statusInt = (uint)value & PinMask,
                     valueProviderCallback: _ => statusInt);
 
             // GPIO_STATUS_W1TS_REG: 0x48
             Registers.StatusW1ts.Define(this)
-                .WithValueField(0, 26, mode: FieldMode.Write, name: "STATUS_W1TS",
+                .WithValueField(0, 22, mode: FieldMode.Write, name: "STATUS_W1TS",
                     writeCallback: (_, value) => statusInt |= (uint)value & PinMask);
 
             // GPIO_STATUS_W1TC_REG: 0x4C
             Registers.StatusW1tc.Define(this)
-                .WithValueField(0, 26, mode: FieldMode.Write, name: "STATUS_W1TC",
+                .WithValueField(0, 22, mode: FieldMode.Write, name: "STATUS_W1TC",
                     writeCallback: (_, value) => statusInt &= ~((uint)value & PinMask));
 
             // PCPU_INT: 0x5C (read-only, pro CPU interrupt status)
             Registers.PcpuInt.Define(this)
-                .WithValueField(0, 26, mode: FieldMode.Read, name: "PROCPU_INT",
+                .WithValueField(0, 22, mode: FieldMode.Read, name: "PROCPU_INT",
                     valueProviderCallback: _ => 0u);
 
             // PCPU_NMI_INT: 0x60 (read-only)
             Registers.PcpuNmiInt.Define(this)
-                .WithValueField(0, 26, mode: FieldMode.Read, name: "PROCPU_NMI_INT",
+                .WithValueField(0, 22, mode: FieldMode.Read, name: "PROCPU_NMI_INT",
                     valueProviderCallback: _ => 0u);
 
             // CPUSDIO_INT: 0x64 (read-only)
             Registers.CpuSdioInt.Define(this)
-                .WithValueField(0, 26, mode: FieldMode.Read, name: "SDIO_INT",
+                .WithValueField(0, 22, mode: FieldMode.Read, name: "SDIO_INT",
                     valueProviderCallback: _ => 0u);
 
             // GPIO_PINn_REG: 0x74 + n*4, for n = 0..21

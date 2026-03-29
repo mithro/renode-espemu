@@ -91,11 +91,13 @@ namespace Antmicro.Renode.Peripherals.Timers
             if (!timerEnabled)
                 return;
 
-            // Advance by a fixed step per access (emulation approximation)
+            // Advance scaled by divider (APB_CLK / divider ticks per step)
+            ulong step = 1000 / (ulong)timerDivider;
+            if (step == 0) step = 1;
             if (timerIncrease)
-                timerCounter += 1000;
-            else if (timerCounter >= 1000)
-                timerCounter -= 1000;
+                timerCounter += step;
+            else if (timerCounter >= step)
+                timerCounter -= step;
         }
 
         private void CheckAlarm()

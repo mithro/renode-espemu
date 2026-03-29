@@ -109,7 +109,7 @@ namespace Antmicro.Renode.Peripherals.Timers
             {
                 if (IsUnitWorkEnabled(unit))
                 {
-                    unitCounter[unit] += TimerTickInterval;
+                    unitCounter[unit] += (ulong)TimerTickInterval;
                     // Wrap at 52 bits
                     unitCounter[unit] &= CounterMask;
                 }
@@ -191,7 +191,9 @@ namespace Antmicro.Renode.Peripherals.Timers
 
         private void UpdateTimerEnabled()
         {
-            // Enable the inner timer if any unit or target is work-enabled
+            // Enable the inner timer if any unit is work-enabled
+            // (targets need a running unit to fire, but we check both
+            // so that enabling a target while a unit is running keeps the timer on)
             bool anyEnabled = false;
             for (int i = 0; i < NumUnits; i++)
             {
@@ -199,6 +201,17 @@ namespace Antmicro.Renode.Peripherals.Timers
                 {
                     anyEnabled = true;
                     break;
+                }
+            }
+            if (!anyEnabled)
+            {
+                for (int i = 0; i < NumTargets; i++)
+                {
+                    if (IsTargetWorkEnabled(i))
+                    {
+                        anyEnabled = true;
+                        break;
+                    }
                 }
             }
             innerTimer.Enabled = anyEnabled;
@@ -341,20 +354,28 @@ namespace Antmicro.Renode.Peripherals.Timers
                 .WithValueField(0, 20, mode: FieldMode.Read, name: "TIMER_UNIT0_VALUE_HI",
                     valueProviderCallback: _ => latchedHi[0]);
 
-            // 0x44: SYSTIMER_UNIT0_VALUE_LO_REG (read-only, latched)
+            // 0x44: SYSTIMER_UNIT0_VALUE_LO_REG (read-only, latched; clears VALUE_VALID)
             Registers.Unit0ValueLo.Define(this)
                 .WithValueField(0, 32, mode: FieldMode.Read, name: "TIMER_UNIT0_VALUE_LO",
-                    valueProviderCallback: _ => latchedLo[0]);
+                    valueProviderCallback: _ =>
+                    {
+                        unitValueValid[0] = false;
+                        return latchedLo[0];
+                    });
 
             // 0x48: SYSTIMER_UNIT1_VALUE_HI_REG (read-only, latched)
             Registers.Unit1ValueHi.Define(this)
                 .WithValueField(0, 20, mode: FieldMode.Read, name: "TIMER_UNIT1_VALUE_HI",
                     valueProviderCallback: _ => latchedHi[1]);
 
-            // 0x4C: SYSTIMER_UNIT1_VALUE_LO_REG (read-only, latched)
+            // 0x4C: SYSTIMER_UNIT1_VALUE_LO_REG (read-only, latched; clears VALUE_VALID)
             Registers.Unit1ValueLo.Define(this)
                 .WithValueField(0, 32, mode: FieldMode.Read, name: "TIMER_UNIT1_VALUE_LO",
-                    valueProviderCallback: _ => latchedLo[1]);
+                    valueProviderCallback: _ =>
+                    {
+                        unitValueValid[1] = false;
+                        return latchedLo[1];
+                    });
 
             // 0x50: SYSTIMER_COMP0_LOAD_REG (write trigger)
             Registers.Comp0Load.Define(this)
@@ -477,7 +498,7 @@ namespace Antmicro.Renode.Peripherals.Timers
         private const ulong CounterMask = (1UL << 52) - 1;   // 52-bit counter
         // Timer fires every 1600 counter ticks = 100 us at 16 MHz.
         // This gives reasonable alarm resolution without excessive overhead.
-        private const ulong TimerTickInterval = 1600;
+        private const long TimerTickInterval = 1600;
         // Default CONF: bit 30 (UNIT0_WORK_EN) = 1
         private const uint DefaultConfReg = 0x40000000;
 
