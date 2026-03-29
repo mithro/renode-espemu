@@ -5,9 +5,9 @@
 | Metric                        | Value     |
 |-------------------------------|-----------|
 | Boot progress score           | **5/5**   |
-| Peripherals implemented       | 7/11 (all C#: IntMatrix, eFuse, RTC, SysTimer, TimerGroup, System, RNG) |
-| Peripherals passing all tests | 0/0       |
-| Total Robot tests             | 0         |
+| Peripherals implemented       | 10 C#: IntMatrix, eFuse, RTC, SysTimer, TimerGroup, System, RNG/SYSCON, GPIO, ExtMem, UART |
+| Peripherals reviewed + fixed  | 10/10 (18 bugs found and fixed) |
+| Total Robot tests             | 3 passing |
 | Last update                   | 2026-03-29 |
 
 ## Peripheral Status

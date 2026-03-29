@@ -1,0 +1,15 @@
+# ESP-IDF build artifacts
+**/build/
+**/sdkconfig
+**/sdkconfig.old
+
+# Renode test artifacts
+robot_output.xml
+log.html
+report.html
+logs/
+snapshots/
+
+# Python
+__pycache__/
+*.pyc
