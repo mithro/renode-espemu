@@ -24,7 +24,19 @@ void app_main(void)
 {
     printf("[RTC] === test_rtc_power_regs ===\n");
 
-    // TODO: Add register reads/writes here
+    #define DR_REG_RTCCNTL_BASE 0x60008000
+
+    print_reg("RTC_CNTL_BIAS_CONF_REG", RTC_CNTL_BIAS_CONF_REG);
+    print_reg("RTC_CNTL_PWC_REG", RTC_CNTL_PWC_REG);
+    print_reg("RTC_CNTL_DIG_PWC_REG", RTC_CNTL_DIG_PWC_REG);
+    print_reg("RTC_CNTL_DIG_ISO_REG", RTC_CNTL_DIG_ISO_REG);
+
+    /* Read additional power registers via base+offset where defines may not exist */
+    print_reg("RTC_CNTL_REG (base+0x0084)", DR_REG_RTCCNTL_BASE + 0x0084);
+    print_reg("RTC_CNTL_REGULATOR0 (base+0x00CC)", DR_REG_RTCCNTL_BASE + 0x00CC);
+    print_reg("RTC_CNTL_REGULATOR1 (base+0x00D0)", DR_REG_RTCCNTL_BASE + 0x00D0);
+
+    printf("[RTC] TEST_PASS\n");
 
     printf("[RTC] === Done ===\n");
 

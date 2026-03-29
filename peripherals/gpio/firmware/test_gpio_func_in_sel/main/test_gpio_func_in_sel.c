@@ -24,7 +24,14 @@ void app_main(void)
 {
     printf("[GPIO] === test_gpio_func_in_sel ===\n");
 
-    // TODO: Add register reads/writes here
+    /* Read default value */
+    print_reg("GPIO_FUNC0_IN_SEL_CFG_REG (default)", GPIO_FUNC0_IN_SEL_CFG_REG);
+
+    /* Write a value and read back */
+    REG_WRITE_RAW(GPIO_FUNC0_IN_SEL_CFG_REG, 0x05);
+    printf("[GPIO] REG_WRITE addr=0x%08lx val=0x00000005  GPIO_FUNC0_IN_SEL_CFG_REG\n",
+           (unsigned long)GPIO_FUNC0_IN_SEL_CFG_REG);
+    print_reg("GPIO_FUNC0_IN_SEL_CFG_REG (readback)", GPIO_FUNC0_IN_SEL_CFG_REG);
 
     printf("[GPIO] === Done ===\n");
 

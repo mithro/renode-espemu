@@ -24,7 +24,9 @@ void app_main(void)
 {
     printf("[GPIO] === test_gpio_out_reset ===\n");
 
-    // TODO: Add register reads/writes here
+    print_reg("GPIO_OUT_REG", GPIO_OUT_REG);
+    print_reg("GPIO_ENABLE_REG", GPIO_ENABLE_REG);
+    print_reg("GPIO_STATUS_REG", GPIO_STATUS_REG);
 
     printf("[GPIO] === Done ===\n");
 

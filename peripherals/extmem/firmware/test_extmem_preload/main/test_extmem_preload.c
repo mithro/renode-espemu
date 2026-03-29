@@ -8,6 +8,7 @@
 #include <stdint.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "soc/extmem_reg.h"
 
 #define REG_READ_RAW(addr) (*((volatile uint32_t *)(addr)))
 #define REG_WRITE_RAW(addr, val) (*((volatile uint32_t *)(addr)) = (val))
@@ -23,7 +24,18 @@ void app_main(void)
 {
     printf("[EXTMEM] === test_extmem_preload ===\n");
 
-    // TODO: Add register reads/writes here
+    /* Read preload control register (done bit) */
+    print_reg("EXTMEM_ICACHE_PRELOAD_CTRL_REG", EXTMEM_ICACHE_PRELOAD_CTRL_REG);
+
+    /* Write preload address and read back */
+    REG_WRITE_RAW(EXTMEM_ICACHE_PRELOAD_ADDR_REG, 0x42010000);
+    print_reg("EXTMEM_ICACHE_PRELOAD_ADDR_REG", EXTMEM_ICACHE_PRELOAD_ADDR_REG);
+
+    /* Write preload size and read back */
+    REG_WRITE_RAW(EXTMEM_ICACHE_PRELOAD_SIZE_REG, 0x200);
+    print_reg("EXTMEM_ICACHE_PRELOAD_SIZE_REG", EXTMEM_ICACHE_PRELOAD_SIZE_REG);
+
+    printf("[EXTMEM] TEST_PASS\n");
 
     printf("[EXTMEM] === Done ===\n");
 

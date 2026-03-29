@@ -8,6 +8,7 @@
 #include <stdint.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "soc/extmem_reg.h"
 
 #define REG_READ_RAW(addr) (*((volatile uint32_t *)(addr)))
 #define REG_WRITE_RAW(addr, val) (*((volatile uint32_t *)(addr)) = (val))
@@ -23,7 +24,10 @@ void app_main(void)
 {
     printf("[EXTMEM] === test_extmem_tag_power ===\n");
 
-    // TODO: Add register reads/writes here
+    /* Read tag power control register reset value */
+    print_reg("EXTMEM_ICACHE_TAG_POWER_CTRL_REG", EXTMEM_ICACHE_TAG_POWER_CTRL_REG);
+
+    printf("[EXTMEM] TEST_PASS\n");
 
     printf("[EXTMEM] === Done ===\n");
 

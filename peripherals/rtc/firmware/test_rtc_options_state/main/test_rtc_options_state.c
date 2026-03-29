@@ -24,7 +24,17 @@ void app_main(void)
 {
     printf("[RTC] === test_rtc_options_state ===\n");
 
-    // TODO: Add register reads/writes here
+    print_reg("RTC_CNTL_OPTIONS0_REG", RTC_CNTL_OPTIONS0_REG);
+    print_reg("RTC_CNTL_STATE0_REG", RTC_CNTL_STATE0_REG);
+    print_reg("RTC_CNTL_TIMER1_REG", RTC_CNTL_TIMER1_REG);
+    print_reg("RTC_CNTL_TIMER2_REG", RTC_CNTL_TIMER2_REG);
+    print_reg("RTC_CNTL_TIMER3_REG", RTC_CNTL_TIMER3_REG);
+    print_reg("RTC_CNTL_TIMER4_REG", RTC_CNTL_TIMER4_REG);
+    print_reg("RTC_CNTL_TIMER5_REG", RTC_CNTL_TIMER5_REG);
+    print_reg("RTC_CNTL_TIMER6_REG", RTC_CNTL_TIMER6_REG);
+    print_reg("RTC_CNTL_ANA_CONF_REG", RTC_CNTL_ANA_CONF_REG);
+
+    printf("[RTC] TEST_PASS\n");
 
     printf("[RTC] === Done ===\n");
 

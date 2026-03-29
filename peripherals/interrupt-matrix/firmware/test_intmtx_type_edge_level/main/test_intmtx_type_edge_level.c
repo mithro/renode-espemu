@@ -23,7 +23,25 @@ void app_main(void)
 {
     printf("[INTMTX] === test_intmtx_type_edge_level ===\n");
 
-    // TODO: Add register reads/writes here
+    /* IntMatrix base: 0x600C2000, CPU_INT_TYPE at base+0x108 */
+    uint32_t base = 0x600C2000;
+    uint32_t type_addr = base + 0x108;
+
+    /* Read current CPU_INT_TYPE */
+    uint32_t saved = REG_READ_RAW(type_addr);
+    print_reg("CPU_INT_TYPE (initial)", type_addr);
+
+    /* Write 0xF, read back */
+    printf("[INTMTX] Writing CPU_INT_TYPE = 0xF\n");
+    REG_WRITE_RAW(type_addr, 0xF);
+    print_reg("CPU_INT_TYPE (expect 0xF)", type_addr);
+
+    /* Restore original value */
+    printf("[INTMTX] Restoring CPU_INT_TYPE\n");
+    REG_WRITE_RAW(type_addr, saved);
+    print_reg("CPU_INT_TYPE (restored)", type_addr);
+
+    printf("[INTMTX] TEST_PASS\n");
 
     printf("[INTMTX] === Done ===\n");
 

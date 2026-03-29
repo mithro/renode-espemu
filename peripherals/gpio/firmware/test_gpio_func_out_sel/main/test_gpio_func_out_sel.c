@@ -24,7 +24,24 @@ void app_main(void)
 {
     printf("[GPIO] === test_gpio_func_out_sel ===\n");
 
-    // TODO: Add register reads/writes here
+    /* Read FUNC0..FUNC4 OUT_SEL_CFG -- default should be 0x80 */
+    print_reg("GPIO_FUNC0_OUT_SEL_CFG_REG", GPIO_FUNC0_OUT_SEL_CFG_REG);
+    print_reg("GPIO_FUNC1_OUT_SEL_CFG_REG", GPIO_FUNC1_OUT_SEL_CFG_REG);
+    print_reg("GPIO_FUNC2_OUT_SEL_CFG_REG", GPIO_FUNC2_OUT_SEL_CFG_REG);
+    print_reg("GPIO_FUNC3_OUT_SEL_CFG_REG", GPIO_FUNC3_OUT_SEL_CFG_REG);
+    print_reg("GPIO_FUNC4_OUT_SEL_CFG_REG", GPIO_FUNC4_OUT_SEL_CFG_REG);
+
+    uint32_t v0 = REG_READ_RAW(GPIO_FUNC0_OUT_SEL_CFG_REG);
+    uint32_t v1 = REG_READ_RAW(GPIO_FUNC1_OUT_SEL_CFG_REG);
+    uint32_t v2 = REG_READ_RAW(GPIO_FUNC2_OUT_SEL_CFG_REG);
+    uint32_t v3 = REG_READ_RAW(GPIO_FUNC3_OUT_SEL_CFG_REG);
+    uint32_t v4 = REG_READ_RAW(GPIO_FUNC4_OUT_SEL_CFG_REG);
+
+    if (v0 == 0x80 && v1 == 0x80 && v2 == 0x80 && v3 == 0x80 && v4 == 0x80) {
+        printf("[GPIO] TEST_PASS\n");
+    } else {
+        printf("[GPIO] TEST_FAIL (expected all 0x80)\n");
+    }
 
     printf("[GPIO] === Done ===\n");
 

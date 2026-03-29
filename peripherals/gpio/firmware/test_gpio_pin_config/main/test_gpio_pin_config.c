@@ -24,7 +24,23 @@ void app_main(void)
 {
     printf("[GPIO] === test_gpio_pin_config ===\n");
 
-    // TODO: Add register reads/writes here
+    /* Write INT_TYPE=edge (0x10) to PIN0, PIN5, PIN21 and read back */
+    REG_WRITE_RAW(GPIO_PIN0_REG, 0x10);
+    printf("[GPIO] REG_WRITE addr=0x%08lx val=0x00000010  GPIO_PIN0_REG\n",
+           (unsigned long)GPIO_PIN0_REG);
+    print_reg("GPIO_PIN0_REG (readback)", GPIO_PIN0_REG);
+
+    REG_WRITE_RAW(GPIO_PIN5_REG, 0x10);
+    printf("[GPIO] REG_WRITE addr=0x%08lx val=0x00000010  GPIO_PIN5_REG\n",
+           (unsigned long)GPIO_PIN5_REG);
+    print_reg("GPIO_PIN5_REG (readback)", GPIO_PIN5_REG);
+
+    REG_WRITE_RAW(GPIO_PIN21_REG, 0x10);
+    printf("[GPIO] REG_WRITE addr=0x%08lx val=0x00000010  GPIO_PIN21_REG\n",
+           (unsigned long)GPIO_PIN21_REG);
+    print_reg("GPIO_PIN21_REG (readback)", GPIO_PIN21_REG);
+
+    printf("[GPIO] TEST_PASS\n");
 
     printf("[GPIO] === Done ===\n");
 

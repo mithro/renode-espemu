@@ -24,7 +24,7 @@ void app_main(void)
 {
     printf("[GPIO] === test_gpio_strap ===\n");
 
-    // TODO: Add register reads/writes here
+    print_reg("GPIO_STRAP_REG", GPIO_STRAP_REG);
 
     printf("[GPIO] === Done ===\n");
 

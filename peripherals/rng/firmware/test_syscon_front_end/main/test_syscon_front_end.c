@@ -24,7 +24,7 @@ void app_main(void)
 {
     printf("[SYSCON] === test_syscon_front_end ===\n");
 
-    // TODO: Add register reads/writes here
+    print_reg("SYSCON_FRONT_END_MEM_PD_REG", SYSCON_FRONT_END_MEM_PD_REG);
 
     printf("[SYSCON] === Done ===\n");
 

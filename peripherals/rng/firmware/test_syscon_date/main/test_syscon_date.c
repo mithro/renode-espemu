@@ -24,7 +24,15 @@ void app_main(void)
 {
     printf("[SYSCON] === test_syscon_date ===\n");
 
-    // TODO: Add register reads/writes here
+    uint32_t date_val = REG_READ_RAW(SYSCON_DATE_REG);
+    printf("[SYSCON] REG_READ  addr=0x%08lx val=0x%08lx  SYSCON_DATE_REG\n",
+           (unsigned long)SYSCON_DATE_REG, (unsigned long)date_val);
+
+    if (date_val != 0) {
+        printf("[SYSCON] TEST_PASS\n");
+    } else {
+        printf("[SYSCON] TEST_FAIL (SYSCON_DATE_REG is zero)\n");
+    }
 
     printf("[SYSCON] === Done ===\n");
 

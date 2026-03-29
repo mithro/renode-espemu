@@ -24,7 +24,17 @@ void app_main(void)
 {
     printf("[GPIO] === test_gpio_clock_date ===\n");
 
-    // TODO: Add register reads/writes here
+    print_reg("GPIO_CLOCK_GATE_REG", GPIO_CLOCK_GATE_REG);
+
+    uint32_t date_val = REG_READ_RAW(GPIO_DATE_REG);
+    printf("[GPIO] REG_READ  addr=0x%08lx val=0x%08lx  GPIO_DATE_REG\n",
+           (unsigned long)GPIO_DATE_REG, (unsigned long)date_val);
+
+    if (date_val != 0) {
+        printf("[GPIO] TEST_PASS\n");
+    } else {
+        printf("[GPIO] TEST_FAIL (GPIO_DATE_REG is zero)\n");
+    }
 
     printf("[GPIO] === Done ===\n");
 

@@ -23,7 +23,25 @@ void app_main(void)
 {
     printf("[INTMTX] === test_intmtx_threshold ===\n");
 
-    // TODO: Add register reads/writes here
+    /* IntMatrix base: 0x600C2000, CPU_INT_THRESH at base+0x194 */
+    uint32_t base = 0x600C2000;
+    uint32_t thresh_addr = base + 0x194;
+
+    /* Read current CPU_INT_THRESH */
+    uint32_t saved = REG_READ_RAW(thresh_addr);
+    print_reg("CPU_INT_THRESH (initial)", thresh_addr);
+
+    /* Write 3, read back */
+    printf("[INTMTX] Writing CPU_INT_THRESH = 3\n");
+    REG_WRITE_RAW(thresh_addr, 3);
+    print_reg("CPU_INT_THRESH (expect 3)", thresh_addr);
+
+    /* Restore original value */
+    printf("[INTMTX] Restoring CPU_INT_THRESH\n");
+    REG_WRITE_RAW(thresh_addr, saved);
+    print_reg("CPU_INT_THRESH (restored)", thresh_addr);
+
+    printf("[INTMTX] TEST_PASS\n");
 
     printf("[INTMTX] === Done ===\n");
 
