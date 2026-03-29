@@ -1,0 +1,68 @@
+## ESP32-C3 common setup script for peripheral test firmware
+## Usage: set $firmware_elf and $firmware_bin before including this script
+##
+## Example:
+##   $firmware_elf = "/path/to/test_efuse.elf"
+##   $firmware_bin = "/path/to/test_efuse.bin"
+##   include @/path/to/esp32c3_setup.resc
+
+$base="/home/tim/github/mithro/renode-espemu"
+
+using sysbus
+include @/home/tim/github/mithro/renode-espemu/peripherals/interrupt-matrix/ESP32C3_InterruptMatrix.cs
+include @/home/tim/github/mithro/renode-espemu/peripherals/efuse/ESP32C3_eFuse.cs
+include @/home/tim/github/mithro/renode-espemu/peripherals/rtc/ESP32C3_RTC.cs
+include @/home/tim/github/mithro/renode-espemu/peripherals/systimer/ESP32C3_SysTimer.cs
+include @/home/tim/github/mithro/renode-espemu/peripherals/timer-group/ESP32C3_TimerGroup.cs
+include @/home/tim/github/mithro/renode-espemu/peripherals/system/ESP32C3_System.cs
+include @/home/tim/github/mithro/renode-espemu/peripherals/rng/ESP32C3_RNG.cs
+include @/home/tim/github/mithro/renode-espemu/peripherals/gpio/ESP32C3_GPIO.cs
+include @/home/tim/github/mithro/renode-espemu/peripherals/extmem/ESP32C3_ExtMem.cs
+include @/home/tim/github/mithro/renode-espemu/peripherals/uart/ESP32C3_UART.cs
+mach create "esp32c3"
+machine LoadPlatformDescription @/home/tim/github/mithro/renode-espemu/platforms/cpus/esp32c3.repl
+
+sysbus LoadELF @/home/tim/esp/esp-rom-elfs/esp32c3_rev3_rom.elf
+sysbus LoadELF $firmware_elf
+sysbus LoadBinary @/home/tim/github/mithro/renode-espemu/hello_world/firmware/flash_header_128k.bin 0x3C000000
+sysbus LoadBinary $firmware_bin 0x3C020000
+sysbus LoadBinary @/home/tim/github/mithro/renode-espemu/platforms/rom_data_segment.bin 0x3FF00000
+cpu SP 0x3FCE0000
+sysbus LoadBinary @/home/tim/github/mithro/renode-espemu/platforms/rom_func_stubs.bin 0x50001D00
+
+# Patch rom function tables after BSS clear
+cpu AddHook 0x40380338 "machine.SystemBus.WriteDoubleWord(0x3FCDF5B8, 0x50001D00); machine.SystemBus.WriteDoubleWord(0x3FCDFFD4, 0x50001D00)"
+
+# Patch init_flash to return ESP_OK immediately (li a0,0; ret)
+sysbus WriteWord 0x42000526 0x4501
+sysbus WriteWord 0x42000528 0x8082
+
+# Skip delay functions (cycle counter doesn't increment)
+set skip_func
+"""
+cpu.PC = cpu.GetRegister(1).RawValue
+"""
+cpu AddHook 0x400462CC $skip_func
+cpu AddHook 0x40000050 $skip_func
+
+# Skip brownout ISR
+cpu AddHook 0x403805EE $skip_func
+
+# Skip memprot section
+set skip_memprot
+"""
+from Antmicro.Renode.Peripherals.CPU import RegisterValue
+cpu.PC = RegisterValue.Create(0x403804E4, 32)
+"""
+cpu AddHook 0x403804B2 $skip_memprot
+
+# Fix mcause at _interrupt_handler entry
+set fix_mcause
+"""
+intmatrix = machine['sysbus.intmatrix']
+pending = intmatrix.PendingMcause
+if pending != 0:
+    from Antmicro.Renode.Peripherals.CPU import RegisterValue
+    cpu.SetRegister(9, RegisterValue.Create(pending, 32))
+"""
+cpu AddHook 0x4038022E $fix_mcause
