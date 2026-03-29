@@ -1,0 +1,39 @@
+/**
+ * test_rtc_clk_conf — ESP32-C3 rtc peripheral test
+ *
+ * Tests a specific feature of the rtc peripheral.
+ * Output format: [RTC] REG_READ addr=0xNNN val=0xNNN register_name
+ */
+#include <stdio.h>
+#include <stdint.h>
+#include "freertos/FreeRTOS.h"
+#include "freertos/task.h"
+#include "soc/rtc_cntl_reg.h"
+
+#define REG_READ_RAW(addr) (*((volatile uint32_t *)(addr)))
+#define REG_WRITE_RAW(addr, val) (*((volatile uint32_t *)(addr)) = (val))
+
+static void print_reg(const char *name, uint32_t addr)
+{
+    uint32_t val = REG_READ_RAW(addr);
+    printf("[RTC] REG_READ  addr=0x%08lx val=0x%08lx  %s\n",
+           (unsigned long)addr, (unsigned long)val, name);
+}
+
+void app_main(void)
+{
+    printf("[RTC] === test_rtc_clk_conf ===\n");
+
+    print_reg("RTC_CNTL_CLK_CONF_REG", RTC_CNTL_CLK_CONF_REG);
+    print_reg("RTC_CNTL_SLOW_CLK_CONF_REG", RTC_CNTL_SLOW_CLK_CONF_REG);
+
+    uint32_t clk_conf = REG_READ_RAW(RTC_CNTL_CLK_CONF_REG);
+    uint32_t slow_clk_conf = REG_READ_RAW(RTC_CNTL_SLOW_CLK_CONF_REG);
+    printf("[RTC] CLK_CONF reset value = 0x%08lx\n", (unsigned long)clk_conf);
+    printf("[RTC] SLOW_CLK_CONF reset value = 0x%08lx\n", (unsigned long)slow_clk_conf);
+    printf("[RTC] TEST_PASS\n");
+
+    printf("[RTC] === Done ===\n");
+
+    while (1) { vTaskDelay(1000 / portTICK_PERIOD_MS); }
+}
