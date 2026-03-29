@@ -82,16 +82,17 @@ start
 sleep 1
 pause
 
-# Firmware has completed init. Fire interrupts to wake scheduler.
-# Source 37 = SYSTIMER_TARGET0 → CPU int line (configured by firmware)
-# Source 50 = FROM_CPU_INTR0 → CPU int line (configured by firmware)
-# Enable MEIE (bit 11) in MIE and MIE (bit 3) in MSTATUS
-# Set SYSTIMER INT_RAW bit 0 (TARGET0 alarm) before firing source 37,
-# so the ISR sees alarm status in SYSTIMER_INT_ST_REG.
-
-# Tick 1: systimer alarm + cross-core interrupt
+# Firmware has completed init. FreeRTOS scheduler is running but needs
+# one interrupt kick to start task switching. After the first tick,
+# the C# SYSTIMER auto-fires subsequent alarms via GPIO → intmatrix.
+#
+# Enable MEIE (bit 11) in MIE and MIE (bit 3) in MSTATUS.
+# ESP32-C3 firmware uses CLIC-style interrupt control and doesn't set
+# standard RISC-V mie/mip, so we must force-enable MEIE.
 cpu MIE 0x800
 cpu MSTATUS 0x1808
+
+# Single manual kick: set SYSTIMER INT_RAW + fire interrupt sources
 sysbus WriteDoubleWord 0x60023068 0x1
 sysbus.intmatrix OnGPIO 37 true
 sysbus.intmatrix OnGPIO 50 true
@@ -101,47 +102,9 @@ pause
 sysbus.intmatrix OnGPIO 37 false
 sysbus.intmatrix OnGPIO 50 false
 
-# Tick 2: systimer alarm
-cpu MIE 0x800
-sysbus WriteDoubleWord 0x60023068 0x1
-sysbus.intmatrix OnGPIO 37 true
+# Let SYSTIMER auto-fire handle subsequent ticks
 start
-sleep 0.1
-pause
-sysbus.intmatrix OnGPIO 37 false
-
-# Tick 3: cross-core interrupt
-cpu MIE 0x800
-sysbus.intmatrix OnGPIO 50 true
-start
-sleep 0.1
-pause
-sysbus.intmatrix OnGPIO 50 false
-
-# Tick 4: systimer alarm
-cpu MIE 0x800
-sysbus WriteDoubleWord 0x60023068 0x1
-sysbus.intmatrix OnGPIO 37 true
-start
-sleep 0.1
-pause
-sysbus.intmatrix OnGPIO 37 false
-
-# Tick 5: cross-core interrupt
-cpu MIE 0x800
-sysbus.intmatrix OnGPIO 50 true
-start
-sleep 0.5
-pause
-sysbus.intmatrix OnGPIO 50 false
-
-# Tick 6+: both, longer run
-cpu MIE 0x800
-sysbus WriteDoubleWord 0x60023068 0x1
-sysbus.intmatrix OnGPIO 37 true
-sysbus.intmatrix OnGPIO 50 true
-start
-sleep 2
+sleep 3
 pause
 
 cpu PC
