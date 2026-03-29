@@ -23,7 +23,33 @@ void app_main(void)
 {
     printf("[INTMTX] === test_intmtx_firmware_config ===\n");
 
-    // TODO: Add register reads/writes here
+    /* IntMatrix base: 0x600C2000 */
+    uint32_t base = 0x600C2000;
+
+    /* Read current source mappings as configured by ESP-IDF boot */
+    printf("[INTMTX] --- Non-zero source mappings (ESP-IDF boot config) ---\n");
+    for (int src = 0; src < 62; src++) {
+        uint32_t addr = base + src * 4;
+        uint32_t val = REG_READ_RAW(addr);
+        if (val != 0) {
+            printf("[INTMTX] REG_READ  addr=0x%08lx val=0x%08lx  SRC_%d -> line %lu\n",
+                   (unsigned long)addr, (unsigned long)val, src, (unsigned long)val);
+        }
+    }
+
+    /* Read CPU_INT_ENABLE */
+    print_reg("CPU_INT_ENABLE", base + 0x104);
+
+    /* Read priorities for lines 1..31 */
+    printf("[INTMTX] --- Interrupt priorities ---\n");
+    for (int i = 1; i <= 31; i++) {
+        uint32_t addr = base + 0x114 + i * 4;
+        uint32_t val = REG_READ_RAW(addr);
+        if (val != 0) {
+            printf("[INTMTX] REG_READ  addr=0x%08lx val=0x%08lx  CPU_INT_PRI_%d\n",
+                   (unsigned long)addr, (unsigned long)val, i);
+        }
+    }
 
     printf("[INTMTX] === Done ===\n");
 

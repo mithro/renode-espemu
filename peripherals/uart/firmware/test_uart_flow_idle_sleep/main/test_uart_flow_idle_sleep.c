@@ -8,6 +8,7 @@
 #include <stdint.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "soc/uart_reg.h"
 
 #define REG_READ_RAW(addr) (*((volatile uint32_t *)(addr)))
 #define REG_WRITE_RAW(addr, val) (*((volatile uint32_t *)(addr)) = (val))
@@ -23,7 +24,16 @@ void app_main(void)
 {
     printf("[UART] === test_uart_flow_idle_sleep ===\n");
 
-    // TODO: Add register reads/writes here
+    /* Read FLOW_CONF reset value */
+    print_reg("UART_FLOW_CONF_REG", UART_FLOW_CONF_REG(0));
+
+    /* Read IDLE_CONF reset value */
+    print_reg("UART_IDLE_CONF_REG", UART_IDLE_CONF_REG(0));
+
+    /* Read SLEEP_CONF reset value */
+    print_reg("UART_SLEEP_CONF_REG", UART_SLEEP_CONF_REG(0));
+
+    printf("[UART] TEST_PASS\n");
 
     printf("[UART] === Done ===\n");
 

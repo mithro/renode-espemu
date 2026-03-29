@@ -8,6 +8,7 @@
 #include <stdint.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "soc/extmem_reg.h"
 
 #define REG_READ_RAW(addr) (*((volatile uint32_t *)(addr)))
 #define REG_WRITE_RAW(addr, val) (*((volatile uint32_t *)(addr)) = (val))
@@ -23,7 +24,13 @@ void app_main(void)
 {
     printf("[EXTMEM] === test_extmem_conf_date ===\n");
 
-    // TODO: Add register reads/writes here
+    /* Read cache conf misc register */
+    print_reg("EXTMEM_CACHE_CONF_MISC_REG", EXTMEM_CACHE_CONF_MISC_REG);
+
+    /* Read date register */
+    print_reg("EXTMEM_DATE_REG", EXTMEM_DATE_REG);
+
+    printf("[EXTMEM] TEST_PASS\n");
 
     printf("[EXTMEM] === Done ===\n");
 

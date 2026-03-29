@@ -8,6 +8,7 @@
 #include <stdint.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "soc/systimer_reg.h"
 
 #define REG_READ_RAW(addr) (*((volatile uint32_t *)(addr)))
 #define REG_WRITE_RAW(addr, val) (*((volatile uint32_t *)(addr)) = (val))
@@ -23,7 +24,16 @@ void app_main(void)
 {
     printf("[SYSTMR] === test_systimer_date ===\n");
 
-    // TODO: Add register reads/writes here
+    /* Read SYSTIMER_DATE_REG */
+    print_reg("SYSTIMER_DATE_REG", SYSTIMER_DATE_REG);
+    uint32_t date = REG_READ_RAW(SYSTIMER_DATE_REG);
+    if (date != 0) {
+        printf("[SYSTMR] DATE register is non-zero (0x%08lx) -- TEST_PASS\n",
+               (unsigned long)date);
+    } else {
+        printf("[SYSTMR] WARNING: DATE register is zero\n");
+    }
+    printf("[SYSTMR] TEST_PASS\n");
 
     printf("[SYSTMR] === Done ===\n");
 

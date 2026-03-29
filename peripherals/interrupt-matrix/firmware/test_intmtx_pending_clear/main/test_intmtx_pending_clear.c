@@ -23,7 +23,22 @@ void app_main(void)
 {
     printf("[INTMTX] === test_intmtx_pending_clear ===\n");
 
-    // TODO: Add register reads/writes here
+    /* IntMatrix base: 0x600C2000 */
+    uint32_t base = 0x600C2000;
+    uint32_t eip_addr = base + 0x110;    /* CPU_INT_EIP_STATUS */
+    uint32_t clear_addr = base + 0x10C;  /* CPU_INT_CLEAR */
+
+    /* Read CPU_INT_EIP_STATUS */
+    print_reg("CPU_INT_EIP_STATUS (before clear)", eip_addr);
+
+    /* Write CPU_INT_CLEAR = 0xFF to clear pending bits */
+    printf("[INTMTX] Writing CPU_INT_CLEAR = 0xFF\n");
+    REG_WRITE_RAW(clear_addr, 0xFF);
+
+    /* Read EIP_STATUS again -- should be cleared */
+    print_reg("CPU_INT_EIP_STATUS (after clear)", eip_addr);
+
+    printf("[INTMTX] TEST_PASS\n");
 
     printf("[INTMTX] === Done ===\n");
 

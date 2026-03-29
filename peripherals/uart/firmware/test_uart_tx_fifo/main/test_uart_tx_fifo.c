@@ -8,6 +8,7 @@
 #include <stdint.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "soc/uart_reg.h"
 
 #define REG_READ_RAW(addr) (*((volatile uint32_t *)(addr)))
 #define REG_WRITE_RAW(addr, val) (*((volatile uint32_t *)(addr)) = (val))
@@ -23,7 +24,14 @@ void app_main(void)
 {
     printf("[UART] === test_uart_tx_fifo ===\n");
 
-    // TODO: Add register reads/writes here
+    /* Write 'A' to FIFO register -- verify write doesn't crash */
+    REG_WRITE_RAW(UART_FIFO_REG(0), 'A');
+    printf("[UART] Wrote 0x41 ('A') to UART_FIFO_REG\n");
+
+    /* Read STATUS to see if TXFIFO_CNT reflects the write */
+    print_reg("UART_STATUS_REG", UART_STATUS_REG(0));
+
+    printf("[UART] TEST_PASS\n");
 
     printf("[UART] === Done ===\n");
 

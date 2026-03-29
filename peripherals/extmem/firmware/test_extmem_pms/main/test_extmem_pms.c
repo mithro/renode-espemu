@@ -8,6 +8,7 @@
 #include <stdint.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "soc/extmem_reg.h"
 
 #define REG_READ_RAW(addr) (*((volatile uint32_t *)(addr)))
 #define REG_WRITE_RAW(addr, val) (*((volatile uint32_t *)(addr)) = (val))
@@ -23,7 +24,24 @@ void app_main(void)
 {
     printf("[EXTMEM] === test_extmem_pms ===\n");
 
-    // TODO: Add register reads/writes here
+    /* ExtMem base = 0x600C4000 */
+    #define EXTMEM_BASE 0x600C4000
+
+    /* Read IBUS PMS registers using base+offset */
+    print_reg("EXTMEM_IBUS_PMS_TBL_LOCK_REG", EXTMEM_IBUS_PMS_TBL_LOCK_REG);
+    print_reg("EXTMEM_IBUS_PMS_TBL_BOUNDARY0_REG", EXTMEM_IBUS_PMS_TBL_BOUNDARY0_REG);
+    print_reg("EXTMEM_IBUS_PMS_TBL_BOUNDARY1_REG", EXTMEM_IBUS_PMS_TBL_BOUNDARY1_REG);
+    print_reg("EXTMEM_IBUS_PMS_TBL_BOUNDARY2_REG", EXTMEM_IBUS_PMS_TBL_BOUNDARY2_REG);
+    print_reg("EXTMEM_IBUS_PMS_TBL_ATTR_REG", EXTMEM_IBUS_PMS_TBL_ATTR_REG);
+
+    /* Read DBUS PMS registers */
+    print_reg("EXTMEM_DBUS_PMS_TBL_LOCK_REG", EXTMEM_DBUS_PMS_TBL_LOCK_REG);
+    print_reg("EXTMEM_DBUS_PMS_TBL_BOUNDARY0_REG", EXTMEM_DBUS_PMS_TBL_BOUNDARY0_REG);
+    print_reg("EXTMEM_DBUS_PMS_TBL_BOUNDARY1_REG", EXTMEM_DBUS_PMS_TBL_BOUNDARY1_REG);
+    print_reg("EXTMEM_DBUS_PMS_TBL_BOUNDARY2_REG", EXTMEM_DBUS_PMS_TBL_BOUNDARY2_REG);
+    print_reg("EXTMEM_DBUS_PMS_TBL_ATTR_REG", EXTMEM_DBUS_PMS_TBL_ATTR_REG);
+
+    printf("[EXTMEM] TEST_PASS\n");
 
     printf("[EXTMEM] === Done ===\n");
 

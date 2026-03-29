@@ -8,6 +8,7 @@
 #include <stdint.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "soc/extmem_reg.h"
 
 #define REG_READ_RAW(addr) (*((volatile uint32_t *)(addr)))
 #define REG_WRITE_RAW(addr, val) (*((volatile uint32_t *)(addr)) = (val))
@@ -23,7 +24,13 @@ void app_main(void)
 {
     printf("[EXTMEM] === test_extmem_freeze ===\n");
 
-    // TODO: Add register reads/writes here
+    /* Read freeze register (freeze_done bit) */
+    print_reg("EXTMEM_ICACHE_FREEZE_REG", EXTMEM_ICACHE_FREEZE_REG);
+    uint32_t freeze = REG_READ_RAW(EXTMEM_ICACHE_FREEZE_REG);
+    uint32_t freeze_done = (freeze >> 1) & 0x1;
+    printf("[EXTMEM] ICACHE_FREEZE freeze_done bit = %lu\n", (unsigned long)freeze_done);
+
+    printf("[EXTMEM] TEST_PASS\n");
 
     printf("[EXTMEM] === Done ===\n");
 
