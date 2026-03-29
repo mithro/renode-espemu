@@ -8,6 +8,7 @@ include @peripherals/system/ESP32C3_System.cs
 include @peripherals/rng/ESP32C3_RNG.cs
 include @peripherals/gpio/ESP32C3_GPIO.cs
 include @peripherals/extmem/ESP32C3_ExtMem.cs
+include @peripherals/uart/ESP32C3_UART.cs
 mach create "esp32c3"
 machine LoadPlatformDescription @platforms/cpus/esp32c3.repl
 
