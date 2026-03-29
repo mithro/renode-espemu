@@ -170,6 +170,21 @@ namespace Antmicro.Renode.Peripherals.UART
                     .WithValueField(0, 32, name: "CONF1")
                 },
 
+                // UART_LOWPULSE_REG: 0x28 (RO, baud detection)
+                {(long)Registers.LowPulse, new DoubleWordRegister(this)
+                    .WithValueField(0, 32, FieldMode.Read, name: "LOWPULSE")
+                },
+
+                // UART_HIGHPULSE_REG: 0x2C (RO, baud detection)
+                {(long)Registers.HighPulse, new DoubleWordRegister(this)
+                    .WithValueField(0, 32, FieldMode.Read, name: "HIGHPULSE")
+                },
+
+                // UART_RXD_CNT_REG: 0x30 (RO, edge count)
+                {(long)Registers.RxdCnt, new DoubleWordRegister(this)
+                    .WithValueField(0, 32, FieldMode.Read, name: "RXD_CNT")
+                },
+
                 // UART_FLOW_CONF_REG: 0x34
                 {(long)Registers.FlowConf, new DoubleWordRegister(this)
                     .WithValueField(0, 32, name: "FLOW_CONF")
@@ -180,9 +195,34 @@ namespace Antmicro.Renode.Peripherals.UART
                     .WithValueField(0, 32, name: "SLEEP_CONF")
                 },
 
-                // UART_IDLE_CONF_REG: 0x40
+                // UART_SWFC_CONF0_REG: 0x3C
+                {(long)Registers.SwfcConf0, new DoubleWordRegister(this)
+                    .WithValueField(0, 32, name: "SWFC_CONF0")
+                },
+
+                // UART_SWFC_CONF1_REG: 0x40
+                {(long)Registers.SwfcConf1, new DoubleWordRegister(this)
+                    .WithValueField(0, 32, name: "SWFC_CONF1")
+                },
+
+                // UART_TXBRK_CONF_REG: 0x44
+                {(long)Registers.TxbrkConf, new DoubleWordRegister(this)
+                    .WithValueField(0, 32, name: "TXBRK_CONF")
+                },
+
+                // UART_IDLE_CONF_REG: 0x48
                 {(long)Registers.IdleConf, new DoubleWordRegister(this)
                     .WithValueField(0, 32, name: "IDLE_CONF")
+                },
+
+                // UART_RS485_CONF_REG: 0x4C
+                {(long)Registers.Rs485Conf, new DoubleWordRegister(this)
+                    .WithValueField(0, 32, name: "RS485_CONF")
+                },
+
+                // UART_MEM_TX_STATUS_REG: 0x5C (RO)
+                {(long)Registers.MemTxStatus, new DoubleWordRegister(this)
+                    .WithValueField(0, 32, FieldMode.Read, name: "MEM_TX_STATUS")
                 },
 
                 // UART_MEM_CONF_REG: 0x60
@@ -190,10 +230,25 @@ namespace Antmicro.Renode.Peripherals.UART
                     .WithValueField(0, 32, name: "MEM_CONF")
                 },
 
+                // UART_MEM_RX_STATUS_REG: 0x64 (RO)
+                {(long)Registers.MemRxStatus, new DoubleWordRegister(this)
+                    .WithValueField(0, 32, FieldMode.Read, name: "MEM_RX_STATUS")
+                },
+
                 // UART_FSM_STATUS_REG: 0x6C (read-only FSM state)
                 {(long)Registers.FsmStatus, new DoubleWordRegister(this)
                     .WithValueField(0, 32, FieldMode.Read, name: "FSM_STATUS",
                         valueProviderCallback: _ => 0u) // idle
+                },
+
+                // UART_POSPULSE_REG: 0x70 (RO, baud detection)
+                {(long)Registers.PosPulse, new DoubleWordRegister(this)
+                    .WithValueField(0, 32, FieldMode.Read, name: "POSPULSE")
+                },
+
+                // UART_NEGPULSE_REG: 0x74 (RO, baud detection)
+                {(long)Registers.NegPulse, new DoubleWordRegister(this)
+                    .WithValueField(0, 32, FieldMode.Read, name: "NEGPULSE")
                 },
 
                 // UART_CLK_CONF_REG: 0x78
@@ -230,11 +285,22 @@ namespace Antmicro.Renode.Peripherals.UART
             Status = 0x1C,
             Conf0 = 0x20,
             Conf1 = 0x24,
+            LowPulse = 0x28,
+            HighPulse = 0x2C,
+            RxdCnt = 0x30,
             FlowConf = 0x34,
             SleepConf = 0x38,
-            IdleConf = 0x40,
+            SwfcConf0 = 0x3C,
+            SwfcConf1 = 0x40,
+            TxbrkConf = 0x44,
+            IdleConf = 0x48,
+            Rs485Conf = 0x4C,
+            MemTxStatus = 0x5C,
             MemConf = 0x60,
+            MemRxStatus = 0x64,
             FsmStatus = 0x6C,
+            PosPulse = 0x70,
+            NegPulse = 0x74,
             ClkConf = 0x78,
             Date = 0x7C,
             Id = 0x80,

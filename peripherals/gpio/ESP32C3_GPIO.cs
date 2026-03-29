@@ -119,10 +119,10 @@ namespace Antmicro.Renode.Peripherals.GPIOPort
                     valueProviderCallback: _ => 0);
 
             // GPIO_IN_REG: 0x3C (read-only, input level)
-            // For emulation: returns output data ANDed with enable (loopback)
+            // For emulation: returns output data (loopback, independent of enable)
             Registers.In.Define(this)
                 .WithValueField(0, 26, mode: FieldMode.Read, name: "IN_DATA",
-                    valueProviderCallback: _ => outData & enableData);
+                    valueProviderCallback: _ => outData);
 
             // GPIO_STATUS_REG: 0x44 (interrupt status, bits [25:0])
             Registers.Status.Define(this)

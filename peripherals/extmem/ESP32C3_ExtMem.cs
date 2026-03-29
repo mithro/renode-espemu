@@ -263,10 +263,11 @@ namespace Antmicro.Renode.Peripherals.Miscellaneous
                 .WithValueField(0, 32, mode: FieldMode.Read, name: "CORE0_IBUS_REJECT_VADDR");
 
             // CACHE_MMU_FAULT_CONTENT_REG: 0xA0 (RO)
+            // Bits [9:0] = FAULT_CONTENT, [13:10] = FAULT_CODE (4-bit)
             Registers.CacheMmuFaultContent.Define(this)
-                .WithValueField(0, 16, mode: FieldMode.Read, name: "CACHE_MMU_FAULT_CONTENT")
-                .WithFlag(16, mode: FieldMode.Read, name: "CACHE_MMU_FAULT_CODE")
-                .WithReservedBits(17, 15);
+                .WithValueField(0, 10, mode: FieldMode.Read, name: "CACHE_MMU_FAULT_CONTENT")
+                .WithValueField(10, 4, mode: FieldMode.Read, name: "CACHE_MMU_FAULT_CODE")
+                .WithReservedBits(14, 18);
 
             // CACHE_MMU_FAULT_VADDR_REG: 0xA4 (RO)
             Registers.CacheMmuFaultVaddr.Define(this)
