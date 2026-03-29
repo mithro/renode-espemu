@@ -1,0 +1,7 @@
+I (199) heap_init: At 3FCC0000 len 0001C710 (113 KiB): Retention RAM
+I (217) spi_flash: detected chip: generic
+I (223) sleep_gpio: Configure to isolate all GPIO pins in sleep state
+I (236) main_task: Started on CPU0
+[EXTMEM] === test_extmem_cache_state ===
+[EXTMEM] CACHE_STATE low bits = 0x001
+[EXTMEM] === Done ===

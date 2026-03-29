@@ -1,0 +1,124 @@
+ESP-ROM:esp32c3-api1-20210207
+Build:Feb  7 2021
+rst:0x15 (USB_UART_CHIP_RESET),boot:0xd (SPI_FAST_FLASH_BOOT)
+Saved PC:0x40382856
+SPIWP:0xee
+mode:DIO, clock div:1
+load:0x3fcd5820,len:0x1574
+load:0x403cc710,len:0xc30
+load:0x403ce710,len:0x2f64
+entry 0x403cc71a
+I (24) boot: ESP-IDF v5.4.1 2nd stage bootloader
+I (24) boot: compile time Mar 29 2026 19:14:06
+I (24) boot: chip revision: v0.4
+I (25) boot: efuse block revision: v1.3
+I (28) boot.esp32c3: SPI Speed      : 80MHz
+I (32) boot.esp32c3: SPI Mode       : DIO
+I (36) boot.esp32c3: SPI Flash Size : 4MB
+I (39) boot: Enabling RNG early entropy source...
+I (44) boot: Partition Table:
+I (46) boot: ## Label            Usage          Type ST Offset   Length
+I (53) boot:  0 nvs              WiFi data        01 02 00009000 00006000
+I (59) boot:  1 phy_init         RF data          01 01 0000f000 00001000
+I (66) boot:  2 factory          factory app      00 00 00010000 00100000
+I (72) boot: End of partition table
+I (76) esp_image: segment 0: paddr=00010020 vaddr=3c020020 size=08c2ch ( 35884) map
+I (89) esp_image: segment 1: paddr=00018c54 vaddr=3fc8ba00 size=0128ch (  4748) load
+I (91) esp_image: segment 2: paddr=00019ee8 vaddr=40380000 size=06130h ( 24880) load
+I (102) esp_image: segment 3: paddr=00020020 vaddr=42000020 size=16628h ( 91688) map
+I (120) esp_image: segment 4: paddr=00036650 vaddr=40386130 size=056d4h ( 22228) load
+I (124) esp_image: segment 5: paddr=0003bd2c vaddr=50000200 size=0001ch (    28) load
+I (128) boot: Loaded app from partition at offset 0x10000
+I (129) boot: Disabling RNG early entropy source...
+I (145) cpu_start: Unicore app
+I (153) cpu_start: Pro cpu start user code
+I (153) cpu_start: cpu freq: 160000000 Hz
+I (154) app_init: Application information:
+I (154) app_init: Project name:     test_intmtx_reset_values
+I (159) app_init: App version:      57a353f
+I (163) app_init: Compile time:     Mar 29 2026 19:13:52
+I (168) app_init: ELF file SHA256:  95ed6da16...
+I (172) app_init: ESP-IDF:          v5.4.1
+I (176) efuse_init: Min chip rev:     v0.3
+I (180) efuse_init: Max chip rev:     v1.99 
+I (184) efuse_init: Chip rev:         v0.4
+I (188) heap_init: Initializing. RAM available for dynamic allocation:
+I (194) heap_init: At 3FC8DB40 len 000324C0 (201 KiB): RAM
+I (199) heap_init: At 3FCC0000 len 0001C710 (113 KiB): Retention RAM
+I (205) heap_init: At 3FCDC710 len 00002950 (10 KiB): Retention RAM
+I (211) heap_init: At 5000021C len 00001DCC (7 KiB): RTCRAM
+I (217) spi_flash: detected chip: generic
+I (220) spi_flash: flash io: dio
+I (223) sleep_gpio: Configure to isolate all GPIO pins in sleep state
+I (229) sleep_gpio: Enable automatic switching of GPIO sleep configuration
+I (236) main_task: Started on CPU0
+I (236) main_task: Calling app_main()
+[INTMTX] === test_intmtx_reset_values ===
+[INTMTX] --- Source Mapping Registers (62 sources) ---
+[INTMTX] REG_READ  addr=0x600c2000 val=0x00000000  PRO_MAC_INTR_MAP + src_0
+[INTMTX] REG_READ  addr=0x600c2004 val=0x00000000  PRO_MAC_INTR_MAP + src_1
+[INTMTX] REG_READ  addr=0x600c2008 val=0x00000000  PRO_MAC_INTR_MAP + src_2
+[INTMTX] REG_READ  addr=0x600c200c val=0x00000000  PRO_MAC_INTR_MAP + src_3
+[INTMTX] REG_READ  addr=0x600c2010 val=0x00000000  PRO_MAC_INTR_MAP + src_4
+[INTMTX] REG_READ  addr=0x600c2014 val=0x00000000  PRO_MAC_INTR_MAP + src_5
+[INTMTX] REG_READ  addr=0x600c2018 val=0x00000000  PRO_MAC_INTR_MAP + src_6
+[INTMTX] REG_READ  addr=0x600c201c val=0x00000000  PRO_MAC_INTR_MAP + src_7
+[INTMTX] REG_READ  addr=0x600c2020 val=0x00000000  PRO_MAC_INTR_MAP + src_8
+[INTMTX] REG_READ  addr=0x600c2024 val=0x00000000  PRO_MAC_INTR_MAP + src_9
+[INTMTX] REG_READ  addr=0x600c2028 val=0x00000000  PRO_MAC_INTR_MAP + src_10
+[INTMTX] REG_READ  addr=0x600c202c val=0x00000000  PRO_MAC_INTR_MAP + src_11
+[INTMTX] REG_READ  addr=0x600c2030 val=0x00000000  PRO_MAC_INTR_MAP + src_12
+[INTMTX] REG_READ  addr=0x600c2034 val=0x00000000  PRO_MAC_INTR_MAP + src_13
+[INTMTX] REG_READ  addr=0x600c2038 val=0x00000000  PRO_MAC_INTR_MAP + src_14
+[INTMTX] REG_READ  addr=0x600c203c val=0x00000000  PRO_MAC_INTR_MAP + src_15
+[INTMTX] REG_READ  addr=0x600c2040 val=0x00000000  PRO_MAC_INTR_MAP + src_16
+[INTMTX] REG_READ  addr=0x600c2044 val=0x00000000  PRO_MAC_INTR_MAP + src_17
+[INTMTX] REG_READ  addr=0x600c2048 val=0x00000000  PRO_MAC_INTR_MAP + src_18
+[INTMTX] REG_READ  addr=0x600c204c val=0x00000000  PRO_MAC_INTR_MAP + src_19
+[INTMTX] REG_READ  addr=0x600c2050 val=0x00000000  PRO_MAC_INTR_MAP + src_20
+[INTMTX] REG_READ  addr=0x600c2054 val=0x00000000  PRO_MAC_INTR_MAP + src_21
+[INTMTX] REG_READ  addr=0x600c2058 val=0x00000000  PRO_MAC_INTR_MAP + src_22
+[INTMTX] REG_READ  addr=0x600c205c val=0x00000000  PRO_MAC_INTR_MAP + src_23
+[INTMTX] REG_READ  addr=0x600c2060 val=0x00000000  PRO_MAC_INTR_MAP + src_24
+[INTMTX] REG_READ  addr=0x600c2064 val=0x00000000  PRO_MAC_INTR_MAP + src_25
+[INTMTX] REG_READ  addr=0x600c2068 val=0x00000000  PRO_MAC_INTR_MAP + src_26
+[INTMTX] REG_READ  addr=0x600c206c val=0x00000002  PRO_MAC_INTR_MAP + src_27
+[INTMTX] REG_READ  addr=0x600c2070 val=0x00000000  PRO_MAC_INTR_MAP + src_28
+[INTMTX] REG_READ  addr=0x600c2074 val=0x00000000  PRO_MAC_INTR_MAP + src_29
+[INTMTX] REG_READ  addr=0x600c2078 val=0x00000000  PRO_MAC_INTR_MAP + src_30
+[INTMTX] REG_READ  addr=0x600c207c val=0x00000000  PRO_MAC_INTR_MAP + src_31
+[INTMTX] REG_READ  addr=0x600c2080 val=0x00000000  PRO_MAC_INTR_MAP + src_32
+[INTMTX] REG_READ  addr=0x600c2084 val=0x00000005  PRO_MAC_INTR_MAP + src_33
+[INTMTX] REG_READ  addr=0x600c2088 val=0x00000000  PRO_MAC_INTR_MAP + src_34
+[INTMTX] REG_READ  addr=0x600c208c val=0x00000018  PRO_MAC_INTR_MAP + src_35
+[INTMTX] REG_READ  addr=0x600c2090 val=0x00000019  PRO_MAC_INTR_MAP + src_36
+[INTMTX] REG_READ  addr=0x600c2094 val=0x00000004  PRO_MAC_INTR_MAP + src_37
+[INTMTX] REG_READ  addr=0x600c2098 val=0x00000000  PRO_MAC_INTR_MAP + src_38
+[INTMTX] REG_READ  addr=0x600c209c val=0x00000000  PRO_MAC_INTR_MAP + src_39
+[INTMTX] REG_READ  addr=0x600c20a0 val=0x00000000  PRO_MAC_INTR_MAP + src_40
+[INTMTX] REG_READ  addr=0x600c20a4 val=0x00000000  PRO_MAC_INTR_MAP + src_41
+[INTMTX] REG_READ  addr=0x600c20a8 val=0x00000000  PRO_MAC_INTR_MAP + src_42
+[INTMTX] REG_READ  addr=0x600c20ac val=0x00000000  PRO_MAC_INTR_MAP + src_43
+[INTMTX] REG_READ  addr=0x600c20b0 val=0x00000000  PRO_MAC_INTR_MAP + src_44
+[INTMTX] REG_READ  addr=0x600c20b4 val=0x00000000  PRO_MAC_INTR_MAP + src_45
+[INTMTX] REG_READ  addr=0x600c20b8 val=0x00000000  PRO_MAC_INTR_MAP + src_46
+[INTMTX] REG_READ  addr=0x600c20bc val=0x00000000  PRO_MAC_INTR_MAP + src_47
+[INTMTX] REG_READ  addr=0x600c20c0 val=0x00000000  PRO_MAC_INTR_MAP + src_48
+[INTMTX] REG_READ  addr=0x600c20c4 val=0x00000000  PRO_MAC_INTR_MAP + src_49
+[INTMTX] REG_READ  addr=0x600c20c8 val=0x00000003  PRO_MAC_INTR_MAP + src_50
+[INTMTX] REG_READ  addr=0x600c20cc val=0x00000000  PRO_MAC_INTR_MAP + src_51
+[INTMTX] REG_READ  addr=0x600c20d0 val=0x00000000  PRO_MAC_INTR_MAP + src_52
+[INTMTX] REG_READ  addr=0x600c20d4 val=0x00000000  PRO_MAC_INTR_MAP + src_53
+[INTMTX] REG_READ  addr=0x600c20d8 val=0x0000001b  PRO_MAC_INTR_MAP + src_54
+[INTMTX] REG_READ  addr=0x600c20dc val=0x00000000  PRO_MAC_INTR_MAP + src_55
+[INTMTX] REG_READ  addr=0x600c20e0 val=0x0000001a  PRO_MAC_INTR_MAP + src_56
+[INTMTX] REG_READ  addr=0x600c20e4 val=0x0000001a  PRO_MAC_INTR_MAP + src_57
+[INTMTX] REG_READ  addr=0x600c20e8 val=0x0000001a  PRO_MAC_INTR_MAP + src_58
+[INTMTX] REG_READ  addr=0x600c20ec val=0x00000000  PRO_MAC_INTR_MAP + src_59
+[INTMTX] REG_READ  addr=0x600c20f0 val=0x00000000  PRO_MAC_INTR_MAP + src_60
+[INTMTX] REG_READ  addr=0x600c20f4 val=0x00000019  PRO_MAC_INTR_MAP + src_61
+[INTMTX] REG_READ  addr=0x600c2104 val=0x0f00003c  CPU_INT_ENABLE
+[INTMTX] REG_READ  addr=0x600c2108 val=0x00000000  CPU_INT_TYPE
+[INTMTX] REG_READ  addr=0x600c2110 val=0x00000000  CPU_INT_EIP_STATUS
+[INTMTX] REG_READ  addr=0x600c2194 val=0x00000001  CPU_INT_THRESH
+[INTMTX] === Done ===

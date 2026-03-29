@@ -61,12 +61,13 @@ def capture_one(periph: str, test_name: str, fw_dir: Path,
     remote_dir = f"/tmp/esp32c3_{test_name}"
 
     try:
-        # Copy files
+        # Copy all files in one scp call
         subprocess.run(["ssh", host, f"mkdir -p {remote_dir}"],
-                       check=True, capture_output=True, timeout=30)
-        for f in (bootloader, partition, app_bin):
-            subprocess.run(["scp", str(f), f"{host}:{remote_dir}/{f.name}"],
-                           check=True, capture_output=True, timeout=30)
+                       check=True, capture_output=True, timeout=60)
+        subprocess.run(
+            ["scp", str(bootloader), str(partition), str(app_bin),
+             f"{host}:{remote_dir}/"],
+            check=True, capture_output=True, timeout=120)
 
         # Flash
         flash_cmd = (
@@ -81,7 +82,7 @@ def capture_one(periph: str, test_name: str, fw_dir: Path,
 
         # Copy serial capture helper
         subprocess.run(["scp", str(SERIAL_CAPTURE), f"{host}:/tmp/serial_capture.py"],
-                       check=True, capture_output=True, timeout=30)
+                       check=True, capture_output=True, timeout=60)
 
         # Capture UART
         capture_cmd = (

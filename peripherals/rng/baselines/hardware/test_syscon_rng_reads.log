@@ -1,0 +1,79 @@
+I (120) esp_image: segment 4: paddr=00036644 vaddr=40386178 sizeESP-ROM:esp32c3-api1-20210207
+Build:Feb  7 2021
+rst:0x15 (USB_UART_CHIP_RESET),boot:0xd (SPI_FAST_FLASH_BOOT)
+Saved PC:0x40382856
+SPIWP:0xee
+mode:DIO, clock div:1
+load:0x3fcd5820,len:0x1574
+load:0x403cc710,len:0xc30
+load:0x403ce710,len:0x2f64
+entry 0x403cc71a
+I (24) boot: ESP-IDF v5.4.1 2nd stage bootloader
+I (24) boot: compile time Mar 29 2026 19:16:55
+I (24) boot: chip revision: v0.4
+I (25) boot: efuse block revision: v1.3
+I (28) boot.esp32c3: SPI Speed      : 80MHz
+I (32) boot.esp32c3: SPI Mode       : DIO
+I (36) boot.esp32c3: SPI Flash Size : 4MB
+I (39) boot: Enabling RNG early entropy source...
+I (44) boot: Partition Table:
+I (46) boot: ## Label            Usage          Type ST Offset   Length
+I (53) boot:  0 nvs              WiFi data        01 02 00009000 00006000
+I (59) boot:  1 phy_init         RF data          01 01 0000f000 00001000
+I (66) boot:  2 factory          factory app      00 00 00010000 00100000
+I (72) boot: End of partition table
+I (76) esp_image: segment 0: paddr=00010020 vaddr=3c020020 size=08be4h ( 35812) map
+I (89) esp_image: segment 1: paddr=00018c0c vaddr=3fc8ba00 size=0128ch (  4748) load
+I (91) esp_image: segment 2: paddr=00019ea0 vaddr=40380000 size=06178h ( 24952) load
+I (102) esp_image: segment 3: paddr=00020020 vaddr=42000020 size=1661ch ( 91676) map
+I (120) esp_image: segment 4: paddr=00036644 vaddr=40386178 size=0568ch ( 22156) load
+I (124) esp_image: segment 5: paddr=0003bcd8 vaddr=50000200 size=0001ch (    28) load
+I (128) boot: Loaded app from partition at offset 0x10000
+I (129) boot: Disabling RNG early entropy source...
+I (145) cpu_start: Unicore app
+I (153) cpu_start: Pro cpu start user code
+I (153) cpu_start: cpu freq: 160000000 Hz
+I (154) app_init: Application information:
+I (154) app_init: Project name:     test_syscon_rng_reads
+I (159) app_init: App version:      57a353f
+I (163) app_init: Compile time:     Mar 29 2026 19:16:41
+I (168) app_init: ELF file SHA256:  836c00826...
+I (172) app_init: ESP-IDF:          v5.4.1
+I (176) efuse_init: Min chip rev:     v0.3
+I (180) efuse_init: Max chip rev:     v1.99 
+I (184) efuse_init: Chip rev:         v0.4
+I (187) heap_init: Initializing. RAM available for dynamic allocation:
+I (194) heap_init: At 3FC8DB40 len 000324C0 (201 KiB): RAM
+I (199) heap_init: At 3FCC0000 len 0001C710 (113 KiB): Retention RAM
+I (205) heap_init: At 3FCDC710 len 00002950 (10 KiB): Retention RAM
+I (211) heap_init: At 5000021C len 00001DCC (7 KiB): RTCRAM
+I (217) spi_flash: detected chip: generic
+I (220) spi_flash: flash io: dio
+I (223) sleep_gpio: Configure to isolate all GPIO pins in sleep state
+I (229) sleep_gpio: Enable automatic switching of GPIO sleep configuration
+I (236) main_task: Started on CPU0
+I (236) main_task: Calling app_main()
+[SYSCON] === test_syscon_rng_reads ===
+[SYSCON] REG_READ  addr=0x600260b0 val=0x2b9f33f8  SYSCON_RND_DATA_REG [0]
+[SYSCON] REG_READ  addr=0x600260b0 val=0x60d810c4  SYSCON_RND_DATA_REG [1]
+[SYSCON] REG_READ  addr=0x600260b0 val=0x0269d309  SYSCON_RND_DATA_REG [2]
+[SYSCON] REG_READ  addr=0x600260b0 val=0x6c3f5773  SYSCON_RND_DATA_REG [3]
+[SYSCON] REG_READ  addr=0x600260b0 val=0x327e71b8  SYSCON_RND_DATA_REG [4]
+[SYSCON] REG_READ  addr=0x600260b0 val=0x5ba57ec0  SYSCON_RND_DATA_REG [5]
+[SYSCON] REG_READ  addr=0x600260b0 val=0xadfab54a  SYSCON_RND_DATA_REG [6]
+[SYSCON] REG_READ  addr=0x600260b0 val=0x1a3ef2fa  SYSCON_RND_DATA_REG [7]
+[SYSCON] REG_READ  addr=0x600260b0 val=0x931026a1  SYSCON_RND_DATA_REG [8]
+[SYSCON] REG_READ  addr=0x600260b0 val=0x60834e02  SYSCON_RND_DATA_REG [9]
+[SYSCON] REG_READ  addr=0x600260b0 val=0xdd5a58dd  SYSCON_RND_DATA_REG [10]
+[SYSCON] REG_READ  addr=0x600260b0 val=0x06f72a74  SYSCON_RND_DATA_REG [11]
+[SYSCON] REG_READ  addr=0x600260b0 val=0x081012d8  SYSCON_RND_DATA_REG [12]
+[SYSCON] REG_READ  addr=0x600260b0 val=0x3c1060f8  SYSCON_RND_DATA_REG [13]
+[SYSCON] REG_READ  addr=0x600260b0 val=0xbb283b41  SYSCON_RND_DATA_REG [14]
+[SYSCON] REG_READ  addr=0x600260b0 val=0xc6162d48  SYSCON_RND_DATA_REG [15]
+[SYSCON] REG_READ  addr=0x600260b0 val=0xd84ac6ca  SYSCON_RND_DATA_REG [16]
+[SYSCON] REG_READ  addr=0x600260b0 val=0x84e0b333  SYSCON_RND_DATA_REG [17]
+[SYSCON] REG_READ  addr=0x600260b0 val=0x14d3a1a2  SYSCON_RND_DATA_REG [18]
+[SYSCON] REG_READ  addr=0x600260b0 val=0xaf23a6dd  SYSCON_RND_DATA_REG [19]
+[SYSCON] Distinct values: 20 / 20
+[SYSCON] TEST_PASS
+[SYSCON] === Done ===
