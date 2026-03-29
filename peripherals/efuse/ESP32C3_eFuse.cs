@@ -152,7 +152,7 @@ namespace Antmicro.Renode.Peripherals.Miscellaneous
             Registers.Clk.Define(this)
                 .WithValueField(0, 32, name: "CLK");
 
-            // CONF register: 0x1C4
+            // CONF register: 0x1CC
             Registers.Conf.Define(this)
                 .WithValueField(0, 32, name: "CONF");
 
@@ -188,14 +188,14 @@ namespace Antmicro.Renode.Peripherals.Miscellaneous
         {
             // Read data at 0x2C-0x178 defined dynamically
             // Programming at 0x00-0x28 defined dynamically
-            Conf = 0x1C4,
             Clk = 0x1C8,
-            Status = 0x1CC,
-            Cmd = 0x1D0,
-            IntRaw = 0x1D4,
-            IntSt = 0x1D8,
-            IntEna = 0x1DC,
-            IntClr = 0x1E0,
+            Conf = 0x1CC,
+            Status = 0x1D0,
+            Cmd = 0x1D4,
+            IntRaw = 0x1D8,
+            IntSt = 0x1DC,
+            IntEna = 0x1E0,
+            IntClr = 0x1E4,
             Date = 0x1FC,
         }
     }

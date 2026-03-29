@@ -36,6 +36,7 @@ namespace Antmicro.Renode.Peripherals.Miscellaneous
         {
             base.Reset();
             rtcTimeCounter = 0;
+            latchedRtcTime = 0;
             intEna = 0;
             intRaw = 0;
             SetDefaults();
@@ -77,25 +78,21 @@ namespace Antmicro.Renode.Peripherals.Miscellaneous
                     {
                         if ((value & 0x80000000u) != 0)
                         {
-                            // Trigger time latch: advance counter
+                            // Trigger time latch: advance counter and snapshot
                             rtcTimeCounter += 1000;
+                            latchedRtcTime = rtcTimeCounter;
                         }
                     });
 
             // TIME_LOW0: 0x10 (read-only, low 32 bits of latched RTC time)
             Registers.TimeLow0.Define(this)
                 .WithValueField(0, 32, mode: FieldMode.Read, name: "TIME_LOW0",
-                    valueProviderCallback: _ =>
-                    {
-                        // Auto-advance on read (for firmware that reads without latching)
-                        rtcTimeCounter += 1000;
-                        return (uint)(rtcTimeCounter & 0xFFFFFFFF);
-                    });
+                    valueProviderCallback: _ => (uint)(latchedRtcTime & 0xFFFFFFFF));
 
             // TIME_HIGH0: 0x14 (read-only, high 16 bits)
             Registers.TimeHigh0.Define(this)
                 .WithValueField(0, 16, mode: FieldMode.Read, name: "TIME_HIGH0",
-                    valueProviderCallback: _ => (uint)((rtcTimeCounter >> 32) & 0xFFFF));
+                    valueProviderCallback: _ => (uint)((latchedRtcTime >> 32) & 0xFFFF));
 
             // STATE0: 0x18
             Registers.State0.Define(this)
@@ -179,11 +176,25 @@ namespace Antmicro.Renode.Peripherals.Miscellaneous
             Registers.Pwc.Define(this)
                 .WithValueField(0, 32, name: "PWC");
 
-            // DIG registers: 0x88-0x94
+            // DIG registers: 0x88-0x8C
             Registers.DigPwc.Define(this).WithValueField(0, 32, name: "DIG_PWC");
             Registers.DigIsoReg.Define(this).WithValueField(0, 32, name: "DIG_ISO");
+
+            // RTC WDT registers: 0x90-0xA8 (accept writes silently, firmware configures WDT)
             Registers.Wdtconfig0.Define(this).WithValueField(0, 32, name: "WDTCONFIG0");
             Registers.Wdtconfig1.Define(this).WithValueField(0, 32, name: "WDTCONFIG1");
+            Registers.Wdtconfig2.Define(this).WithValueField(0, 32, name: "WDTCONFIG2");
+            Registers.Wdtconfig3.Define(this).WithValueField(0, 32, name: "WDTCONFIG3");
+            Registers.Wdtconfig4.Define(this).WithValueField(0, 32, name: "WDTCONFIG4");
+            Registers.Wdtfeed.Define(this).WithValueField(0, 32, name: "WDTFEED");
+            Registers.Wdtwprotect.Define(this).WithValueField(0, 32, name: "WDTWPROTECT");
+
+            // SWD (super watchdog): 0xAC-0xB0
+            Registers.SwdConf.Define(this).WithValueField(0, 32, name: "SWD_CONF");
+            Registers.SwdWprotect.Define(this).WithValueField(0, 32, name: "SWD_WPROTECT");
+
+            // SW_CPU_STALL: 0xB4
+            Registers.SwCpuStall.Define(this).WithValueField(0, 32, name: "SW_CPU_STALL");
 
             // STORE4-7: 0xB8-0xC4
             DefineStoreRegister(Registers.Store4, 4);
@@ -214,6 +225,7 @@ namespace Antmicro.Renode.Peripherals.Miscellaneous
 
         private uint[] store;
         private ulong rtcTimeCounter;
+        private ulong latchedRtcTime;
         private uint intEna;
         private uint intRaw;
 
@@ -257,6 +269,14 @@ namespace Antmicro.Renode.Peripherals.Miscellaneous
             DigIsoReg = 0x8C,
             Wdtconfig0 = 0x90,
             Wdtconfig1 = 0x94,
+            Wdtconfig2 = 0x98,
+            Wdtconfig3 = 0x9C,
+            Wdtconfig4 = 0xA0,
+            Wdtfeed = 0xA4,
+            Wdtwprotect = 0xA8,
+            SwdConf = 0xAC,
+            SwdWprotect = 0xB0,
+            SwCpuStall = 0xB4,
             Store4 = 0xB8,
             Store5 = 0xBC,
             Store6 = 0xC0,
