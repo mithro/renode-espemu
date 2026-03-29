@@ -5,7 +5,7 @@
 | Metric                        | Value     |
 |-------------------------------|-----------|
 | Boot progress score           | **5/5**   |
-| Peripherals implemented       | 7/11 (C#: IntMatrix, eFuse, RTC, SysTimer, TimerGroup, System; Python: RNG) |
+| Peripherals implemented       | 7/11 (all C#: IntMatrix, eFuse, RTC, SysTimer, TimerGroup, System, RNG) |
 | Peripherals passing all tests | 0/0       |
 | Total Robot tests             | 0         |
 | Last update                   | 2026-03-29 |
