@@ -8,6 +8,7 @@
 #include <stdint.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "soc/timer_group_reg.h"
 
 #define REG_READ_RAW(addr) (*((volatile uint32_t *)(addr)))
 #define REG_WRITE_RAW(addr, val) (*((volatile uint32_t *)(addr)) = (val))
@@ -23,7 +24,21 @@ void app_main(void)
 {
     printf("[TIMG] === test_timg_wdt_config ===\n");
 
-    // TODO: Add register reads/writes here
+    /* Unlock WDT write protect (write magic value 0x50D83AA1) */
+    printf("[TIMG] Unlocking WDTWPROTECT\n");
+    REG_WRITE_RAW(TIMG_WDTWPROTECT_REG(0), 0x50D83AA1);
+    print_reg("WDTWPROTECT", TIMG_WDTWPROTECT_REG(0));
+
+    /* Write WDTCONFIG0 with a test value */
+    printf("[TIMG] Writing WDTCONFIG0 = 0x00060000\n");
+    REG_WRITE_RAW(TIMG_WDTCONFIG0_REG(0), 0x00060000);
+    print_reg("WDTCONFIG0 (expect 0x00060000)", TIMG_WDTCONFIG0_REG(0));
+
+    /* Re-lock WDT write protect */
+    printf("[TIMG] Re-locking WDTWPROTECT\n");
+    REG_WRITE_RAW(TIMG_WDTWPROTECT_REG(0), 0);
+
+    printf("[TIMG] TEST_PASS\n");
 
     printf("[TIMG] === Done ===\n");
 

@@ -8,6 +8,7 @@
 #include <stdint.h>
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
+#include "soc/timer_group_reg.h"
 
 #define REG_READ_RAW(addr) (*((volatile uint32_t *)(addr)))
 #define REG_WRITE_RAW(addr, val) (*((volatile uint32_t *)(addr)) = (val))
@@ -23,7 +24,9 @@ void app_main(void)
 {
     printf("[TIMG] === test_timg_regclk_date ===\n");
 
-    // TODO: Add register reads/writes here
+    /* Read REGCLK and NTIMERS_DATE registers */
+    print_reg("TIMG_REGCLK_REG(0)", TIMG_REGCLK_REG(0));
+    print_reg("TIMG_NTIMERS_DATE_REG(0)", TIMG_NTIMERS_DATE_REG(0));
 
     printf("[TIMG] === Done ===\n");
 
