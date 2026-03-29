@@ -5,6 +5,7 @@ include @peripherals/rtc/ESP32C3_RTC.cs
 include @peripherals/systimer/ESP32C3_SysTimer.cs
 include @peripherals/timer-group/ESP32C3_TimerGroup.cs
 include @peripherals/system/ESP32C3_System.cs
+include @peripherals/rng/ESP32C3_RNG.cs
 mach create "esp32c3"
 machine LoadPlatformDescription @platforms/cpus/esp32c3.repl
 

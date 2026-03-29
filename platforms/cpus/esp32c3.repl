@@ -211,10 +211,8 @@ stub_spi2: Python.PythonPeripheral @ sysbus 0x60024000
     script: "request.Value = 0x0"
 
 // SYSCON at 0x60026000 (includes WDEV_RND_REG at offset 0xB0 for RNG)
-stub_syscon: Python.PythonPeripheral @ sysbus 0x60026000
-    size: 0x1000
-    initable: true
-    filename: "/home/tim/github/mithro/renode-espemu/peripherals/rng/stub_syscon_rng.py"
+// C# peripheral: xorshift32 PRNG at offset 0xB0, pass-through for other regs
+syscon: Miscellaneous.ESP32C3_RNG @ sysbus 0x60026000
 
 // TWAI at 0x6002B000
 stub_twai: Python.PythonPeripheral @ sysbus 0x6002B000
