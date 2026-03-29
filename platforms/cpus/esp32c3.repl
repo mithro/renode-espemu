@@ -137,10 +137,8 @@ stub_bb: Python.PythonPeripheral @ sysbus 0x6001E000
     script: "request.Value = 0x0"
 
 // GPIO at 0x60004000
-stub_gpio: Python.PythonPeripheral @ sysbus 0x60004000
-    size: 0x1000
-    initable: true
-    script: "request.Value = 0x0"
+// C# peripheral: 22 pins, W1TS/W1TC registers, per-pin config, function mux
+gpio: GPIOPort.ESP32C3_GPIO @ sysbus 0x60004000
 
 // RTC Controller at 0x60008000
 // RTC Controller at 0x60008000
@@ -296,11 +294,8 @@ intmatrix: IRQControllers.ESP32C3_InterruptMatrix @ sysbus 0x600C2000
     11 -> cpu@11
 
 // External Memory (cache control) at 0x600C4000
-// Returns cache done/ready status bits for suspend/sync operations
-stub_extmem: Python.PythonPeripheral @ sysbus 0x600C4000
-    size: 0x1000
-    initable: true
-    filename: "/home/tim/github/mithro/renode-espemu/platforms/scripts/stub_extmem.py"
+// C# peripheral: ICache control, sync/preload done bits, cache state
+extmem: Miscellaneous.ESP32C3_ExtMem @ sysbus 0x600C4000
 
 // MMU Table at 0x600C5000
 stub_mmu: Python.PythonPeripheral @ sysbus 0x600C5000
