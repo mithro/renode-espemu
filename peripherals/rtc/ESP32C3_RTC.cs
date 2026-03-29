@@ -207,6 +207,14 @@ namespace Antmicro.Renode.Peripherals.Miscellaneous
             // Default: enabled but not detected
             Registers.BrownOut.Define(this, 0x40000000)
                 .WithValueField(0, 32, name: "BROWN_OUT");
+
+            // FIB_SEL: 0x10C (firmware integrity boot select)
+            Registers.FibSel.Define(this, 0x00000007)
+                .WithValueField(0, 32, name: "FIB_SEL");
+
+            // SENSOR_CTRL: 0x11C (sensor control)
+            Registers.SensorCtrl.Define(this)
+                .WithValueField(0, 32, name: "SENSOR_CTRL");
         }
 
         private void DefineStoreRegister(Registers reg, int index)
@@ -282,6 +290,8 @@ namespace Antmicro.Renode.Peripherals.Miscellaneous
             Store6 = 0xC0,
             Store7 = 0xC4,
             BrownOut = 0xD8,
+            FibSel = 0x10C,
+            SensorCtrl = 0x11C,
         }
     }
 }

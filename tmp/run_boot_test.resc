@@ -12,6 +12,8 @@ include @peripherals/uart/ESP32C3_UART.cs
 mach create "esp32c3"
 machine LoadPlatformDescription @platforms/cpus/esp32c3.repl
 
+showAnalyzer uart0
+
 sysbus LoadELF @/home/tim/esp/esp-rom-elfs/esp32c3_rev3_rom.elf
 sysbus LoadELF @hello_world/firmware/hello_world.elf
 sysbus LoadBinary @hello_world/firmware/flash_header_128k.bin 0x3C000000
