@@ -1,0 +1,127 @@
+ESP-ROM:esp32c3-api1-20210207
+Build:Feb  7 2021
+rst:0x15 (USB_UART_CHIP_RESET),boot:0xd (SPI_FAST_FLASH_BOOT)
+Saved PC:0x40382856
+SPIWP:0xee
+mode:DIO, clock div:1
+load:0x3fcd5820,len:0x1574
+load:0x403cc710,len:0xc30
+load:0x403ce710,len:0x2f64
+entry 0x403cc71a
+I (24) boot: ESP-IDF v5.4.1 2nd stage bootloader
+I (24) boot: compile time Mar 29 2026 14:43:51
+I (24) boot: chip revision: v0.4
+I (25) boot: efuse block revision: v1.3
+I (28) boot.esp32c3: SPI Speed      : 80MHz
+I (32) boot.esp32c3: SPI Mode       : DIO
+I (36) boot.esp32c3: SPI Flash Size : 4MB
+I (39) boot: Enabling RNG early entropy source...
+I (44) boot: Partition Table:
+I (46) boot: ## Label            Usage          Type ST Offset   Length
+I (53) boot:  0 nvs              WiFi data        01 02 00009000 00006000
+I (59) boot:  1 phy_init         RF data          01 01 0000f000 00001000
+I (66) boot:  2 factory          factory app      00 00 00010000 00100000
+I (72) boot: End of partition table
+I (76) esp_image: segment 0: paddr=00010020 vaddr=3c020020 size=09094h ( 37012) map
+I (89) esp_image: segment 1: paddr=000190bc vaddr=3fc8ba00 size=0128ch (  4748) load
+I (91) esp_image: segment 2: paddr=0001a350 vaddr=40380000 size=05cc8h ( 23752) load
+I (102) esp_image: segment 3: paddr=00020020 vaddr=42000020 size=169dch ( 92636) map
+I (120) esp_image: segment 4: paddr=00036a04 vaddr=40385cc8 size=05b3ch ( 23356) load
+I (125) esp_image: segment 5: paddr=0003c548 vaddr=50000200 size=0001ch (    28) load
+I (129) boot: Loaded app from partition at offset 0x10000
+I (129) boot: Disabling RNG early entropy source...
+I (145) cpu_start: Unicore app
+I (153) cpu_start: Pro cpu start user code
+I (154) cpu_start: cpu freq: 160000000 Hz
+I (154) app_init: Application information:
+I (154) app_init: Project name:     test_timer_group
+I (158) app_init: App version:      b1e4949
+I (162) app_init: Compile time:     Mar 29 2026 14:57:13
+I (167) app_init: ELF file SHA256:  ee1871649...
+I (172) app_init: ESP-IDF:          v5.4.1
+I (175) efuse_init: Min chip rev:     v0.3
+I (179) efuse_init: Max chip rev:     v1.99 
+I (183) efuse_init: Chip rev:         v0.4
+I (187) heap_init: Initializing. RAM available for dynamic allocation:
+I (193) heap_init: At 3FC8DB40 len 000324C0 (201 KiB): RAM
+I (199) heap_init: At 3FCC0000 len 0001C710 (113 KiB): Retention RAM
+I (205) heap_init: At 3FCDC710 len 00002950 (10 KiB): Retention RAM
+I (211) heap_init: At 5000021C len 00001DCC (7 KiB): RTCRAM
+I (217) spi_flash: detected chip: generic
+I (220) spi_flash: flash io: dio
+I (223) sleep_gpio: Configure to isolate all GPIO pins in sleep state
+I (229) sleep_gpio: Enable automatic switching of GPIO sleep configuration
+I (236) main_task: Started on CPU0
+I (236) main_task: Calling app_main()
+[TIMER] === ESP32-C3 Timer Group Test ===
+[TIMER] === TIMG0 Register Dump ===
+[TIMER] REG_READ  addr=0x6001f000 val=0x60002000  TIMG0.T0CONFIG
+[TIMER] REG_READ  addr=0x6001f004 val=0x00000000  TIMG0.T0LO
+[TIMER] REG_READ  addr=0x6001f008 val=0x00000000  TIMG0.T0HI
+[TIMER] REG_READ  addr=0x6001f010 val=0x00000000  TIMG0.T0ALARMLO
+[TIMER] REG_READ  addr=0x6001f014 val=0x00000000  TIMG0.T0ALARMHI
+[TIMER] REG_READ  addr=0x6001f018 val=0x00000000  TIMG0.T0LOADLO
+[TIMER] REG_READ  addr=0x6001f01c val=0x00000000  TIMG0.T0LOADHI
+[TIMER] REG_READ  addr=0x6001f048 val=0xb83f8000  TIMG0.WDTCONFIG0
+[TIMER] REG_READ  addr=0x6001f064 val=0x00000000  TIMG0.WDTWPROTECT
+[TIMER] REG_READ  addr=0x6001f068 val=0x00013000  TIMG0.RTCCALICFG
+[TIMER] REG_READ  addr=0x6001f06c val=0x00000000  TIMG0.RTCCALICFG1
+[TIMER] REG_READ  addr=0x6001f080 val=0xffffff98  TIMG0.RTCCALICFG2
+[TIMER] REG_READ  addr=0x6001f070 val=0x00000002  TIMG0.INT_ENA
+[TIMER] REG_READ  addr=0x6001f074 val=0x00000000  TIMG0.INT_RAW
+[TIMER] REG_READ  addr=0x6001f078 val=0x00000000  TIMG0.INT_ST
+[TIMER] REG_READ  addr=0x6001f0fc val=0x60000000  TIMG0.REGCLK
+[TIMER] === TIMG0 RTC Calibration Test ===
+[TIMER] TIMG0.RTC_CALI_RDY=0
+[TIMER] TEST_FAIL TIMG0_rtc_cali_rdy expected=1 got=0
+[TIMER] TIMG0.RTC_CALI_VALUE=0x0
+[TIMER] TEST_FAIL TIMG0_rtc_cali_value_nonzero expected=nonzero got=0
+[TIMER] TIMG0.RTC_CALI_TIMEOUT=0
+[TIMER] TEST_PASS TIMG0_rtc_cali_no_timeout
+[TIMER] === TIMG0 Timer Counter Test ===
+[TIMER] TIMG0.T0_COUNTER_1=0x0000000000000000
+[TIMER] TIMG0.T0_COUNTER_2=0x0000000000000000
+[TIMER] TIMG0.T0_AFTER_RELOAD=0x000000ab12345678
+[TIMER] TEST_PASS TIMG0_timer_reload
+[TIMER] === TIMG0 Timer Alarm Test ===
+[TIMER] TIMG0.INT_RAW_AFTER_ALARM=0x00000000 (T0_INT=0)
+[TIMER] TIMG0.T0_ALARM_EN_AFTER=0
+[TIMER] TEST_FAIL TIMG0_alarm_interrupt expected=1 got=0
+[TIMER] TIMG0.INT_RAW_AFTER_CLR=0x00000000
+[TIMER] TEST_PASS TIMG0_interrupt_clear
+[TIMER] === TIMG1 Register Dump ===
+[TIMER] REG_READ  addr=0x60020000 val=0x60002000  TIMG1.T0CONFIG
+[TIMER] REG_READ  addr=0x60020004 val=0x00000000  TIMG1.T0LO
+[TIMER] REG_READ  addr=0x60020008 val=0x00000000  TIMG1.T0HI
+[TIMER] REG_READ  addr=0x60020010 val=0x00000000  TIMG1.T0ALARMLO
+[TIMER] REG_READ  addr=0x60020014 val=0x00000000  TIMG1.T0ALARMHI
+[TIMER] REG_READ  addr=0x60020018 val=0x00000000  TIMG1.T0LOADLO
+[TIMER] REG_READ  addr=0x6002001c val=0x00000000  TIMG1.T0LOADHI
+[TIMER] REG_READ  addr=0x60020048 val=0xb83f8000  TIMG1.WDTCONFIG0
+[TIMER] REG_READ  addr=0x60020064 val=0x00000000  TIMG1.WDTWPROTECT
+[TIMER] REG_READ  addr=0x60020068 val=0x00013000  TIMG1.RTCCALICFG
+[TIMER] REG_READ  addr=0x6002006c val=0x00000000  TIMG1.RTCCALICFG1
+[TIMER] REG_READ  addr=0x60020080 val=0xffffff98  TIMG1.RTCCALICFG2
+[TIMER] REG_READ  addr=0x60020070 val=0x00000002  TIMG1.INT_ENA
+[TIMER] REG_READ  addr=0x60020074 val=0x00000000  TIMG1.INT_RAW
+[TIMER] REG_READ  addr=0x60020078 val=0x00000000  TIMG1.INT_ST
+[TIMER] REG_READ  addr=0x600200fc val=0x60000000  TIMG1.REGCLK
+[TIMER] === TIMG1 RTC Calibration Test ===
+[TIMER] TIMG1.RTC_CALI_RDY=0
+[TIMER] TEST_FAIL TIMG1_rtc_cali_rdy expected=1 got=0
+[TIMER] TIMG1.RTC_CALI_VALUE=0x0
+[TIMER] TEST_FAIL TIMG1_rtc_cali_value_nonzero expected=nonzero got=0
+[TIMER] TIMG1.RTC_CALI_TIMEOUT=0
+[TIMER] TEST_PASS TIMG1_rtc_cali_no_timeout
+[TIMER] === TIMG1 Timer Counter Test ===
+[TIMER] TIMG1.T0_COUNTER_1=0x0000000000000000
+[TIMER] TIMG1.T0_COUNTER_2=0x0000000000000000
+[TIMER] TIMG1.T0_AFTER_RELOAD=0x0000000000000000
+[TIMER] TEST_FAIL TIMG1_timer_reload expected=~0xAB12345678 got=0x000000000
+[TIMER] === TIMG1 Timer Alarm Test ===
+[TIMER] TIMG1.INT_RAW_AFTER_ALARM=0x00000000 (T0_INT=0)
+[TIMER] TIMG1.T0_ALARM_EN_AFTER=0
+[TIMER] TEST_FAIL TIMG1_alarm_interrupt expected=1 got=0
+[TIMER] TIMG1.INT_RAW_AFTER_CLR=0x00000000
+[TIMER] TEST_PASS TIMG1_interrupt_clear
+[TIMER] === All Tests Complete ===

@@ -95,7 +95,7 @@ def main():
     parser.add_argument("--clean", action="store_true", help="Clean build")
     parser.add_argument("--skip-build", action="store_true", help="Skip build step")
     parser.add_argument("--hardware", action="store_true", help="Include hardware capture + compare")
-    parser.add_argument("--host", default="rpi4-esp", help="Hardware target host")
+    parser.add_argument("--host", default="eth0.rpi4-esp.iot.welland.mithis.com", help="Hardware target host")
     args = parser.parse_args()
 
     peripherals = ["efuse", "rng", "gpio", "system", "systimer", "timer-group"]

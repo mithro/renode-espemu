@@ -21,8 +21,8 @@ import time
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
-DEFAULT_HOST = "rpi4-esp"
-DEFAULT_PORT = "/dev/ttyUSB0"
+DEFAULT_HOST = "eth0.rpi4-esp.iot.welland.mithis.com"
+DEFAULT_PORT = "/dev/ttyACM1"
 CAPTURE_DURATION = 10  # seconds
 
 
@@ -74,7 +74,7 @@ def flash_and_capture(
     # Flash
     print("Flashing...")
     flash_cmd = (
-        f"cd {remote_dir} && python3 -m esptool "
+        f"cd {remote_dir} && ~/.venvs/esptool/bin/esptool "
         f"--chip esp32c3 -p {port} -b 460800 "
         f"--before default_reset --after hard_reset write_flash "
         f"--flash_mode dio --flash_size 4MB --flash_freq 80m "
@@ -82,17 +82,25 @@ def flash_and_capture(
     )
     subprocess.run(["ssh", host, flash_cmd], check=True)
 
-    # Capture UART output
+    # Copy serial capture helper
+    capture_script = Path(__file__).parent / "serial_capture.py"
+    subprocess.run(
+        ["scp", str(capture_script), f"{host}:/tmp/serial_capture.py"],
+        check=True,
+    )
+
+    # Capture UART output via pyserial (handles USB-JTAG-Serial properly)
     print(f"Capturing UART output for {duration}s...")
     capture_cmd = (
-        f"stty -F {port} 115200 raw -echo && "
-        f"timeout {duration} cat {port}"
+        f"timeout {duration + 5} "
+        f"~/.venvs/esptool/bin/python3 /tmp/serial_capture.py "
+        f"{port} {duration} --reset"
     )
     result = subprocess.run(
         ["ssh", host, capture_cmd],
         capture_output=True,
         text=True,
-        timeout=duration + 10,
+        timeout=duration + 30,
     )
 
     return result.stdout

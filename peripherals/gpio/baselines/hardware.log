@@ -1,0 +1,88 @@
+ESP-ROM:esp32c3-api1-20210207
+Build:Feb  7 2021
+rst:0x15 (USB_UART_CHIP_RESET),boot:0xd (SPI_FAST_FLASH_BOOT)
+Saved PC:0x40382856
+SPIWP:0xee
+mode:DIO, clock div:1
+load:0x3fcd5820,len:0x1574
+load:0x403cc710,len:0xc30
+load:0x403ce710,len:0x2f64
+entry 0x403cc71a
+I (24) boot: ESP-IDF v5.4.1 2nd stage bootloader
+I (24) boot: compile time Mar 29 2026 14:41:58
+I (24) boot: chip revision: v0.4
+I (25) boot: efuse block revision: v1.3
+I (28) boot.esp32c3: SPI Speed      : 80MHz
+I (32) boot.esp32c3: SPI Mode       : DIO
+I (36) boot.esp32c3: SPI Flash Size : 4MB
+I (39) boot: Enabling RNG early entropy source...
+I (44) boot: Partition Table:
+I (46) boot: ## Label            Usage          Type ST Offset   Length
+I (53) boot:  0 nvs              WiFi data        01 02 00009000 00006000
+I (59) boot:  1 phy_init         RF data          01 01 0000f000 00001000
+I (66) boot:  2 factory          factory app      00 00 00010000 00100000
+I (72) boot: End of partition table
+I (76) esp_image: segment 0: paddr=00010020 vaddr=3c020020 size=08e74h ( 36468) map
+I (89) esp_image: segment 1: paddr=00018e9c vaddr=3fc8ba00 size=0128ch (  4748) load
+I (91) esp_image: segment 2: paddr=0001a130 vaddr=40380000 size=05ee8h ( 24296) load
+I (102) esp_image: segment 3: paddr=00020020 vaddr=42000020 size=168b8h ( 92344) map
+I (120) esp_image: segment 4: paddr=000368e0 vaddr=40385ee8 size=0591ch ( 22812) load
+I (125) esp_image: segment 5: paddr=0003c204 vaddr=50000200 size=0001ch (    28) load
+I (128) boot: Loaded app from partition at offset 0x10000
+I (129) boot: Disabling RNG early entropy source...
+I (145) cpu_start: Unicore app
+I (153) cpu_start: Pro cpu start user code
+I (154) cpu_start: cpu freq: 160000000 Hz
+I (154) app_init: Application information:
+I (154) app_init: Project name:     test_gpio
+I (158) app_init: App version:      b1e4949
+I (162) app_init: Compile time:     Mar 29 2026 14:56:42
+I (167) app_init: ELF file SHA256:  95aafdf95...
+I (171) app_init: ESP-IDF:          v5.4.1
+I (175) efuse_init: Min chip rev:     v0.3
+I (179) efuse_init: Max chip rev:     v1.99 
+I (183) efuse_init: Chip rev:         v0.4
+I (186) heap_init: Initializing. RAM available for dynamic allocation:
+I (193) heap_init: At 3FC8DB50 len 000324B0 (201 KiB): RAM
+I (198) heap_init: At 3FCC0000 len 0001C710 (113 KiB): Retention RAM
+I (204) heap_init: At 3FCDC710 len 00002950 (10 KiB): Retention RAM
+I (210) heap_init: At 5000021C len 00001DCC (7 KiB): RTCRAM
+I (216) spi_flash: detected chip: generic
+I (219) spi_flash: flash io: dio
+I (222) sleep_gpio: Configure to isolate all GPIO pins in sleep state
+I (228) sleep_gpio: Enable automatic switching of GPIO sleep configuration
+I (235) main_task: Started on CPU0
+I (235) main_task: Calling app_main()
+[GPIO] === ESP32-C3 GPIO Register Test ===
+[GPIO] DR_REG_GPIO_BASE = 0x60004000
+[GPIO] === Initial State ===
+[GPIO] REG_READ  addr=0x60004004 val=0x00000000  GPIO_OUT_REG
+[GPIO] REG_READ  addr=0x60004020 val=0x00000000  GPIO_ENABLE_REG
+[GPIO] REG_READ  addr=0x6000403c val=0x0011b74c  GPIO_IN_REG
+[GPIO] REG_READ  addr=0x60004044 val=0x00000000  GPIO_STATUS_REG
+[GPIO] REG_READ  addr=0x60004038 val=0x0000000d  GPIO_STRAP_REG
+[GPIO] REG_READ  addr=0x600046fc val=0x02006130  GPIO_DATE_REG
+[GPIO] === Test: OUT register ===
+[GPIO] TEST_PASS out_clear val=0x00000000
+[GPIO] TEST_PASS out_write_0A val=0x0000000a
+[GPIO] === Test: OUT W1TS/W1TC ===
+[GPIO] TEST_PASS out_w1ts_05 val=0x00000005
+[GPIO] TEST_PASS out_w1ts_0F val=0x0000000f
+[GPIO] TEST_PASS out_w1tc_0C val=0x0000000c
+[GPIO] === Test: ENABLE W1TS/W1TC ===
+[GPIO] TEST_PASS enable_clear val=0x00000000
+[GPIO] TEST_PASS enable_w1ts val=0x00000ff0
+[GPIO] TEST_PASS enable_w1tc val=0x00000f00
+[GPIO] === Test: STATUS W1TS/W1TC ===
+[GPIO] TEST_PASS status_w1ts val=0x00000007
+[GPIO] TEST_PASS status_w1tc val=0x00000002
+[GPIO] === Test: PINn config ===
+[GPIO] REG_READ  addr=0x60004074 val=0x00000000  GPIO_PIN0_REG
+[GPIO] REG_READ  addr=0x60004078 val=0x00000000  GPIO_PIN1_REG
+[GPIO] TEST_PASS pin0_wakeup_inttype val=0x00000580
+[GPIO] === Test: FUNC_OUT_SEL defaults ===
+[GPIO] TEST_PASS func0_out_sel_default val=0x00000080
+[GPIO] === Test: DATE register ===
+[GPIO] TEST_PASS date_version val=0x02006130
+[GPIO] === Tests Complete ===
+[GPIO] PASSED=13 FAILED=0 TOTAL=13
