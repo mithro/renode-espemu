@@ -104,8 +104,8 @@ namespace Antmicro.Renode.Peripherals.Miscellaneous
             // Default MAC: 7C:DF:A1:52:45:4E (Espressif OUI + "REN" in ASCII)
             SetMacAddress(new byte[] { 0x7C, 0xDF, 0xA1, 0x52, 0x45, 0x4E });
 
-            // Default chip revision: v0.3 (ESP32-C3 rev 3)
-            SetChipRevision(0, 3);
+            // Default chip revision: v0.4 (matches rpi4-esp hardware baseline)
+            SetChipRevision(0, 4);
 
             // DATE register (offset 0x1FC / word 127)
             efuseData[127] = 0x02012200; // version date
