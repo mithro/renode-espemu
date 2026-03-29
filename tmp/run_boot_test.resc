@@ -2,6 +2,9 @@ using sysbus
 include @peripherals/interrupt-matrix/ESP32C3_InterruptMatrix.cs
 include @peripherals/efuse/ESP32C3_eFuse.cs
 include @peripherals/rtc/ESP32C3_RTC.cs
+include @peripherals/systimer/ESP32C3_SysTimer.cs
+include @peripherals/timer-group/ESP32C3_TimerGroup.cs
+include @peripherals/system/ESP32C3_System.cs
 mach create "esp32c3"
 machine LoadPlatformDescription @platforms/cpus/esp32c3.repl
 
