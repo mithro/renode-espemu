@@ -233,9 +233,9 @@ namespace Antmicro.Renode.Peripherals.Timers
                     {
                         wdtWriteProtect = (uint)value;
                         if (value == 0x50D83AA1)
-                            this.Log(LogLevel.Debug, "WDT write-protect locked");
-                        else
                             this.Log(LogLevel.Debug, "WDT write-protect unlocked");
+                        else
+                            this.Log(LogLevel.Debug, "WDT write-protect locked");
                     },
                     valueProviderCallback: _ => wdtWriteProtect);
 
@@ -243,7 +243,7 @@ namespace Antmicro.Renode.Peripherals.Timers
 
             // RTCCALICFG: 0x68
             // [12]=START_CYCLING, [14:13]=CLK_SEL, [15]=RDY(RO), [30:16]=MAX, [31]=START
-            Registers.RtcCaliCfg.Define(this, 0x00011000) // default: START_CYCLING=1, CLK_SEL=1
+            Registers.RtcCaliCfg.Define(this, 0x00013000) // default: START_CYCLING=1, CLK_SEL=1
                 .WithValueField(0, 12, name: "RTCCALICFG_RESERVED_0_11")
                 .WithFlag(12, name: "RTC_CALI_START_CYCLING")
                 .WithValueField(13, 2, name: "RTC_CALI_CLK_SEL")
@@ -276,10 +276,9 @@ namespace Antmicro.Renode.Peripherals.Timers
                     writeCallback: (_, value) => intEna = (uint)value,
                     valueProviderCallback: _ => intEna);
 
-            // INT_RAW: 0x74 (bit 0 = T0, bit 1 = WDT; read-only status, write-to-clear)
+            // INT_RAW: 0x74 (bit 0 = T0, bit 1 = WDT; read-only, set by hardware)
             Registers.IntRaw.Define(this)
-                .WithValueField(0, 2, name: "INT_RAW",
-                    writeCallback: (_, value) => intRaw &= ~(uint)value,
+                .WithValueField(0, 2, mode: FieldMode.Read, name: "INT_RAW",
                     valueProviderCallback: _ => intRaw);
 
             // INT_ST: 0x78 (masked: RAW & ENA, read-only)

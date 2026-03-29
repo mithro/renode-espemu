@@ -76,7 +76,7 @@ namespace Antmicro.Renode.Peripherals.Miscellaneous
             // 0x10: PERIP_CLK_EN0_REG
             // Default: many peripherals clocked by default. From header bit defaults:
             // bits 31,30,29,28,27,24,23,22,16,15,14,13,6,5,3,2,1,0 = 1
-            Registers.PeripClkEn0.Define(this, 0xF1C0E06F)
+            Registers.PeripClkEn0.Define(this, 0xF9C1E06F)
                 .WithValueField(0, 32, name: "PERIP_CLK_EN0");
 
             // 0x14: PERIP_CLK_EN1_REG
@@ -107,8 +107,9 @@ namespace Antmicro.Renode.Peripherals.Miscellaneous
                 .WithValueField(0, 32, name: "BT_LPCK_DIV_FRAC");
 
             // 0x28-0x34: CPU_INTR_FROM_CPU_0 through CPU_INTR_FROM_CPU_3
-            // Writing bit 0 = 1 fires the corresponding GPIO output (interrupt source).
-            // Writing bit 0 = 0 clears it. Reading returns pending state.
+            // Writing bit 0 = 1 asserts the GPIO then auto-clears (pulse).
+            // Reading always returns 0 (matches Python stub behavior needed for
+            // vPortYield which polls until the register reads 0).
             for (int i = 0; i < NumCpuIntrSources; i++)
             {
                 int idx = i;
@@ -116,16 +117,19 @@ namespace Antmicro.Renode.Peripherals.Miscellaneous
                     .WithFlag(0, name: $"CPU_INTR_FROM_CPU_{idx}",
                         writeCallback: (_, value) =>
                         {
-                            cpuIntrPending[idx] = value;
-                            Connections[idx].Set(value);
                             if (value)
                             {
-                                this.Log(LogLevel.Debug, "FROM_CPU_INTR{0} asserted (-> interrupt matrix source {1})",
+                                // Assert GPIO to interrupt matrix, then immediately
+                                // clear pending so reads return 0 (pulse semantics)
+                                Connections[idx].Set(true);
+                                cpuIntrPending[idx] = false;
+                                this.Log(LogLevel.Debug, "FROM_CPU_INTR{0} pulsed (-> interrupt matrix source {1})",
                                     idx, 50 + idx);
                             }
                             else
                             {
-                                this.Log(LogLevel.Debug, "FROM_CPU_INTR{0} cleared", idx);
+                                Connections[idx].Set(false);
+                                cpuIntrPending[idx] = false;
                             }
                         },
                         valueProviderCallback: _ => cpuIntrPending[idx])

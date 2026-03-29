@@ -129,29 +129,31 @@ namespace Antmicro.Renode.Peripherals.Timers
 
                 if (counterVal >= targetVal)
                 {
-                    // Alarm match
+                    // Alarm match — advance target BEFORE checking intRaw guard,
+                    // so periodic alarms keep advancing even if firmware hasn't
+                    // cleared the previous interrupt yet.
+                    if (targetPeriodMode[target])
+                    {
+                        // Periodic mode: advance target by period
+                        ulong period = targetPeriod[target];
+                        targetVal += period;
+                        targetVal &= CounterMask;
+                        targetHi[target] = (uint)((targetVal >> 32) & 0xFFFFF);
+                        targetLo[target] = (uint)(targetVal & 0xFFFFFFFF);
+                    }
+                    else
+                    {
+                        // One-shot: disable the target
+                        targetLoaded[target] = false;
+                    }
+
+                    // Only set intRaw and fire GPIO if not already pending
                     uint bit = 1u << target;
                     if ((intRaw & bit) == 0)
                     {
                         intRaw |= bit;
                         this.Log(LogLevel.Debug, "TARGET{0} alarm fired, counter=0x{1:X13} target=0x{2:X13}",
                             target, counterVal, targetVal);
-
-                        if (targetPeriodMode[target])
-                        {
-                            // Periodic mode: advance target by period
-                            ulong period = targetPeriod[target];
-                            targetVal += period;
-                            targetVal &= CounterMask;
-                            targetHi[target] = (uint)((targetVal >> 32) & 0xFFFFF);
-                            targetLo[target] = (uint)(targetVal & 0xFFFFFFFF);
-                        }
-                        else
-                        {
-                            // One-shot: disable the target
-                            targetLoaded[target] = false;
-                        }
-
                         UpdateInterrupt(target);
                     }
                 }
