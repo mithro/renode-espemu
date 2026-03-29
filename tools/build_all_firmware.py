@@ -17,25 +17,34 @@ PERIPHERALS_DIR = REPO_ROOT / "peripherals"
 IDF_PATH = Path.home() / "esp" / "esp-idf"
 EXPORT_SCRIPT = IDF_PATH / "export.sh"
 
-# Peripherals with ESP-IDF firmware (have main/CMakeLists.txt)
-PERIPHERAL_FIRMWARE = [
-    "efuse",
-    "rng",
-    "gpio",
-    "system",
-    "systimer",
-    "timer-group",
-]
+# Auto-discover all ESP-IDF firmware directories
+# Supports both single firmware (firmware/main/) and multi (firmware/test_*/main/)
+def discover_firmware():
+    """Find all ESP-IDF firmware directories under peripherals/."""
+    firmware = []
+    for periph_dir in sorted(PERIPHERALS_DIR.iterdir()):
+        if not periph_dir.is_dir():
+            continue
+        fw_base = periph_dir / "firmware"
+        if not fw_base.is_dir():
+            continue
+        # Check for multi-firmware layout: firmware/test_*/main/
+        for sub in sorted(fw_base.iterdir()):
+            if sub.is_dir() and (sub / "main").is_dir() and (sub / "CMakeLists.txt").exists():
+                firmware.append(sub)
+        # Check for single-firmware layout: firmware/main/
+        if (fw_base / "main").is_dir() and (fw_base / "CMakeLists.txt").exists():
+            # Only add if no sub-firmware found (avoid building old monolithic + new split)
+            if not any(f.parent == fw_base for f in firmware):
+                firmware.append(fw_base)
+    return firmware
 
 
-def build_firmware(peripheral: str, clean: bool = False) -> bool:
-    """Build one peripheral's test firmware. Returns True on success."""
-    fw_dir = PERIPHERALS_DIR / peripheral / "firmware"
-    if not (fw_dir / "main").is_dir():
-        print(f"  SKIP {peripheral}: no firmware/main/ directory")
-        return True
+def build_firmware(fw_dir: Path, clean: bool = False) -> bool:
+    """Build one firmware directory. Returns True on success."""
+    name = fw_dir.name if fw_dir.name != "firmware" else fw_dir.parent.name
 
-    print(f"  BUILD {peripheral}...")
+    print(f"  BUILD {name}...")
 
     # Build command: use login shell to get correct Python, source ESP-IDF
     cmd = f"source {EXPORT_SCRIPT} && cd {fw_dir}"
@@ -51,21 +60,18 @@ def build_firmware(peripheral: str, clean: bool = False) -> bool:
     )
 
     if result.returncode != 0:
-        print(f"  FAIL {peripheral}:")
-        # Show last 10 lines of output
-        for line in result.stdout.splitlines()[-10:]:
-            print(f"    {line}")
-        for line in result.stderr.splitlines()[-5:]:
+        print(f"  FAIL {name}:")
+        for line in result.stdout.splitlines()[-5:]:
             print(f"    {line}")
         return False
 
     # Verify ELF exists
     elf_files = list((fw_dir / "build").glob("*.elf"))
     if not elf_files:
-        print(f"  FAIL {peripheral}: no .elf file produced")
+        print(f"  FAIL {name}: no .elf file produced")
         return False
 
-    print(f"  OK   {peripheral}: {elf_files[0].name}")
+    print(f"  OK   {name}: {elf_files[0].name}")
     return True
 
 
@@ -77,24 +83,19 @@ def main():
     print(f"Peripherals: {PERIPHERALS_DIR}")
     print()
 
-    results = {}
-    for peripheral in PERIPHERAL_FIRMWARE:
-        results[peripheral] = build_firmware(peripheral, clean)
+    all_firmware = discover_firmware()
+    print(f"Discovered {len(all_firmware)} firmware directories\n")
 
-    # Also build hello_world
-    hw_dir = REPO_ROOT / "hello_world" / "firmware"
-    if hw_dir.is_dir() and (hw_dir / "hello_world.elf").exists():
-        print(f"  OK   hello_world: already built")
-        results["hello_world"] = True
-    else:
-        print(f"  SKIP hello_world: pre-built firmware")
-        results["hello_world"] = True
+    results = {}
+    for fw_dir in all_firmware:
+        name = fw_dir.name if fw_dir.name != "firmware" else fw_dir.parent.name
+        results[name] = build_firmware(fw_dir, clean)
 
     print()
     print("=== Build Summary ===")
     passed = sum(1 for v in results.values() if v)
     total = len(results)
-    for name, ok in results.items():
+    for name, ok in sorted(results.items()):
         status = "PASS" if ok else "FAIL"
         print(f"  {status} {name}")
     print(f"\n{passed}/{total} builds succeeded")
