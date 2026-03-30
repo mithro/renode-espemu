@@ -15,6 +15,22 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent.parent
 PERIPHERALS_DIR = REPO_ROOT / "peripherals"
 
+# Tests with inherently non-matching output (exclude from strict comparison)
+EXPECTED_DIFF_TESTS = {
+    # eFuse: real OTP data vs fake emulation values
+    "test_efuse_blk0_reset_values", "test_efuse_blk1_spi_config",
+    "test_efuse_blk2_sys_part1", "test_efuse_blk3_usr_data",
+    "test_efuse_chip_revision", "test_efuse_control_regs",
+    "test_efuse_key_blocks", "test_efuse_mac_address",
+    # RNG: hardware RNG vs PRNG produce different sequences
+    "test_syscon_rng_reads",
+}
+
+# Register patterns that are timing-dependent (exclude from value comparison)
+TIMING_DEPENDENT_RE = re.compile(
+    r"(VALUE_LO|VALUE_HI|T0LO|T0HI|TIME_LOW|TIME_HIGH|counter|COUNTER)"
+)
+
 # Match structured output lines
 STRUCTURED_RE = re.compile(r"^\[([A-Z_]+)\]\s+(.*)$")
 
@@ -51,10 +67,13 @@ def compare_test(hw_file: Path, renode_file: Path, verbose: bool = False) -> dic
     rn_pass = {l for l in renode_lines if "TEST_PASS" in l}
     rn_fail = {l for l in renode_lines if "TEST_FAIL" in l}
 
-    # Find register value differences
+    # Find register value differences (skip timing-dependent registers)
     reg_diffs = []
     for hw_r, rn_r in zip(hw_reads, rn_reads):
         if hw_r != rn_r:
+            # Skip timing-dependent values (counters, timers)
+            if TIMING_DEPENDENT_RE.search(hw_r):
+                continue
             reg_diffs.append((hw_r, rn_r))
 
     # Count mismatches in length
@@ -117,16 +136,20 @@ def main():
 
     match_count = 0
     diff_count = 0
+    skip_count = 0
     total_reg_diffs = 0
 
     for periph, test_name, hw_file, rn_file in tests:
+        if test_name in EXPECTED_DIFF_TESTS:
+            skip_count += 1
+            print(f"  ~ {test_name} (expected diff, skipped)")
+            continue
+
         result = compare_test(hw_file, rn_file, args.verbose)
         if result["match"]:
             match_count += 1
-            status = "MATCH"
         else:
             diff_count += 1
-            status = "DIFF"
             total_reg_diffs += len(result["reg_diffs"]) + abs(result["len_diff"])
 
         symbol = "." if result["match"] else "X"
@@ -142,9 +165,10 @@ def main():
             detail = f" ({', '.join(parts)})"
         print(f"  {symbol} {test_name}{detail}")
 
+    compared = match_count + diff_count
     print(f"\n{'='*50}")
-    print(f"  MATCH: {match_count}/{len(tests)}")
-    print(f"  DIFF:  {diff_count}/{len(tests)}")
+    print(f"  MATCH: {match_count}/{compared} (of {len(tests)} total, {skip_count} skipped)")
+    print(f"  DIFF:  {diff_count}/{compared}")
     print(f"  Total register differences: {total_reg_diffs}")
 
     return 0 if diff_count == 0 else 1
