@@ -1,0 +1,6 @@
+I (0) main_task: Started on CPU0
+I (0) main_task: Calling app_main()
+[SYSTEM] === test_system_sysclk_conf ===
+[SYSTEM] REG_READ  addr=0x600c0058 val=0x00028400  SYSTEM_SYSCLK_CONF_REG
+[SYSTEM] DECODE   CLK_XTAL_FREQ[18:12]=40  SOC_CLK_SEL[11:10]=1  PRE_DIV_CNT[9:0]=0
+[SYSTEM] === Done ===

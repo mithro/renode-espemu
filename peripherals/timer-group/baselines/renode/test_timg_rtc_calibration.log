@@ -1,0 +1,9 @@
+I (0) main_task: Started on CPU0
+I (0) main_task: Calling app_main()
+[TIMG] === test_timg_rtc_calibration ===
+[TIMG] REG_READ  addr=0x6001f068 val=0x04008000  TIMG_RTCCALICFG_REG(0)
+[TIMG] RTCCALICFG.RDY = 1
+[TIMG] REG_READ  addr=0x6001f06c val=0x01000001  TIMG_RTCCALICFG1_REG(0)
+[TIMG] RTC calibration ready
+[TIMG] TEST_PASS
+[TIMG] === Done ===

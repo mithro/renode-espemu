@@ -1,0 +1,11 @@
+I (0) main_task: Started on CPU0
+I (0) main_task: Calling app_main()
+[SYSTMR] === test_systimer_target_conf ===
+[SYSTMR] Writing TARGET0_CONF = 0xAA
+[SYSTMR] REG_READ  addr=0x60023034 val=0x000000aa  TARGET0_CONF (expect 0xAA)
+[SYSTMR] Writing TARGET1_CONF = 0xBB
+[SYSTMR] REG_READ  addr=0x60023038 val=0x000000bb  TARGET1_CONF (expect 0xBB)
+[SYSTMR] Writing TARGET2_CONF = 0xCC
+[SYSTMR] REG_READ  addr=0x6002303c val=0x000000cc  TARGET2_CONF (expect 0xCC)
+[SYSTMR] TEST_PASS
+[SYSTMR] === Done ===

@@ -1,0 +1,9 @@
+I (0) main_task: Started on CPU0
+I (0) main_task: Calling app_main()
+[UART] === test_uart_status_reset ===
+[UART] REG_READ  addr=0x6000001c val=0x80008000  UART_STATUS_REG
+[UART] TXFIFO_CNT = 0
+[UART] REG_READ  addr=0x60000020 val=0x1000001c  UART_CONF0_REG
+[UART] REG_READ  addr=0x60000024 val=0x0000c060  UART_CONF1_REG
+[UART] TEST_PASS
+[UART] === Done ===

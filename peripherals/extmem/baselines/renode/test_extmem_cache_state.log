@@ -1,0 +1,7 @@
+I (0) main_task: Started on CPU0
+I (0) main_task: Calling app_main()
+[EXTMEM] === test_extmem_cache_state ===
+[EXTMEM] REG_READ  addr=0x600c40b0 val=0x00000001  EXTMEM_CACHE_STATE_REG
+[EXTMEM] CACHE_STATE low bits = 0x001
+[EXTMEM] TEST_PASS: cache is idle
+[EXTMEM] === Done ===

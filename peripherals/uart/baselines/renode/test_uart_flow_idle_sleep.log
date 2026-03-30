@@ -1,0 +1,8 @@
+I (0) main_task: Started on CPU0
+I (0) main_task: Calling app_main()
+[UART] === test_uart_flow_idle_sleep ===
+[UART] REG_READ  addr=0x60000034 val=0x00000000  UART_FLOW_CONF_REG
+[UART] REG_READ  addr=0x60000048 val=0x00040100  UART_IDLE_CONF_REG
+[UART] REG_READ  addr=0x60000038 val=0x000000f0  UART_SLEEP_CONF_REG
+[UART] TEST_PASS
+[UART] === Done ===

@@ -1,0 +1,6 @@
+I (0) main_task: Started on CPU0
+I (0) main_task: Calling app_main()
+[EXTMEM] === test_extmem_tag_power ===
+[EXTMEM] REG_READ  addr=0x600c4008 val=0x00000004  EXTMEM_ICACHE_TAG_POWER_CTRL_REG
+[EXTMEM] TEST_PASS
+[EXTMEM] === Done ===

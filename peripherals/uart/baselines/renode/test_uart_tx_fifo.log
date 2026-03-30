@@ -1,0 +1,7 @@
+I (0) main_task: Started on CPU0
+I (0) main_task: Calling app_main()
+[UART] === test_uart_tx_fifo ===
+A[UART] Wrote 0x41 ('A') to UART_FIFO_REG
+[UART] REG_READ  addr=0x6000001c val=0x80008000  UART_STATUS_REG
+[UART] TEST_PASS
+[UART] === Done ===

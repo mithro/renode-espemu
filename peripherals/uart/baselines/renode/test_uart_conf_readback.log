@@ -1,0 +1,9 @@
+I (0) main_task: Started on CPU0
+I (0) main_task: Calling app_main()
+[UART] === test_uart_conf_readback ===
+[UART] Original UART_CONF0_REG = 0x1000001c
+[UART] REG_READ  addr=0x60000020 val=0x0000001c  UART_CONF0_REG (after write)
+[UART] Readback matches written value
+[UART] REG_READ  addr=0x60000020 val=0x1000001c  UART_CONF0_REG (restored)
+[UART] TEST_PASS
+[UART] === Done ===

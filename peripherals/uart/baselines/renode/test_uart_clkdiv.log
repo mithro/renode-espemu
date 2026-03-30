@@ -1,0 +1,8 @@
+I (0) main_task: Started on CPU0
+I (0) main_task: Calling app_main()
+[UART] === test_uart_clkdiv ===
+[UART] REG_READ  addr=0x60000014 val=0x0030015b  UART_CLKDIV_REG (reset)
+[UART] REG_READ  addr=0x60000014 val=0x000002b6  UART_CLKDIV_REG (after write)
+[UART] CLKDIV readback matches
+[UART] TEST_PASS
+[UART] === Done ===

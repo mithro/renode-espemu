@@ -1,0 +1,9 @@
+I (0) main_task: Started on CPU0
+I (0) main_task: Calling app_main()
+[SYSTEM] === test_system_clk_write_readback ===
+[SYSTEM] REG_READ  addr=0x600c0010 val=0x7180e007  SYSTEM_PERIP_CLK_EN0_REG (original)
+[SYSTEM] REG_WRITE addr=0x600c0010 val=0x7180e006  SYSTEM_PERIP_CLK_EN0_REG (toggled bit0)
+[SYSTEM] REG_READ  addr=0x600c0010 val=0x7180e006  SYSTEM_PERIP_CLK_EN0_REG (readback)
+[SYSTEM] REG_WRITE addr=0x600c0010 val=0x7180e007  SYSTEM_PERIP_CLK_EN0_REG (restored)
+[SYSTEM] TEST_PASS clk_write_readback
+[SYSTEM] === Done ===

@@ -1,0 +1,9 @@
+I (0) main_task: Started on CPU0
+I (0) main_task: Calling app_main()
+[RTC] === test_rtc_clk_conf ===
+[RTC] REG_READ  addr=0x60008070 val=0x31583218  RTC_CNTL_CLK_CONF_REG
+[RTC] REG_READ  addr=0x60008074 val=0x00400000  RTC_CNTL_SLOW_CLK_CONF_REG
+[RTC] CLK_CONF reset value = 0x31583218
+[RTC] SLOW_CLK_CONF reset value = 0x00400000
+[RTC] TEST_PASS
+[RTC] === Done ===

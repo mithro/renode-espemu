@@ -1,0 +1,14 @@
+I (0) main_task: Started on CPU0
+I (0) main_task: Calling app_main()
+[TIMG] === test_timg_int_registers ===
+[TIMG] REG_READ  addr=0x6001f070 val=0x00000002  INT_ENA_TIMERS (initial)
+[TIMG] REG_READ  addr=0x6001f074 val=0x00000000  INT_RAW_TIMERS (initial)
+[TIMG] REG_READ  addr=0x6001f078 val=0x00000000  INT_ST_TIMERS  (initial)
+[TIMG] Writing INT_ENA_TIMERS = 1
+[TIMG] REG_READ  addr=0x6001f070 val=0x00000001  INT_ENA_TIMERS (after write)
+[TIMG] REG_READ  addr=0x6001f078 val=0x00000000  INT_ST_TIMERS (after ENA)
+[TIMG] Writing INT_CLR_TIMERS = 1
+[TIMG] REG_READ  addr=0x6001f074 val=0x00000000  INT_RAW_TIMERS (after clear)
+[TIMG] REG_READ  addr=0x6001f078 val=0x00000000  INT_ST_TIMERS  (after clear)
+[TIMG] TEST_PASS
+[TIMG] === Done ===

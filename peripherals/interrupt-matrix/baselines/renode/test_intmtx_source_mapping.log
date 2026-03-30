@@ -1,0 +1,9 @@
+I (0) main_task: Started on CPU0
+I (0) main_task: Calling app_main()
+[INTMTX] === test_intmtx_source_mapping ===
+[INTMTX] Writing source 0 mapping = 5
+[INTMTX] REG_READ  addr=0x600c2000 val=0x00000005  SRC_0_MAP (expect 5)
+[INTMTX] Writing source 10 mapping = 15
+[INTMTX] REG_READ  addr=0x600c2028 val=0x0000000f  SRC_10_MAP (expect 15)
+[INTMTX] TEST_PASS
+[INTMTX] === Done ===

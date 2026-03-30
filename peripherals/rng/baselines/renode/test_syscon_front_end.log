@@ -1,0 +1,5 @@
+I (0) main_task: Started on CPU0
+I (0) main_task: Calling app_main()
+[SYSCON] === test_syscon_front_end ===
+[SYSCON] REG_READ  addr=0x6002609c val=0x00000000  SYSCON_FRONT_END_MEM_PD_REG
+[SYSCON] === Done ===

@@ -1,0 +1,7 @@
+I (0) main_task: Started on CPU0
+I (0) main_task: Calling app_main()
+[RTC] === test_rtc_time_counter ===
+[RTC] REG_READ  addr=0x6000800c val=0x80000000  RTC_CNTL_TIME_UPDATE_REG
+[RTC] REG_READ  addr=0x60008010 val=0x00001b58  RTC_CNTL_TIME_LOW0_REG
+[RTC] REG_READ  addr=0x60008014 val=0x00000000  RTC_CNTL_TIME_HIGH0_REG
+[RTC] time_a = 0x0000000000001b58

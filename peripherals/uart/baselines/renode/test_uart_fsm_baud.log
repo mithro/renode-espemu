@@ -1,0 +1,10 @@
+I (0) main_task: Started on CPU0
+I (0) main_task: Calling app_main()
+[UART] === test_uart_fsm_baud ===
+[UART] REG_READ  addr=0x6000006c val=0x00000000  UART_FSM_STATUS_REG
+[UART] REG_READ  addr=0x60000028 val=0x00000fff  UART_LOWPULSE_REG
+[UART] REG_READ  addr=0x6000002c val=0x00000fff  UART_HIGHPULSE_REG
+[UART] REG_READ  addr=0x60000070 val=0x00000fff  UART_POSPULSE_REG
+[UART] REG_READ  addr=0x60000074 val=0x00000fff  UART_NEGPULSE_REG
+[UART] TEST_PASS
+[UART] === Done ===

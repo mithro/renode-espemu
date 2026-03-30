@@ -1,0 +1,7 @@
+I (0) main_task: Started on CPU0
+I (0) main_task: Calling app_main()
+[SYSTEM] === test_system_cpu_intr ===
+[SYSTEM] REG_WRITE addr=0x600c0028 val=0x00000001  SYSTEM_CPU_INTR_FROM_CPU_0_REG
+[SYSTEM] REG_READ  addr=0x600c0028 val=0x00000000  SYSTEM_CPU_INTR_FROM_CPU_0_REG (readback)
+[SYSTEM] TEST_PASS cpu_intr_auto_clear
+[SYSTEM] === Done ===

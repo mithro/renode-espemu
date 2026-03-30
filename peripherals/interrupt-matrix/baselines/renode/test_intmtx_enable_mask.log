@@ -1,0 +1,10 @@
+I (0) main_task: Started on CPU0
+I (0) main_task: Calling app_main()
+[INTMTX] === test_intmtx_enable_mask ===
+[INTMTX] REG_READ  addr=0x600c2104 val=0x0f00003c  CPU_INT_ENABLE (initial)
+[INTMTX] Writing CPU_INT_ENABLE = 0xFF
+[INTMTX] REG_READ  addr=0x600c2104 val=0x000000ff  CPU_INT_ENABLE (expect 0xFF)
+[INTMTX] Restoring CPU_INT_ENABLE
+[INTMTX] REG_READ  addr=0x600c2104 val=0x0f00003c  CPU_INT_ENABLE (restored)
+[INTMTX] TEST_PASS
+[INTMTX] === Done ===

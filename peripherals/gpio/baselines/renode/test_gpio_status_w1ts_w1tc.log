@@ -1,0 +1,11 @@
+I (0) main_task: Started on CPU0
+I (0) main_task: Calling app_main()
+[GPIO] === test_gpio_status_w1ts_w1tc ===
+[GPIO] REG_WRITE addr=0x60004048 val=0x00000001  GPIO_STATUS_W1TS_REG
+[GPIO] REG_READ  addr=0x60004044 val=0x00000001  GPIO_STATUS_REG (after W1TS)
+[GPIO] REG_WRITE addr=0x6000404c val=0x00000001  GPIO_STATUS_W1TC_REG
+[GPIO] REG_READ  addr=0x60004044 val=0x00000000  GPIO_STATUS_REG (after W1TC)
+[GPIO] REG_READ  addr=0x60004048 val=0x00000000  GPIO_STATUS_W1TS_REG (direct read)
+[GPIO] REG_READ  addr=0x6000404c val=0x00000000  GPIO_STATUS_W1TC_REG (direct read)
+[GPIO] TEST_PASS
+[GPIO] === Done ===

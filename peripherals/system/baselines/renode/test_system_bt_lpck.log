@@ -1,0 +1,6 @@
+I (0) main_task: Started on CPU0
+I (0) main_task: Calling app_main()
+[SYSTEM] === test_system_bt_lpck ===
+[SYSTEM] REG_READ  addr=0x600c0020 val=0x00000000  SYSTEM_BT_LPCK_DIV_INT_REG
+[SYSTEM] REG_READ  addr=0x600c0024 val=0x01001001  SYSTEM_BT_LPCK_DIV_FRAC_REG
+[SYSTEM] === Done ===

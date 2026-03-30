@@ -1,0 +1,8 @@
+I (0) main_task: Started on CPU0
+I (0) main_task: Calling app_main()
+[INTMTX] === test_intmtx_pending_clear ===
+[INTMTX] REG_READ  addr=0x600c2110 val=0x00000010  CPU_INT_EIP_STATUS (before clear)
+[INTMTX] Writing CPU_INT_CLEAR = 0xFF
+[INTMTX] REG_READ  addr=0x600c2110 val=0x00000000  CPU_INT_EIP_STATUS (after clear)
+[INTMTX] TEST_PASS
+[INTMTX] === Done ===

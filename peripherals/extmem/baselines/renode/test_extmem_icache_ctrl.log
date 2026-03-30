@@ -1,0 +1,8 @@
+I (0) main_task: Started on CPU0
+I (0) main_task: Calling app_main()
+[EXTMEM] === test_extmem_icache_ctrl ===
+[EXTMEM] REG_READ  addr=0x600c4000 val=0x00000001  EXTMEM_ICACHE_CTRL_REG
+[EXTMEM] ICACHE_CTRL enable bit = 1
+[EXTMEM] REG_READ  addr=0x600c4004 val=0x00000000  EXTMEM_ICACHE_CTRL1_REG
+[EXTMEM] TEST_PASS
+[EXTMEM] === Done ===

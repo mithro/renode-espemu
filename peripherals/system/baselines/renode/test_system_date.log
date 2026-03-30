@@ -1,0 +1,6 @@
+I (0) main_task: Started on CPU0
+I (0) main_task: Calling app_main()
+[SYSTEM] === test_system_date ===
+[SYSTEM] REG_READ  addr=0x600c0ffc val=0x02007150  SYSTEM_DATE_REG
+[SYSTEM] TEST_PASS system_date_nonzero
+[SYSTEM] === Done ===

@@ -1,0 +1,8 @@
+I (0) main_task: Started on CPU0
+I (0) main_task: Calling app_main()
+[EFUSE] === test_efuse_mac_address ===
+[EFUSE] REG_READ  addr=0x60008844 val=0xa152454e  EFUSE_RD_MAC_SPI_SYS_0_REG
+[EFUSE] REG_READ  addr=0x60008848 val=0x00007cdf  EFUSE_RD_MAC_SPI_SYS_1_REG
+[EFUSE] MAC address: 7c:df:a1:52:45:4e
+[EFUSE] TEST_PASS
+[EFUSE] === Done ===

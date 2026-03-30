@@ -1,0 +1,11 @@
+I (0) main_task: Started on CPU0
+I (0) main_task: Calling app_main()
+[GPIO] === test_gpio_pin_config ===
+[GPIO] REG_WRITE addr=0x60004074 val=0x00000010  GPIO_PIN0_REG
+[GPIO] REG_READ  addr=0x60004074 val=0x00000010  GPIO_PIN0_REG (readback)
+[GPIO] REG_WRITE addr=0x60004088 val=0x00000010  GPIO_PIN5_REG
+[GPIO] REG_READ  addr=0x60004088 val=0x00000010  GPIO_PIN5_REG (readback)
+[GPIO] REG_WRITE addr=0x600040c8 val=0x00000010  GPIO_PIN21_REG
+[GPIO] REG_READ  addr=0x600040c8 val=0x00000010  GPIO_PIN21_REG (readback)
+[GPIO] TEST_PASS
+[GPIO] === Done ===

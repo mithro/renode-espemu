@@ -1,0 +1,10 @@
+I (0) main_task: Started on CPU0
+I (0) main_task: Calling app_main()
+[TIMG] === test_timg_wdt_config ===
+[TIMG] Unlocking WDTWPROTECT
+[TIMG] REG_READ  addr=0x6001f064 val=0x50d83aa1  WDTWPROTECT
+[TIMG] Writing WDTCONFIG0 = 0x00060000
+[TIMG] REG_READ  addr=0x6001f048 val=0x00060000  WDTCONFIG0 (expect 0x00060000)
+[TIMG] Re-locking WDTWPROTECT
+[TIMG] TEST_PASS
+[TIMG] === Done ===

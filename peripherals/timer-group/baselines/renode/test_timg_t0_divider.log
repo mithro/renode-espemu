@@ -1,0 +1,11 @@
+I (0) main_task: Started on CPU0
+I (0) main_task: Calling app_main()
+[TIMG] === test_timg_t0_divider ===
+[TIMG] Setting divider=2, enabling T0
+[TIMG] REG_READ  addr=0x6001f000 val=0xe0004000  T0CONFIG (divider=2)
+[TIMG] REG_READ  addr=0x6001f004 val=0x000001f4  T0LO (1st)
+[TIMG] REG_READ  addr=0x6001f008 val=0x00000000  T0HI (1st)
+[TIMG] REG_READ  addr=0x6001f004 val=0x000003e8  T0LO (2nd)
+[TIMG] REG_READ  addr=0x6001f008 val=0x00000000  T0HI (2nd)
+[TIMG] Counter delta with divider=2: 500
+[TIMG] === Done ===

@@ -1,0 +1,11 @@
+I (0) main_task: Started on CPU0
+I (0) main_task: Calling app_main()
+[SYSTMR] === test_systimer_conf_reset ===
+[SYSTMR] REG_READ  addr=0x60023000 val=0xf5000000  SYSTIMER_CONF_REG
+[SYSTMR] CONF.CLK_EN           = 1
+[SYSTMR] CONF.UNIT0_WORK_EN    = 1
+[SYSTMR] CONF.UNIT1_WORK_EN    = 1
+[SYSTMR] CONF.TARGET0_WORK_EN  = 1
+[SYSTMR] CONF.TARGET1_WORK_EN  = 0
+[SYSTMR] CONF.TARGET2_WORK_EN  = 0
+[SYSTMR] === Done ===

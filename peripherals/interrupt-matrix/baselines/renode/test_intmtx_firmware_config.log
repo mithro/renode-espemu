@@ -1,0 +1,26 @@
+I (0) main_task: Started on CPU0
+I (0) main_task: Calling app_main()
+[INTMTX] === test_intmtx_firmware_config ===
+[INTMTX] --- Non-zero source mappings (ESP-IDF boot config) ---
+[INTMTX] REG_READ  addr=0x600c206c val=0x00000002  SRC_27 -> line 2
+[INTMTX] REG_READ  addr=0x600c2084 val=0x00000005  SRC_33 -> line 5
+[INTMTX] REG_READ  addr=0x600c208c val=0x00000018  SRC_35 -> line 24
+[INTMTX] REG_READ  addr=0x600c2090 val=0x00000019  SRC_36 -> line 25
+[INTMTX] REG_READ  addr=0x600c2094 val=0x00000004  SRC_37 -> line 4
+[INTMTX] REG_READ  addr=0x600c20c8 val=0x00000003  SRC_50 -> line 3
+[INTMTX] REG_READ  addr=0x600c20d8 val=0x0000001b  SRC_54 -> line 27
+[INTMTX] REG_READ  addr=0x600c20e0 val=0x0000001a  SRC_56 -> line 26
+[INTMTX] REG_READ  addr=0x600c20e4 val=0x0000001a  SRC_57 -> line 26
+[INTMTX] REG_READ  addr=0x600c20e8 val=0x0000001a  SRC_58 -> line 26
+[INTMTX] REG_READ  addr=0x600c20f4 val=0x00000019  SRC_61 -> line 25
+[INTMTX] REG_READ  addr=0x600c2104 val=0x0f00003c  CPU_INT_ENABLE
+[INTMTX] --- Interrupt priorities ---
+[INTMTX] REG_READ  addr=0x600c211c val=0x00000001  CPU_INT_PRI_2
+[INTMTX] REG_READ  addr=0x600c2120 val=0x00000001  CPU_INT_PRI_3
+[INTMTX] REG_READ  addr=0x600c2124 val=0x00000001  CPU_INT_PRI_4
+[INTMTX] REG_READ  addr=0x600c2128 val=0x00000001  CPU_INT_PRI_5
+[INTMTX] REG_READ  addr=0x600c2174 val=0x00000004  CPU_INT_PRI_24
+[INTMTX] REG_READ  addr=0x600c2178 val=0x00000004  CPU_INT_PRI_25
+[INTMTX] REG_READ  addr=0x600c217c val=0x00000004  CPU_INT_PRI_26
+[INTMTX] REG_READ  addr=0x600c2180 val=0x00000004  CPU_INT_PRI_27
+[INTMTX] === Done ===

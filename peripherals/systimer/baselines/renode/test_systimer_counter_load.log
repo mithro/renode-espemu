@@ -1,0 +1,11 @@
+I (0) main_task: Started on CPU0
+I (0) main_task: Calling app_main()
+[SYSTMR] === test_systimer_counter_load ===
+[SYSTMR] Writing UNIT0_LOAD_HI=0, UNIT0_LOAD_LO=0x1000
+[SYSTMR] REG_READ  addr=0x6002300c val=0x00000000  UNIT0_LOAD_HI
+[SYSTMR] REG_READ  addr=0x60023010 val=0x00001000  UNIT0_LOAD_LO
+[SYSTMR] Triggering UNIT0_LOAD
+[SYSTMR] REG_READ  addr=0x60023040 val=0x00000000  UNIT0_VALUE_HI (expect 0)
+[SYSTMR] REG_READ  addr=0x60023044 val=0x000c3880  UNIT0_VALUE_LO (expect ~0x1000)
+[SYSTMR] TEST_PASS
+[SYSTMR] === Done ===

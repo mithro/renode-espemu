@@ -1,0 +1,8 @@
+I (0) main_task: Started on CPU0
+I (0) main_task: Calling app_main()
+[RTC] === test_rtc_reset_state ===
+[RTC] REG_READ  addr=0x60008038 val=0x00003001  RTC_CNTL_RESET_STATE_REG
+[RTC] reset_cause (bits[5:0]) = 0x1
+[RTC] Reset cause is POWERON_RESET (1)
+[RTC] TEST_PASS
+[RTC] === Done ===

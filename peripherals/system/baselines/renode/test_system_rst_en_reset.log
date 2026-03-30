@@ -1,0 +1,7 @@
+I (0) main_task: Started on CPU0
+I (0) main_task: Calling app_main()
+[SYSTEM] === test_system_rst_en_reset ===
+[SYSTEM] REG_READ  addr=0x600c0018 val=0x886d1be8  SYSTEM_PERIP_RST_EN0_REG
+[SYSTEM] REG_READ  addr=0x600c001c val=0x000001fe  SYSTEM_PERIP_RST_EN1_REG
+[SYSTEM] REG_READ  addr=0x600c0004 val=0x00000080  SYSTEM_CPU_PERI_RST_EN_REG
+[SYSTEM] === Done ===

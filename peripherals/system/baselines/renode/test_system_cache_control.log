@@ -1,0 +1,5 @@
+I (0) main_task: Started on CPU0
+I (0) main_task: Calling app_main()
+[SYSTEM] === test_system_cache_control ===
+[SYSTEM] REG_READ  addr=0x600c0040 val=0x00000005  SYSTEM_CACHE_CONTROL_REG
+[SYSTEM] === Done ===

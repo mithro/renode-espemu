@@ -1,0 +1,8 @@
+I (0) main_task: Started on CPU0
+I (0) main_task: Calling app_main()
+[GPIO] === test_gpio_in_loopback ===
+[GPIO] REG_WRITE addr=0x60004008 val=0x00000004  GPIO_OUT_W1TS_REG (set bit 2)
+[GPIO] REG_WRITE addr=0x60004024 val=0x00000004  GPIO_ENABLE_W1TS_REG (set bit 2)
+[GPIO] REG_READ  addr=0x6000403c val=0x00000004  GPIO_IN_REG
+[GPIO] TEST_PASS
+[GPIO] === Done ===

@@ -1,0 +1,6 @@
+I (0) main_task: Started on CPU0
+I (0) main_task: Calling app_main()
+[UART] === test_uart_mem_conf ===
+[UART] REG_READ  addr=0x60000060 val=0x000a0012  UART_MEM_CONF_REG
+[UART] TEST_PASS
+[UART] === Done ===

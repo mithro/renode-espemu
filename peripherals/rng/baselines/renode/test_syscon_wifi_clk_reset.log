@@ -1,0 +1,6 @@
+I (0) main_task: Started on CPU0
+I (0) main_task: Calling app_main()
+[SYSCON] === test_syscon_wifi_clk_reset ===
+[SYSCON] REG_READ  addr=0x60026014 val=0xffffffdf  SYSCON_WIFI_CLK_EN_REG
+[SYSCON] REG_READ  addr=0x60026018 val=0x00000000  SYSCON_WIFI_RST_EN_REG
+[SYSCON] === Done ===

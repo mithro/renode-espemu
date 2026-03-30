@@ -1,0 +1,14 @@
+I (0) main_task: Started on CPU0
+I (0) main_task: Calling app_main()
+[EFUSE] === test_efuse_int_regs ===
+[EFUSE] REG_READ  addr=0x600089ec val=0x12000000  EFUSE_INT_RAW (reset)
+[EFUSE] REG_READ  addr=0x600089f0 val=0x00288000  EFUSE_INT_ST  (reset)
+[EFUSE] REG_READ  addr=0x600089f4 val=0x00000190  EFUSE_INT_ENA (reset)
+[EFUSE] TEST_FAIL: interrupt regs not 0 at reset
+[EFUSE] REG_READ  addr=0x600089f4 val=0x00000001  EFUSE_INT_ENA (after write 0x1)
+[EFUSE] TEST_PASS: INT_ENA readback correct
+[EFUSE] REG_READ  addr=0x600089f0 val=0x00288000  EFUSE_INT_ST  (after ENA=1)
+[EFUSE] TEST_FAIL: INT_ST=0x00288000 expected 0
+[EFUSE] REG_WRITE addr=0x600089f8 val=0x00000001  EFUSE_INT_CLR
+[EFUSE] TEST_PASS: INT_CLR write completed
+[EFUSE] === Done ===

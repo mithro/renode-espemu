@@ -1,0 +1,10 @@
+I (0) main_task: Started on CPU0
+I (0) main_task: Calling app_main()
+[RTC] === test_rtc_swd ===
+[RTC] REG_READ  addr=0x600080ac val=0x04b00000  RTC_CNTL_SWD_CONF_REG
+[RTC] REG_READ  addr=0x600080b0 val=0x8f1d312a  RTC_CNTL_SWD_WPROTECT_REG
+[RTC] REG_WRITE addr=0x600080b0 val=0x8f1d312a  RTC_CNTL_SWD_WPROTECT_REG (unlock)
+[RTC] REG_READ  addr=0x600080b0 val=0x8f1d312a  RTC_CNTL_SWD_WPROTECT_REG (readback)
+[RTC] REG_READ  addr=0x600080ac val=0x04b00000  RTC_CNTL_SWD_CONF_REG (after unlock)
+[RTC] TEST_PASS
+[RTC] === Done ===

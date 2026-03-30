@@ -1,0 +1,7 @@
+I (0) main_task: Started on CPU0
+I (0) main_task: Calling app_main()
+[EXTMEM] === test_extmem_conf_date ===
+[EXTMEM] REG_READ  addr=0x600c40c8 val=0x00000007  EXTMEM_CACHE_CONF_MISC_REG
+[EXTMEM] REG_READ  addr=0x600c43fc val=0x02007160  EXTMEM_DATE_REG
+[EXTMEM] TEST_PASS
+[EXTMEM] === Done ===

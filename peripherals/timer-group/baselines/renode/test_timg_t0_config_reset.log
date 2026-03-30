@@ -1,0 +1,10 @@
+I (0) main_task: Started on CPU0
+I (0) main_task: Calling app_main()
+[TIMG] === test_timg_t0_config_reset ===
+[TIMG] REG_READ  addr=0x6001f000 val=0x60002000  TIMG_T0CONFIG_REG(0)
+[TIMG] T0CONFIG.INCREASE    = 1
+[TIMG] T0CONFIG.AUTORELOAD  = 1
+[TIMG] T0CONFIG.DIVIDER     = 1
+[TIMG] T0CONFIG.ALARM_EN    = 0
+[TIMG] T0CONFIG.EN          = 0
+[TIMG] === Done ===

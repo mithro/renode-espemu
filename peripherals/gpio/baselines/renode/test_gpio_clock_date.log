@@ -1,0 +1,7 @@
+I (0) main_task: Started on CPU0
+I (0) main_task: Calling app_main()
+[GPIO] === test_gpio_clock_date ===
+[GPIO] REG_READ  addr=0x6000462c val=0x00000001  GPIO_CLOCK_GATE_REG
+[GPIO] REG_READ  addr=0x600046fc val=0x02006130  GPIO_DATE_REG
+[GPIO] TEST_PASS
+[GPIO] === Done ===

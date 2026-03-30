@@ -1,0 +1,10 @@
+I (0) main_task: Started on CPU0
+I (0) main_task: Calling app_main()
+[INTMTX] === test_intmtx_type_edge_level ===
+[INTMTX] REG_READ  addr=0x600c2108 val=0x00000000  CPU_INT_TYPE (initial)
+[INTMTX] Writing CPU_INT_TYPE = 0xF
+[INTMTX] REG_READ  addr=0x600c2108 val=0x0000000f  CPU_INT_TYPE (expect 0xF)
+[INTMTX] Restoring CPU_INT_TYPE
+[INTMTX] REG_READ  addr=0x600c2108 val=0x00000000  CPU_INT_TYPE (restored)
+[INTMTX] TEST_PASS
+[INTMTX] === Done ===

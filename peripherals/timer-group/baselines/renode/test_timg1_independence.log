@@ -1,0 +1,14 @@
+I (0) main_task: Started on CPU0
+I (0) main_task: Calling app_main()
+[TIMG] === test_timg1_independence ===
+[TIMG] Enabling TIMG1 T0
+[TIMG] REG_READ  addr=0x60020000 val=0xe0002000  TIMG1_T0CONFIG
+[TIMG] REG_READ  addr=0x60020004 val=0x000003e8  TIMG1_T0LO (1st)
+[TIMG] REG_READ  addr=0x60020008 val=0x00000000  TIMG1_T0HI (1st)
+[TIMG] REG_READ  addr=0x6001f004 val=0x00000000  TIMG0_T0LO
+[TIMG] REG_READ  addr=0x6001f008 val=0x00000000  TIMG0_T0HI
+[TIMG] REG_READ  addr=0x60020004 val=0x000007d0  TIMG1_T0LO (2nd)
+[TIMG] REG_READ  addr=0x60020008 val=0x00000000  TIMG1_T0HI (2nd)
+[TIMG] TIMG0 and TIMG1 counters are independent
+[TIMG] TEST_PASS
+[TIMG] === Done ===

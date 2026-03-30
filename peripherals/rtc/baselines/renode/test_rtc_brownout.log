@@ -1,0 +1,8 @@
+I (0) main_task: Started on CPU0
+I (0) main_task: Calling app_main()
+[RTC] === test_rtc_brownout ===
+[RTC] REG_READ  addr=0x600080d8 val=0x4bffc020  RTC_CNTL_BROWN_OUT_REG
+[RTC] Brownout enable (bit 30) = 1
+[RTC] Brownout detect (bit 31) = 0
+[RTC] TEST_PASS
+[RTC] === Done ===

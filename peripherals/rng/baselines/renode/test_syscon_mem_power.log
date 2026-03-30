@@ -1,0 +1,7 @@
+I (0) main_task: Started on CPU0
+I (0) main_task: Calling app_main()
+[SYSCON] === test_syscon_mem_power ===
+[SYSCON] REG_READ  addr=0x600260a4 val=0x0000003f  SYSCON_CLKGATE_FORCE_ON_REG
+[SYSCON] REG_READ  addr=0x600260a8 val=0x00000000  SYSCON_MEM_POWER_DOWN_REG
+[SYSCON] REG_READ  addr=0x600260ac val=0x00000000  SYSCON_MEM_POWER_UP_REG
+[SYSCON] === Done ===

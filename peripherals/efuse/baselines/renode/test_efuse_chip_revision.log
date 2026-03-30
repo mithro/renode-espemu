@@ -1,0 +1,11 @@
+I (0) main_task: Started on CPU0
+I (0) main_task: Calling app_main()
+[EFUSE] === test_efuse_chip_revision ===
+[EFUSE] REG_READ  addr=0x60008850 val=0x00100000  EFUSE_RD_MAC_SPI_SYS_3_REG
+[EFUSE] REG_READ  addr=0x60008858 val=0x00000000  EFUSE_RD_MAC_SPI_SYS_5_REG
+[EFUSE] WAFER_VERSION_MINOR_LO = 4
+[EFUSE] PKG_VERSION            = 0
+[EFUSE] WAFER_VERSION_MAJOR    = 0
+[EFUSE] Chip revision: 0.4
+[EFUSE] TEST_PASS
+[EFUSE] === Done ===

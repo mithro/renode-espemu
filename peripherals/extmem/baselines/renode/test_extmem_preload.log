@@ -1,0 +1,8 @@
+I (0) main_task: Started on CPU0
+I (0) main_task: Calling app_main()
+[EXTMEM] === test_extmem_preload ===
+[EXTMEM] REG_READ  addr=0x600c4034 val=0x00000002  EXTMEM_ICACHE_PRELOAD_CTRL_REG
+[EXTMEM] REG_READ  addr=0x600c4038 val=0x42010000  EXTMEM_ICACHE_PRELOAD_ADDR_REG
+[EXTMEM] REG_READ  addr=0x600c403c val=0x00000200  EXTMEM_ICACHE_PRELOAD_SIZE_REG
+[EXTMEM] TEST_PASS
+[EXTMEM] === Done ===

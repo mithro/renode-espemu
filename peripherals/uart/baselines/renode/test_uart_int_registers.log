@@ -1,0 +1,10 @@
+I (0) main_task: Started on CPU0
+I (0) main_task: Calling app_main()
+[UART] === test_uart_int_registers ===
+[UART] REG_READ  addr=0x60000004 val=0x00000000  UART_INT_RAW_REG
+[UART] REG_READ  addr=0x60000008 val=0x00000000  UART_INT_ST_REG
+[UART] REG_READ  addr=0x6000000c val=0x00000000  UART_INT_ENA_REG
+[UART] REG_READ  addr=0x6000000c val=0x00000001  UART_INT_ENA_REG (after write)
+[UART] Wrote 0xFFFFFFFF to UART_INT_CLR_REG
+[UART] TEST_PASS
+[UART] === Done ===
