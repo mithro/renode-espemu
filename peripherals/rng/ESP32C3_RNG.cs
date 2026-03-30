@@ -281,8 +281,8 @@ namespace Antmicro.Renode.Peripherals.Miscellaneous
                 .WithFlag(1, mode: FieldMode.Write, name: "PERI_BACKUP_ERR_INT_CLR")
                 .WithReservedBits(2, 30);
 
-            // 0x3FC: SYSCON_DATE_REG
-            Registers.Date.Define(this, 0x02007150)
+            // 0x3FC: SYSCON_DATE_REG (hardware reads 0x02007210)
+            Registers.Date.Define(this, 0x02007210)
                 .WithValueField(0, 28, name: "DATE")
                 .WithReservedBits(28, 4);
         }

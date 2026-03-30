@@ -147,9 +147,9 @@ namespace Antmicro.Renode.Peripherals.GPIOPort
                 .WithValueField(0, 26, mode: FieldMode.Write, name: "ENABLE1_W1TC");
 
             // GPIO_STRAP_REG: 0x38 (read-only, boot strapping)
-            Registers.Strap.Define(this)
-                .WithValueField(0, 16, mode: FieldMode.Read, name: "STRAPPING",
-                    valueProviderCallback: _ => 0);
+            // 0xD = SPI_FAST_FLASH_BOOT, matches typical ESP32-C3 dev board
+            Registers.Strap.Define(this, 0x0000000D)
+                .WithValueField(0, 16, mode: FieldMode.Read, name: "STRAPPING");
 
             // GPIO_IN_REG: 0x3C (read-only, input level)
             // For emulation: returns output data (loopback, independent of enable)

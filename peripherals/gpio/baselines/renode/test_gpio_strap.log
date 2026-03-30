@@ -1,5 +1,5 @@
 I (0) main_task: Started on CPU0
 I (0) main_task: Calling app_main()
 [GPIO] === test_gpio_strap ===
-[GPIO] REG_READ  addr=0x60004038 val=0x00000000  GPIO_STRAP_REG
+[GPIO] REG_READ  addr=0x60004038 val=0x0000000d  GPIO_STRAP_REG
 [GPIO] === Done ===
