@@ -20,6 +20,7 @@ include @/home/tim/github/mithro/renode-espemu/peripherals/gpio/ESP32C3_GPIO.cs
 include @/home/tim/github/mithro/renode-espemu/peripherals/extmem/ESP32C3_ExtMem.cs
 include @/home/tim/github/mithro/renode-espemu/peripherals/uart/ESP32C3_UART.cs
 include @/home/tim/github/mithro/renode-espemu/peripherals/iomux/ESP32C3_IOMUX.cs
+include @/home/tim/github/mithro/renode-espemu/peripherals/spi-flash/ESP32C3_SpiMem.cs
 mach create "esp32c3"
 machine LoadPlatformDescription @/home/tim/github/mithro/renode-espemu/platforms/cpus/esp32c3.repl
 
@@ -35,6 +36,7 @@ sysbus LoadBinary @/home/tim/github/mithro/renode-espemu/platforms/rom_func_stub
 cpu AddHook 0x40380338 "machine.SystemBus.WriteDoubleWord(0x3FCDF5B8, 0x50001D00); machine.SystemBus.WriteDoubleWord(0x3FCDFFD4, 0x50001D00)"
 
 # Patch init_flash to return ESP_OK immediately (li a0,0; ret)
+# TODO: Remove once SPI MEM peripheral fully handles flash init
 sysbus WriteWord 0x42000526 0x4501
 sysbus WriteWord 0x42000528 0x8082
 

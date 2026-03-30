@@ -90,10 +90,8 @@ uart0: UART.ESP32C3_UART @ sysbus 0x60000000
 // As real peripherals are implemented, they replace these stubs.
 
 // SPI1 (flash controller) at 0x60002000
-stub_spi1: Python.PythonPeripheral @ sysbus 0x60002000
-    size: 0x1000
-    initable: true
-    script: "request.Value = 0x0"
+// C# peripheral: minimal SPI MEM for flash init (RDID, JEDEC ID)
+spi1: Memory.ESP32C3_SpiMem @ sysbus 0x60002000
 
 // SPI0 at 0x60003000
 stub_spi0: Python.PythonPeripheral @ sysbus 0x60003000
