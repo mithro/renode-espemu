@@ -71,7 +71,8 @@ namespace Antmicro.Renode.Peripherals.GPIOPort
 
             for (int i = 0; i < NumberOfInputSignals; i++)
             {
-                funcInSelCfg[i] = 0;
+                // Default FUNC_IN_SEL = 0x1F (input disconnected), matches hardware
+                funcInSelCfg[i] = 0x1F;
             }
         }
 

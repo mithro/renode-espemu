@@ -288,10 +288,10 @@ namespace Antmicro.Renode.Peripherals.Miscellaneous
                 .WithReservedBits(3, 29);
 
             // CACHE_STATE_REG: 0xB0 (RO)
-            // bits [11:0] = ICACHE_STATE (default 0x001 = idle)
-            Registers.CacheState.Define(this, 0x00000001)
+            // bits [11:0] = ICACHE_STATE (0 = idle, hardware shows 0 after boot)
+            Registers.CacheState.Define(this, 0x00000000)
                 .WithValueField(0, 12, mode: FieldMode.Read, name: "ICACHE_STATE",
-                    valueProviderCallback: _ => 0x001)
+                    valueProviderCallback: _ => 0x000)
                 .WithReservedBits(12, 20);
 
             // CACHE_ENCRYPT_DECRYPT_RECORD_DISABLE_REG: 0xB4
@@ -343,7 +343,7 @@ namespace Antmicro.Renode.Peripherals.Miscellaneous
                 .WithFlag(0, name: "ICACHE_FREEZE_ENA")
                 .WithFlag(1, name: "ICACHE_FREEZE_MODE")
                 .WithFlag(2, mode: FieldMode.Read, name: "ICACHE_FREEZE_DONE",
-                    valueProviderCallback: _ => true)
+                    valueProviderCallback: _ => false)
                 .WithReservedBits(3, 29);
 
             // ICACHE_ATOMIC_OPERATE_ENA_REG: 0xD0

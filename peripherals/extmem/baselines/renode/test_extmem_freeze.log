@@ -1,7 +1,7 @@
 I (0) main_task: Started on CPU0
 I (0) main_task: Calling app_main()
 [EXTMEM] === test_extmem_freeze ===
-[EXTMEM] REG_READ  addr=0x600c40cc val=0x00000004  EXTMEM_ICACHE_FREEZE_REG
+[EXTMEM] REG_READ  addr=0x600c40cc val=0x00000000  EXTMEM_ICACHE_FREEZE_REG
 [EXTMEM] ICACHE_FREEZE freeze_done bit = 0
 [EXTMEM] TEST_PASS
 [EXTMEM] === Done ===
