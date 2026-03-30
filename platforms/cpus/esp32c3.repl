@@ -272,11 +272,9 @@ system: Miscellaneous.ESP32C3_System @ sysbus 0x600C0000
     2 -> intmatrix@52
     3 -> intmatrix@53
 
-// Sensitive registers at 0x600C1000
-stub_sensitive: Python.PythonPeripheral @ sysbus 0x600C1000
-    size: 0x1000
-    initable: true
-    script: "request.Value = 0x0"
+// Sensitive (PMS) registers at 0x600C1000
+// C# peripheral: permission management, lock bits, DMA/PIF access control
+sensitive: Miscellaneous.ESP32C3_Sensitive @ sysbus 0x600C1000
 
 // Interrupt Matrix at 0x600C2000
 // C# peripheral: routes 64 peripheral sources to 32 CPU interrupt lines

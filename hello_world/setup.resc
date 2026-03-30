@@ -11,6 +11,7 @@ include @/home/tim/github/mithro/renode-espemu/peripherals/extmem/ESP32C3_ExtMem
 include @/home/tim/github/mithro/renode-espemu/peripherals/uart/ESP32C3_UART.cs
 include @/home/tim/github/mithro/renode-espemu/peripherals/iomux/ESP32C3_IOMUX.cs
 include @/home/tim/github/mithro/renode-espemu/peripherals/spi-flash/ESP32C3_SpiMem.cs
+include @/home/tim/github/mithro/renode-espemu/peripherals/sensitive/ESP32C3_Sensitive.cs
 mach create "esp32c3"
 machine LoadPlatformDescription @/home/tim/github/mithro/renode-espemu/platforms/cpus/esp32c3.repl
 

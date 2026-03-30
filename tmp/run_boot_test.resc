@@ -11,6 +11,7 @@ include @peripherals/extmem/ESP32C3_ExtMem.cs
 include @peripherals/uart/ESP32C3_UART.cs
 include @peripherals/iomux/ESP32C3_IOMUX.cs
 include @peripherals/spi-flash/ESP32C3_SpiMem.cs
+include @peripherals/sensitive/ESP32C3_Sensitive.cs
 mach create "esp32c3"
 machine LoadPlatformDescription @platforms/cpus/esp32c3.repl
 
@@ -51,7 +52,8 @@ cpu AddHook 0x40000050 $skip_func
 
 # Brownout ISR skip REMOVED — RTC C# peripheral correctly reports no brownout
 
-# Skip memprot section
+# Skip memprot section (Sensitive C# peripheral is in place but memprot
+# init code has address alignment issues — needs register value debugging)
 set skip_memprot
 """
 from Antmicro.Renode.Peripherals.CPU import RegisterValue
