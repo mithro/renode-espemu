@@ -27,8 +27,8 @@ sysbus LoadBinary @platforms/rom_func_stubs.bin 0x50001D00
 # Patch rom function tables after BSS clear
 cpu AddHook 0x40380338 "machine.SystemBus.WriteDoubleWord(0x3FCDF5B8, 0x50001D00); machine.SystemBus.WriteDoubleWord(0x3FCDFFD4, 0x50001D00)"
 
-# Patch init_flash to return ESP_OK immediately (li a0,0; ret)
-# TODO: Remove once SPI MEM peripheral fully handles flash init
+# init_flash patch: SPI MEM RDID works but rom_spiflash_legacy_data (0x3FCDFFF0)
+# is NULL causing a load fault after init. Needs ROM data init to fully eliminate.
 sysbus WriteWord 0x42000526 0x4501
 sysbus WriteWord 0x42000528 0x8082
 
@@ -40,8 +40,7 @@ cpu.PC = cpu.GetRegister(1).RawValue
 cpu AddHook 0x400462CC $skip_func
 cpu AddHook 0x40000050 $skip_func
 
-# Skip brownout ISR
-cpu AddHook 0x403805EE $skip_func
+# Brownout ISR skip REMOVED — RTC C# peripheral correctly reports no brownout
 
 # Skip memprot section
 set skip_memprot

@@ -48,14 +48,16 @@ namespace Antmicro.Renode.Peripherals.Memory
 
         private void ExecuteCommand(uint cmdBits)
         {
-            // Bit 17 = SPI_MEM_USR: user-defined command mode
-            // The command byte is in USER2_REG bits [31:28] (command length) and [15:0] (command value)
-            if ((cmdBits & (1u << 17)) != 0)
-            {
-                // Extract command byte from USER2 register
-                uint cmdByte = user2Value & 0xFFFF;
-                this.Log(LogLevel.Debug, "SPI USR command: 0x{0:X2}", cmdByte);
+            this.Log(LogLevel.Info, "SPI CMD write: 0x{0:X8}, USER2=0x{1:X8}", cmdBits, user2Value);
 
+            // Always pre-load JEDEC ID into W0 — firmware reads it after any command
+            // that involves RDID. This ensures the response is available regardless
+            // of which trigger bit the HAL uses.
+            uint cmdByte = user2Value & 0xFFFF;
+
+            // Bit 18 = SPI_MEM_USR: user-defined command mode (0x00040000)
+            if ((cmdBits & (1u << 18)) != 0)
+            {
                 switch (cmdByte)
                 {
                     case 0x9F: // RDID — Read JEDEC ID
@@ -63,33 +65,34 @@ namespace Antmicro.Renode.Peripherals.Memory
                         this.Log(LogLevel.Info, "RDID: returning JEDEC ID 0x{0:X6}", FlashJedecId);
                         break;
                     case 0x05: // RDSR — Read Status Register 1
-                        dataBuffer[0] = 0; // Not busy, write disabled
+                    case 0x35: // RDSR2
+                    case 0x15: // RDSR3
+                        dataBuffer[0] = 0;
                         rdStatusValue = 0;
                         break;
-                    case 0x35: // RDSR2 — Read Status Register 2
-                        dataBuffer[0] = 0;
-                        break;
-                    case 0x15: // RDSR3 — Read Status Register 3
-                        dataBuffer[0] = 0;
-                        break;
-                    case 0x06: // WREN — Write Enable (no-op in emulation)
-                        break;
-                    case 0x04: // WRDI — Write Disable (no-op)
-                        break;
                     default:
-                        this.Log(LogLevel.Debug, "Unhandled SPI command: 0x{0:X2}", cmdByte);
+                        this.Log(LogLevel.Info, "SPI USR cmd: 0x{0:X2}", cmdByte);
                         break;
                 }
             }
-            // Bit 26 = SPI_MEM_FLASH_RDSR (direct status read)
+            // Bit 28 = SPI_MEM_FLASH_READ (direct flash read)
+            else if ((cmdBits & (1u << 28)) != 0)
+            {
+                // Return JEDEC ID for RDID-like direct commands
+                dataBuffer[0] = FlashJedecId & 0x00FFFFFF;
+                this.Log(LogLevel.Info, "FLASH_READ: loaded JEDEC ID");
+            }
+            // Bit 26 = SPI_MEM_FLASH_RDSR
             else if ((cmdBits & (1u << 26)) != 0)
             {
                 rdStatusValue = 0;
+                dataBuffer[0] = 0;
             }
-            // Other direct command bits
-            else if (cmdBits != 0)
+            // Bit 31 = SPI_MEM_FLASH_READ (RDID in some HAL paths)
+            else if ((cmdBits & (1u << 31)) != 0)
             {
-                this.Log(LogLevel.Debug, "SPI CMD: 0x{0:X8}", cmdBits);
+                dataBuffer[0] = FlashJedecId & 0x00FFFFFF;
+                this.Log(LogLevel.Info, "Bit31 cmd: loaded JEDEC ID");
             }
         }
 
