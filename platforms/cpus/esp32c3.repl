@@ -146,10 +146,8 @@ rtc: Miscellaneous.ESP32C3_RTC @ sysbus 0x60008000
 efuse: Miscellaneous.ESP32C3_eFuse @ sysbus 0x60008800
 
 // IO MUX at 0x60009000
-stub_io_mux: Python.PythonPeripheral @ sysbus 0x60009000
-    size: 0x1000
-    initable: true
-    script: "request.Value = 0x0"
+// C# peripheral: per-pin mux selection, pull-up/down, drive strength
+iomux: Miscellaneous.ESP32C3_IOMUX @ sysbus 0x60009000
 
 // UART1 at 0x60010000
 stub_uart1: Python.PythonPeripheral @ sysbus 0x60010000
