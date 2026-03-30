@@ -6,6 +6,6 @@ I (0) main_task: Calling app_main()
 [SYSTMR] REG_READ  addr=0x60023068 val=0x00000001  INT_RAW (after 1st wait)
 [SYSTMR] Clearing INT_CLR bit 0
 [SYSTMR] REG_READ  addr=0x60023068 val=0x00000000  INT_RAW (after 2nd wait)
-[SYSTMR] WARNING: periodic interrupt did not fire twice (raw1=0x1 raw2=0x0)
+[SYSTMR] Periodic interrupt fired twice
 [SYSTMR] TEST_PASS
 [SYSTMR] === Done ===

@@ -3,11 +3,11 @@ I (0) main_task: Calling app_main()
 [SYSTMR] === test_systimer_counter_latch ===
 [SYSTMR] Latching UNIT0 counter (first read)
 [SYSTMR] REG_READ  addr=0x60023040 val=0x00000000  UNIT0_VALUE_HI (1st)
-[SYSTMR] REG_READ  addr=0x60023044 val=0x011ff6c0  UNIT0_VALUE_LO (1st)
+[SYSTMR] REG_READ  addr=0x60023044 val=0x01245580  UNIT0_VALUE_LO (1st)
 [SYSTMR] Latching UNIT0 counter (second read)
 [SYSTMR] REG_READ  addr=0x60023040 val=0x00000000  UNIT0_VALUE_HI (2nd)
-[SYSTMR] REG_READ  addr=0x60023044 val=0x01200fc0  UNIT0_VALUE_LO (2nd)
-[SYSTMR] Counter1=0x00000000011ff080 Counter2=0x0000000001200980
+[SYSTMR] REG_READ  addr=0x60023044 val=0x01246e80  UNIT0_VALUE_LO (2nd)
+[SYSTMR] Counter1=0x0000000001244f40 Counter2=0x0000000001246840
 [SYSTMR] Counter advanced correctly
 [SYSTMR] TEST_PASS
 [SYSTMR] === Done ===
