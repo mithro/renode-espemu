@@ -44,7 +44,7 @@ def discover_built_firmware():
 
 
 def capture_one(periph: str, test_name: str, fw_dir: Path,
-                host: str, port: str, duration: int) -> bool:
+                host: str, port: str, duration: int, force: bool = False) -> bool:
     """Flash and capture one firmware. Returns True on success."""
     build_dir = fw_dir / "build"
     bootloader = build_dir / "bootloader" / "bootloader.bin"
@@ -58,6 +58,14 @@ def capture_one(periph: str, test_name: str, fw_dir: Path,
         return False
 
     app_bin = app_bins[0]
+
+    # Skip if baseline already exists (unless --force)
+    baseline_dir = PERIPHERALS_DIR / periph / "baselines" / "hardware"
+    baseline_file = baseline_dir / f"{test_name}.log"
+    if not force and baseline_file.exists() and baseline_file.stat().st_size > 0:
+        print(f"  SKIP {test_name}: exists ({baseline_file.stat().st_size} bytes)")
+        return True
+
     remote_dir = f"/tmp/esp32c3_{test_name}"
 
     try:
@@ -116,6 +124,7 @@ def main():
     parser.add_argument("--port", default=DEFAULT_PORT)
     parser.add_argument("--duration", type=int, default=CAPTURE_DURATION)
     parser.add_argument("--peripheral", help="Only capture this peripheral")
+    parser.add_argument("--force", action="store_true", help="Re-capture existing baselines")
     args = parser.parse_args()
 
     firmware = discover_built_firmware()
@@ -129,7 +138,8 @@ def main():
     results = {}
     for periph, test_name, fw_dir in firmware:
         results[test_name] = capture_one(
-            periph, test_name, fw_dir, args.host, args.port, args.duration)
+            periph, test_name, fw_dir, args.host, args.port, args.duration,
+            force=args.force)
         time.sleep(1)  # Brief pause between flashes
 
     print()
