@@ -42,9 +42,11 @@ namespace Antmicro.Renode.Peripherals.Memory
         /// <summary>
         /// Set the JEDEC flash ID returned by RDID command.
         /// Format: [23:16]=manufacturer, [15:8]=memtype, [7:0]=capacity
-        /// Default: Winbond W25Q32 (0xEF4016 = 4MB)
+        /// Default: Winbond W25Q32 (4MB)
+        /// Byte order in W0: [7:0]=manufacturer, [15:8]=memtype, [23:16]=capacity
+        /// SPI returns MSB first but W0 stores LSB first.
         /// </summary>
-        public uint FlashJedecId { get; set; } = 0x00EF4016; // Winbond 4MB
+        public uint FlashJedecId { get; set; } = 0x001640EF; // Winbond 4MB (EF 40 16, LSB first)
 
         private void ExecuteCommand(uint cmdBits)
         {

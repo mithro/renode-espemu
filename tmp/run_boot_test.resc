@@ -24,13 +24,22 @@ sysbus LoadBinary @platforms/rom_data_segment.bin 0x3FF00000
 cpu SP 0x3FCE0000
 sysbus LoadBinary @platforms/rom_func_stubs.bin 0x50001D00
 
-# Patch rom function tables after BSS clear
-cpu AddHook 0x40380338 "machine.SystemBus.WriteDoubleWord(0x3FCDF5B8, 0x50001D00); machine.SystemBus.WriteDoubleWord(0x3FCDFFD4, 0x50001D00)"
+# Patch rom function tables and spiflash data after BSS clear
+# rom_phyFuns (0x3FCDF5B8) -> rom func stubs
+# rom_cache_internal_table_ptr (0x3FCDFFD4) -> rom func stubs
+# rom_spiflash_legacy_data (0x3FCDFFF0) -> flash chip info at 0x50001E00
+cpu AddHook 0x40380338 "machine.SystemBus.WriteDoubleWord(0x3FCDF5B8, 0x50001D00); machine.SystemBus.WriteDoubleWord(0x3FCDFFD4, 0x50001D00); machine.SystemBus.WriteDoubleWord(0x3FCDFFF0, 0x50001E00)"
 
-# init_flash patch: SPI MEM RDID works but rom_spiflash_legacy_data (0x3FCDFFF0)
-# is NULL causing a load fault after init. Needs ROM data init to fully eliminate.
-sysbus WriteWord 0x42000526 0x4501
-sysbus WriteWord 0x42000528 0x8082
+# Pre-populate rom_spiflash_legacy_data structure at 0x50001E00
+# esp_rom_spiflash_chip_t: device_id, chip_size, block_size, sector_size, page_size, status_mask
+sysbus WriteDoubleWord 0x50001E00 0x00EF4016
+sysbus WriteDoubleWord 0x50001E04 0x00400000
+sysbus WriteDoubleWord 0x50001E08 0x00010000
+sysbus WriteDoubleWord 0x50001E0C 0x00001000
+sysbus WriteDoubleWord 0x50001E10 0x00000100
+sysbus WriteDoubleWord 0x50001E14 0x0000FFFF
+# dummy_len_plus[3] + sig_matrix (all zero is fine)
+sysbus WriteDoubleWord 0x50001E18 0x00000000
 
 # Skip delay functions (cycle counter doesn't increment)
 set skip_func
