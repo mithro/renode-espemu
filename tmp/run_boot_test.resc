@@ -28,7 +28,7 @@ sysbus LoadBinary @platforms/rom_func_stubs.bin 0x50001D00
 # Patch rom function tables and spiflash data after BSS clear
 cpu AddHook 0x40380338 "machine.SystemBus.WriteDoubleWord(0x3FCDF5B8, 0x50001D00); machine.SystemBus.WriteDoubleWord(0x3FCDFFD4, 0x50001D00); machine.SystemBus.WriteDoubleWord(0x3FCDFFF0, 0x50001E00)"
 
-# Pre-populate rom_spiflash_legacy_data structure at 0x50001E00
+# Pre-populate rom_spiflash_legacy_data at 0x50001E00
 sysbus WriteDoubleWord 0x50001E00 0x001640EF
 sysbus WriteDoubleWord 0x50001E04 0x00400000
 sysbus WriteDoubleWord 0x50001E08 0x00010000
@@ -37,8 +37,7 @@ sysbus WriteDoubleWord 0x50001E10 0x00000100
 sysbus WriteDoubleWord 0x50001E14 0x0000FFFF
 sysbus WriteDoubleWord 0x50001E18 0x00000000
 
-# init_flash ELIMINATED — SPI MEM C# handles RDID, ROM spiflash data initialized
-# Brownout ISR skip ELIMINATED — RTC C# correctly reports no brownout
+# ELIMINATED: init_flash (SPI MEM RDID works), brownout ISR (RTC reports no brownout)
 
 # Skip delay functions (cycle counter doesn't increment)
 set skip_func
@@ -48,7 +47,7 @@ cpu.PC = cpu.GetRegister(1).RawValue
 cpu AddHook 0x400462CC $skip_func
 cpu AddHook 0x40000050 $skip_func
 
-# Skip memprot section (Sensitive C# in place but init code has alignment issues)
+# Skip memprot section (Sensitive C# in place but init has alignment issues)
 set skip_memprot
 """
 from Antmicro.Renode.Peripherals.CPU import RegisterValue
@@ -56,7 +55,7 @@ cpu.PC = RegisterValue.Create(0x403804E4, 32)
 """
 cpu AddHook 0x403804B2 $skip_memprot
 
-# mcause hook STILL NEEDED — CLIC integration WIP (PrivUnratified mtvec issue)
+# Fix mcause at _interrupt_handler entry
 set fix_mcause
 """
 intmatrix = machine['sysbus.intmatrix']
@@ -66,6 +65,22 @@ if pending != 0:
     cpu.SetRegister(9, RegisterValue.Create(pending, 32))
 """
 cpu AddHook 0x4038022E $fix_mcause
+
+# Capture esp_rom_printf output
+set printf_hook
+"""
+fmt_ptr = cpu.GetRegister(10).RawValue & 0xFFFFFFFF
+msg = ""
+if fmt_ptr > 0x3C000000 and fmt_ptr < 0x42800000:
+    for i in range(120):
+        b = machine.SystemBus.ReadByte(fmt_ptr + i)
+        if b == 0: break
+        if b >= 32 and b < 127: msg += chr(b)
+        elif b == 10: msg += "\\n"
+    if msg:
+        self.Log(LogLevel.Warning, "PRINT: " + msg)
+"""
+cpu AddHook 0x40000040 $printf_hook
 
 # Boot through all init
 start
