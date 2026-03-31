@@ -26,21 +26,19 @@ cpu SP 0x3FCE0000
 sysbus LoadBinary @platforms/rom_func_stubs.bin 0x50001D00
 
 # Patch rom function tables and spiflash data after BSS clear
-# rom_phyFuns (0x3FCDF5B8) -> rom func stubs
-# rom_cache_internal_table_ptr (0x3FCDFFD4) -> rom func stubs
-# rom_spiflash_legacy_data (0x3FCDFFF0) -> flash chip info at 0x50001E00
 cpu AddHook 0x40380338 "machine.SystemBus.WriteDoubleWord(0x3FCDF5B8, 0x50001D00); machine.SystemBus.WriteDoubleWord(0x3FCDFFD4, 0x50001D00); machine.SystemBus.WriteDoubleWord(0x3FCDFFF0, 0x50001E00)"
 
 # Pre-populate rom_spiflash_legacy_data structure at 0x50001E00
-# esp_rom_spiflash_chip_t: device_id, chip_size, block_size, sector_size, page_size, status_mask
-sysbus WriteDoubleWord 0x50001E00 0x00EF4016
+sysbus WriteDoubleWord 0x50001E00 0x001640EF
 sysbus WriteDoubleWord 0x50001E04 0x00400000
 sysbus WriteDoubleWord 0x50001E08 0x00010000
 sysbus WriteDoubleWord 0x50001E0C 0x00001000
 sysbus WriteDoubleWord 0x50001E10 0x00000100
 sysbus WriteDoubleWord 0x50001E14 0x0000FFFF
-# dummy_len_plus[3] + sig_matrix (all zero is fine)
 sysbus WriteDoubleWord 0x50001E18 0x00000000
+
+# init_flash ELIMINATED — SPI MEM C# handles RDID, ROM spiflash data initialized
+# Brownout ISR skip ELIMINATED — RTC C# correctly reports no brownout
 
 # Skip delay functions (cycle counter doesn't increment)
 set skip_func
@@ -50,10 +48,7 @@ cpu.PC = cpu.GetRegister(1).RawValue
 cpu AddHook 0x400462CC $skip_func
 cpu AddHook 0x40000050 $skip_func
 
-# Brownout ISR skip REMOVED — RTC C# peripheral correctly reports no brownout
-
-# Skip memprot section (Sensitive C# peripheral is in place but memprot
-# init code has address alignment issues — needs register value debugging)
+# Skip memprot section (Sensitive C# in place but init code has alignment issues)
 set skip_memprot
 """
 from Antmicro.Renode.Peripherals.CPU import RegisterValue
@@ -61,14 +56,7 @@ cpu.PC = RegisterValue.Create(0x403804E4, 32)
 """
 cpu AddHook 0x403804B2 $skip_memprot
 
-# Fix mcause at _interrupt_handler entry (0x403801DC).
-# Standard RISC-V sets mcause=0x8000000B for MEIP, but ESP32-C3 firmware
-# expects mcause to contain the CPU interrupt line number (e.g., 3 or 4).
-# Read CPU_INT_EIP_STATUS to find the actual pending line and override mcause.
-# Fix mcause at _interrupt_handler entry. Read PendingMcause from the
-# C# interrupt matrix and write it to the csrr mcause instruction at 0x4038022A.
-# The firmware reads mcause at 0x4038022A: csrr s1, mcause
-# We hook 0x4038022E (instruction AFTER csrr) and override s1 (register 9).
+# mcause hook STILL NEEDED — CLIC integration WIP (PrivUnratified mtvec issue)
 set fix_mcause
 """
 intmatrix = machine['sysbus.intmatrix']
@@ -79,38 +67,14 @@ if pending != 0:
 """
 cpu AddHook 0x4038022E $fix_mcause
 
-# Capture esp_rom_printf output
-set printf_hook
-"""
-fmt_ptr = cpu.GetRegister(10).RawValue & 0xFFFFFFFF
-msg = ""
-if fmt_ptr > 0x3C000000 and fmt_ptr < 0x42800000:
-    for i in range(120):
-        b = machine.SystemBus.ReadByte(fmt_ptr + i)
-        if b == 0: break
-        if b >= 32 and b < 127: msg += chr(b)
-        elif b == 10: msg += "\\n"
-    if msg:
-        self.Log(LogLevel.Warning, "PRINT: " + msg)
-"""
-cpu AddHook 0x40000040 $printf_hook
-
-# Boot through all init (1 second should be enough)
+# Boot through all init
 start
 sleep 1
 pause
 
-# Firmware has completed init. FreeRTOS scheduler is running but needs
-# one interrupt kick to start task switching. After the first tick,
-# the C# SYSTIMER auto-fires subsequent alarms via GPIO → intmatrix.
-#
-# Enable MEIE (bit 11) in MIE and MIE (bit 3) in MSTATUS.
-# ESP32-C3 firmware uses CLIC-style interrupt control and doesn't set
-# standard RISC-V mie/mip, so we must force-enable MEIE.
+# Enable MEIE and fire single manual kick
 cpu MIE 0x800
 cpu MSTATUS 0x1808
-
-# Single manual kick: set SYSTIMER INT_RAW + fire interrupt sources
 sysbus WriteDoubleWord 0x60023068 0x1
 sysbus.intmatrix OnGPIO 37 true
 sysbus.intmatrix OnGPIO 50 true
