@@ -126,7 +126,6 @@ namespace Antmicro.Renode.Peripherals.IRQControllers
             // Fire the interrupt via CLIC (per-line GPIO).
             // CLIC sets mcause = 0x80000000 | line automatically.
             irqPending |= lineBit;
-            pendingMcause = 0x80000000u | line;
 
             Connections[(int)line].Set(true);
             this.Log(LogLevel.Info, "Asserted CLIC line {0}", line);
@@ -299,13 +298,6 @@ namespace Antmicro.Renode.Peripherals.IRQControllers
         // meipAsserted removed — CLIC handles per-line delivery
         private bool clockGateClkEn;
         private uint interruptDate;
-
-        /// <summary>
-        /// The mcause value that should be set when the CPU takes this interrupt.
-        /// Format: 0x80000000 | cpu_line_number
-        /// </summary>
-        public uint PendingMcause { get { return pendingMcause; } }
-        private uint pendingMcause;
 
         private const int NumSources = 62;
         private const int NumCpuInterrupts = 32;

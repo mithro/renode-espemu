@@ -23,12 +23,17 @@ sysbus LoadBinary @/home/tim/github/mithro/renode-espemu/platforms/rom_data_segm
 cpu SP 0x3FCE0000
 sysbus LoadBinary @/home/tim/github/mithro/renode-espemu/platforms/rom_func_stubs.bin 0x50001D00
 
-# Patch rom function tables after BSS clear
-cpu AddHook 0x40380338 "machine.SystemBus.WriteDoubleWord(0x3FCDF5B8, 0x50001D00); machine.SystemBus.WriteDoubleWord(0x3FCDFFD4, 0x50001D00)"
+# Patch rom function tables and spiflash data after BSS clear
+cpu AddHook 0x40380338 "machine.SystemBus.WriteDoubleWord(0x3FCDF5B8, 0x50001D00); machine.SystemBus.WriteDoubleWord(0x3FCDFFD4, 0x50001D00); machine.SystemBus.WriteDoubleWord(0x3FCDFFF0, 0x50001E00)"
 
-# Patch init_flash to return ESP_OK immediately (li a0,0; ret)
-sysbus WriteWord 0x42000526 0x4501
-sysbus WriteWord 0x42000528 0x8082
+# Pre-populate rom_spiflash_legacy_data at 0x50001E00
+sysbus WriteDoubleWord 0x50001E00 0x001640EF
+sysbus WriteDoubleWord 0x50001E04 0x00400000
+sysbus WriteDoubleWord 0x50001E08 0x00010000
+sysbus WriteDoubleWord 0x50001E0C 0x00001000
+sysbus WriteDoubleWord 0x50001E10 0x00000100
+sysbus WriteDoubleWord 0x50001E14 0x0000FFFF
+sysbus WriteDoubleWord 0x50001E18 0x00000000
 
 # Skip delay functions (cycle counter doesn't increment)
 set skip_func
@@ -38,9 +43,6 @@ cpu.PC = cpu.GetRegister(1).RawValue
 cpu AddHook 0x400462CC $skip_func
 cpu AddHook 0x40000050 $skip_func
 
-# Skip brownout ISR
-cpu AddHook 0x403805EE $skip_func
-
 # Skip memprot section
 set skip_memprot
 """
@@ -49,35 +51,125 @@ cpu.PC = RegisterValue.Create(0x403804E4, 32)
 """
 cpu AddHook 0x403804B2 $skip_memprot
 
-# Fix mcause at _interrupt_handler entry
-set fix_mcause
-"""
-intmatrix = machine['sysbus.intmatrix']
-pending = intmatrix.PendingMcause
-if pending != 0:
-    from Antmicro.Renode.Peripherals.CPU import RegisterValue
-    cpu.SetRegister(9, RegisterValue.Create(pending, 32))
-"""
-cpu AddHook 0x4038022E $fix_mcause
-
-# Boot through all init
+# Boot with CLIC present but unconfigured
 start
 sleep 1
 pause
 
-# Single manual kick to start FreeRTOS ticking
-cpu MIE 0x800
-cpu MSTATUS 0x1808
-sysbus WriteDoubleWord 0x60023068 0x1
-sysbus.intmatrix OnGPIO 37 true
-sysbus.intmatrix OnGPIO 50 true
-start
-sleep 0.1
-pause
-sysbus.intmatrix OnGPIO 37 false
-sysbus.intmatrix OnGPIO 50 false
+# Configure CLIC interrupt delivery
+cpu MTVEC 0x40380003
 
-# Let SYSTIMER auto-fire handle subsequent ticks
+# CLIC dispatch hook: interrupts -> _interrupt_handler, exceptions -> firmware
+set dispatch_clic
+"""
+from Antmicro.Renode.Peripherals.CPU import RegisterValue
+mcause = cpu.MCAUSE.RawValue
+if mcause & 0x80000000:
+    cpu.PC = RegisterValue.Create(0x403801DC, 32)
+"""
+cpu AddHook 0x40380000 $dispatch_clic
+
+# Enable all 32 CLIC interrupts: level-triggered, SHV=0, max priority
+sysbus WriteByte 0x20001001 0x01
+sysbus WriteByte 0x20001002 0x00
+sysbus WriteByte 0x20001003 0xFF
+sysbus WriteByte 0x20001005 0x01
+sysbus WriteByte 0x20001006 0x00
+sysbus WriteByte 0x20001007 0xFF
+sysbus WriteByte 0x20001009 0x01
+sysbus WriteByte 0x2000100A 0x00
+sysbus WriteByte 0x2000100B 0xFF
+sysbus WriteByte 0x2000100D 0x01
+sysbus WriteByte 0x2000100E 0x00
+sysbus WriteByte 0x2000100F 0xFF
+sysbus WriteByte 0x20001011 0x01
+sysbus WriteByte 0x20001012 0x00
+sysbus WriteByte 0x20001013 0xFF
+sysbus WriteByte 0x20001015 0x01
+sysbus WriteByte 0x20001016 0x00
+sysbus WriteByte 0x20001017 0xFF
+sysbus WriteByte 0x20001019 0x01
+sysbus WriteByte 0x2000101A 0x00
+sysbus WriteByte 0x2000101B 0xFF
+sysbus WriteByte 0x2000101D 0x01
+sysbus WriteByte 0x2000101E 0x00
+sysbus WriteByte 0x2000101F 0xFF
+sysbus WriteByte 0x20001021 0x01
+sysbus WriteByte 0x20001022 0x00
+sysbus WriteByte 0x20001023 0xFF
+sysbus WriteByte 0x20001025 0x01
+sysbus WriteByte 0x20001026 0x00
+sysbus WriteByte 0x20001027 0xFF
+sysbus WriteByte 0x20001029 0x01
+sysbus WriteByte 0x2000102A 0x00
+sysbus WriteByte 0x2000102B 0xFF
+sysbus WriteByte 0x2000102D 0x01
+sysbus WriteByte 0x2000102E 0x00
+sysbus WriteByte 0x2000102F 0xFF
+sysbus WriteByte 0x20001031 0x01
+sysbus WriteByte 0x20001032 0x00
+sysbus WriteByte 0x20001033 0xFF
+sysbus WriteByte 0x20001035 0x01
+sysbus WriteByte 0x20001036 0x00
+sysbus WriteByte 0x20001037 0xFF
+sysbus WriteByte 0x20001039 0x01
+sysbus WriteByte 0x2000103A 0x00
+sysbus WriteByte 0x2000103B 0xFF
+sysbus WriteByte 0x2000103D 0x01
+sysbus WriteByte 0x2000103E 0x00
+sysbus WriteByte 0x2000103F 0xFF
+sysbus WriteByte 0x20001041 0x01
+sysbus WriteByte 0x20001042 0x00
+sysbus WriteByte 0x20001043 0xFF
+sysbus WriteByte 0x20001045 0x01
+sysbus WriteByte 0x20001046 0x00
+sysbus WriteByte 0x20001047 0xFF
+sysbus WriteByte 0x20001049 0x01
+sysbus WriteByte 0x2000104A 0x00
+sysbus WriteByte 0x2000104B 0xFF
+sysbus WriteByte 0x2000104D 0x01
+sysbus WriteByte 0x2000104E 0x00
+sysbus WriteByte 0x2000104F 0xFF
+sysbus WriteByte 0x20001051 0x01
+sysbus WriteByte 0x20001052 0x00
+sysbus WriteByte 0x20001053 0xFF
+sysbus WriteByte 0x20001055 0x01
+sysbus WriteByte 0x20001056 0x00
+sysbus WriteByte 0x20001057 0xFF
+sysbus WriteByte 0x20001059 0x01
+sysbus WriteByte 0x2000105A 0x00
+sysbus WriteByte 0x2000105B 0xFF
+sysbus WriteByte 0x2000105D 0x01
+sysbus WriteByte 0x2000105E 0x00
+sysbus WriteByte 0x2000105F 0xFF
+sysbus WriteByte 0x20001061 0x01
+sysbus WriteByte 0x20001062 0x00
+sysbus WriteByte 0x20001063 0xFF
+sysbus WriteByte 0x20001065 0x01
+sysbus WriteByte 0x20001066 0x00
+sysbus WriteByte 0x20001067 0xFF
+sysbus WriteByte 0x20001069 0x01
+sysbus WriteByte 0x2000106A 0x00
+sysbus WriteByte 0x2000106B 0xFF
+sysbus WriteByte 0x2000106D 0x01
+sysbus WriteByte 0x2000106E 0x00
+sysbus WriteByte 0x2000106F 0xFF
+sysbus WriteByte 0x20001071 0x01
+sysbus WriteByte 0x20001072 0x00
+sysbus WriteByte 0x20001073 0xFF
+sysbus WriteByte 0x20001075 0x01
+sysbus WriteByte 0x20001076 0x00
+sysbus WriteByte 0x20001077 0xFF
+sysbus WriteByte 0x20001079 0x01
+sysbus WriteByte 0x2000107A 0x00
+sysbus WriteByte 0x2000107B 0xFF
+sysbus WriteByte 0x2000107D 0x01
+sysbus WriteByte 0x2000107E 0x00
+sysbus WriteByte 0x2000107F 0xFF
+
+cpu WfiAsNop true
+
+# CLIC delivers systimer interrupts naturally — no manual kick needed
 start
-sleep 3
+sleep 4
 pause

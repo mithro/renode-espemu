@@ -14,12 +14,24 @@ Setup ESP32C3 Peripheral Test
     Create Terminal Tester  ${UART}
 
 Boot And Kick
+    # Phase 1: Boot with CLIC present but unconfigured
     Start Emulation
     Execute Command         sleep 1
     Execute Command         pause
-    Execute Command         cpu MIE 0x800
-    Execute Command         cpu MSTATUS 0x1808
-    Execute Command         sysbus WriteDoubleWord 0x60023068 0x1
-    Execute Command         sysbus.intmatrix OnGPIO 37 true
-    Execute Command         sysbus.intmatrix OnGPIO 50 true
+    # Phase 2: Configure CLIC interrupt delivery
+    Execute Command         cpu MTVEC 0x40380003
+    # CLIC dispatch hook
+    Execute Command         set dispatch_clic\n"""\nfrom Antmicro.Renode.Peripherals.CPU import RegisterValue\nmcause = cpu.MCAUSE.RawValue\nif mcause & 0x80000000:\n    cpu.PC = RegisterValue.Create(0x403801DC, 32)\n"""
+    Execute Command         cpu AddHook 0x40380000 $dispatch_clic
+    # Enable all 32 CLIC interrupts: level-triggered, SHV=0, max priority
+    FOR    ${i}    IN RANGE    32
+        ${addr}=    Evaluate    hex(0x20001000 + ${i} * 4 + 1)
+        Execute Command    sysbus WriteByte ${addr} 0x01
+        ${addr}=    Evaluate    hex(0x20001000 + ${i} * 4 + 2)
+        Execute Command    sysbus WriteByte ${addr} 0x00
+        ${addr}=    Evaluate    hex(0x20001000 + ${i} * 4 + 3)
+        Execute Command    sysbus WriteByte ${addr} 0xFF
+    END
+    Execute Command         cpu WfiAsNop true
+    # CLIC delivers interrupts naturally — no manual kick needed
     Start Emulation
