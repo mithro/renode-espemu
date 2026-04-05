@@ -1,13 +1,13 @@
 # ESP32-C3 Peripheral Emulation Status
 
-> Last updated: 2026-03-30
+> Last updated: 2026-04-05
 
 ## Summary
 
 | Metric | Value |
 |---|---|
 | Boot progress | **5/5** — "Hello world!" prints via UART |
-| C# peripherals implemented | 12 |
+| C# peripherals implemented | 13 |
 | C# peripherals reviewed + fixed | 12 (18+ bugs found and fixed) |
 | Per-feature test firmware | 120 (93 functional + 27 stub reset-value) |
 | Hardware baselines captured | 90 (from real ESP32-C3 on rpi4-esp) |
@@ -15,13 +15,13 @@
 | HW vs Renode comparison | 49/81 match (60%, excluding expected diffs) |
 | Robot Framework test suites | 8 (12 test cases, all passing) |
 | Python stubs remaining | 27 |
-| Boot workarounds | 7 (init_flash, delay, memprot, brownout, MIE, kick, mcause) |
+| Boot workarounds | 2 active (delay, memprot); 5 eliminated via CLIC + SPI MEM + RTC |
 
 ## C# Peripherals (12 Implemented)
 
 | # | Peripheral | Address | Size | Registers | Test FW | HW Baseline | Review |
 |---|---|---|---|---|---|---|---|
-| 1 | Interrupt Matrix | 0x600C2000 | 0x800 | 104 | 8 tests | 8 | Reviewed + fixed |
+| 1 | Interrupt Matrix | 0x600C2000 | 0x800 | 104 | 8 tests | 8 | Reviewed + fixed; CLIC delivery |
 | 2 | eFuse | 0x60008800 | 0x200 | 115 | 9 tests | 9 | Reviewed + fixed |
 | 3 | RTC Controller | 0x60008000 | 0x800 | 74 | 10 tests | 10 | Reviewed + fixed |
 | 4 | SYSTIMER | 0x60023000 | 0x1000 | 30 | 9 tests | 9 | Reviewed + fixed |
@@ -74,7 +74,7 @@ ground truth for future C# implementations.
 | 20 | GDMA | 0x6003F000 | DMA |
 | 21 | APB SAR ADC | 0x60040000 | Analog |
 | 22 | USB Serial/JTAG | 0x60043000 | Debug |
-| 23 | Sensitive (PMS) | 0x600C1000 | Security |
+| ~~23~~ | ~~Sensitive (PMS)~~ | ~~0x600C1000~~ | **Promoted to C# (#13)** |
 | 24 | MMU Table | 0x600C5000 | Memory |
 | 25 | XTS-AES | 0x600CC000 | Crypto |
 | 26 | Assist Debug | 0x600CE000 | Debug |
@@ -84,14 +84,14 @@ ground truth for future C# implementations.
 
 | # | Workaround | Status |
 |---|---|---|
-| 1 | Patch init_flash to return ESP_OK | SPI MEM C# exists but needs debugging |
-| 2 | Skip delay functions (cycle counter) | Needs CSR emulation |
-| 3 | Skip memprot section | Needs Sensitive/PMS peripheral |
-| 4 | Skip brownout ISR | Needs RTC brownout model |
-| 5 | Force MIE/MSTATUS enable | Needs CLIC support |
-| 6 | Single manual interrupt kick | SYSTIMER auto-fires after first kick |
-| 7 | mcause override hook | Needs Renode custom mcause |
-| 8 | ROM function table stubs | Needs proper ROM init |
+| 1 | ~~Patch init_flash to return ESP_OK~~ | **Eliminated** — SPI MEM C# + ROM data |
+| 2 | Skip delay functions (cycle counter) | Active — needs Renode cycle counter |
+| 3 | Skip memprot section | Active — needs Sensitive peripheral work |
+| 4 | ~~Skip brownout ISR~~ | **Eliminated** — RTC C# reports no brownout |
+| 5 | ~~Force MIE/MSTATUS enable~~ | **Eliminated** — CLIC handles enable |
+| 6 | ~~Single manual interrupt kick~~ | **Eliminated** — CLIC delivers naturally |
+| 7 | ~~mcause override hook~~ | **Eliminated** — CLIC sets mcause correctly |
+| 8 | ROM function table stubs | Active (minor) — BSS clear patch |
 
 ## CI Pipeline
 

@@ -14,7 +14,7 @@ register-level accuracy validated against real hardware.
 | Per-feature test firmware | 120 (93 functional + 27 stub reset-value) |
 | HW vs Renode register match | 49/81 (60%, excluding expected diffs) |
 | Robot Framework tests | All passing |
-| Boot workarounds remaining | 7 |
+| Boot workarounds remaining | 2 |
 
 ### Boot workarounds
 
@@ -22,15 +22,31 @@ These CPU hooks patch around gaps where Renode doesn't yet match real
 hardware. Each is a specific function or code path that gets skipped or
 fixed up at runtime:
 
-| Workaround | Description |
-|---|---|
-| `init_flash` | SPI flash init returns ESP_OK immediately |
-| `delay` | Delay functions skipped (cycle counter doesn't increment) |
-| `memprot` | Memory protection setup skipped |
-| `brownout` | Brownout ISR skipped |
-| `MIE` | Machine interrupt enable set manually |
-| `kick` | SYSTIMER and interrupt matrix kicked to start tick |
-| `mcause` | mcause register fixed at interrupt handler entry |
+| Workaround | Status | Description |
+|---|---|---|
+| `delay` | Active | Delay functions skipped (cycle counter doesn't increment) |
+| `memprot` | Active | Memory protection setup skipped |
+| `init_flash` | **Eliminated** | SPI MEM C# handles RDID + ROM spiflash data |
+| `brownout` | **Eliminated** | RTC C# correctly reports no brownout |
+| `MIE` | **Eliminated** | CLIC handles interrupt enable |
+| `kick` | **Eliminated** | CLIC delivers systimer interrupts naturally |
+| `mcause` | **Eliminated** | CLIC sets mcause = 0x80000000 \| cpu_line correctly |
+
+### Interrupt delivery (CLIC)
+
+The ESP32-C3 uses CLIC-style interrupt delivery where `mcause` encodes the
+specific CPU interrupt line number. Renode's built-in
+`CoreLocalInterruptController` provides this automatically:
+
+```
+Peripheral → GPIO → IntMatrix (source mapping) → CLIC → CPU
+                                                   ↓
+                                          mcause = 0x80000000 | line
+```
+
+The platform uses `PrivilegedArchitecture.PrivUnratified` with CLIC
+configured for SHV=0 (non-vectored) mode and a dispatch hook at the
+firmware's vector table entry point.
 
 ## Repository structure
 
@@ -84,7 +100,7 @@ peripherals/<name>/
 
 | # | Peripheral | Address | Registers | Tests | Description |
 |---|---|---|---|---|---|
-| 1 | Interrupt Matrix | `0x600C2000` | 104 | 8 | Routes 62 sources to 32 CPU interrupt lines |
+| 1 | Interrupt Matrix | `0x600C2000` | 104 | 8 | Routes 62 sources to 32 CPU lines via CLIC |
 | 2 | eFuse | `0x60008800` | 115 | 9 | OTP storage: MAC, chip revision, keys |
 | 3 | RTC Controller | `0x60008000` | 74 | 10 | Reset cause, RTC timer, brownout, STORE regs |
 | 4 | SYSTIMER | `0x60023000` | 30 | 9 | 16 MHz system timer, 2 counters, 3 alarms |

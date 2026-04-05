@@ -10,33 +10,27 @@ and the approach for each workaround elimination.
 
 ## 1. CLIC Interrupt Controller
 
-**Renode status: NOT IMPLEMENTED**
+**Renode status: FULLY IMPLEMENTED (since v1.16.0, Sep 2024)**
 
-- GitHub Issue #423 (opened Jan 2023) requests CLIC support — still OPEN
-- Renode only supports standard PLIC and CLINT
-- ESP32-C3 uses CLIC-like interrupt delivery where mcause = 0x80000000 | cpu_line_number
-- Standard RISC-V sets mcause = 11 (MEIP) for all external interrupts
+Renode has a complete CLIC implementation via the
+`IRQControllers.CoreLocalInterruptController` class. It was missed in the
+initial research. See [CLIC integration plan](clic-integration-plan.md) for
+full details.
 
-**Impact on ESP32-C3:**
-The firmware's `_interrupt_handler` reads mcause to determine which CPU interrupt
-line fired, then dispatches to the appropriate ISR. Without CLIC, Renode sets
-mcause=0x8000000B (MEIP) for all interrupts, and the firmware can't distinguish
-between different interrupt sources.
+**ESP32-C3 integration (completed 2026-04-05):**
 
-**Current workaround:** Python hook at 0x4038022E overrides s1 register after
-the firmware's `csrr s1, mcause` instruction, replacing the standard value
-with the ESP32-C3's interrupt matrix PendingMcause.
+The interrupt matrix outputs are wired through CLIC (`[0-31] -> clic@[0-31]`)
+which provides correct `mcause = 0x80000000 | cpu_line_number` automatically.
+The CPU uses `PrivilegedArchitecture.PrivUnratified` for CLIC CSR support.
 
-**Approach to eliminate:** Two options:
-1. **Custom mcause delivery (preferred):** If Renode adds support for
-   per-interrupt-source mcause values, configure the interrupt matrix to set
-   mcause = 0x80000000 | line for each GPIO output. Requires Renode core change.
-2. **CSR intercept (fallback):** Use `RegisterCSRHandlerFromString` on a custom
-   CSR, but this CANNOT override the standard mcause CSR (0x342). The Python
-   hook approach remains the viable workaround.
+**Workarounds eliminated:** W.5 (MIE force), W.6 (manual kick), W.7 (mcause hook).
 
-**Verdict:** Cannot eliminate without Renode core modification. Python hook
-is the correct long-term approach until CLIC support is added.
+**Renode quirks discovered:**
+- mtvec must be set via Renode API (`cpu MTVEC`), not `csrw` — the CLIC's
+  `IIndirectCSRPeripheral` intercepts `csrw` but doesn't update the TLIB raw
+  register that the CPU checks for CLIC mode.
+- SHV=1 (vectored) CLIC delivery doesn't work in the TLIB backend; SHV=0
+  (non-vectored) works reliably with a dispatch hook at mtvec_base.
 
 ## 2. Cycle Counter CSR (0xC00)
 
@@ -98,44 +92,18 @@ beyond simple storage.
 
 ## 4. MIE/MSTATUS Enable
 
-**Renode status: STANDARD RISC-V BEHAVIOR**
+**Status: ELIMINATED (2026-04-05)**
 
-Standard RISC-V interrupt delivery requires:
-- MSTATUS.MIE = 1 (global machine interrupt enable)
-- MIE.MEIE = 1 (machine external interrupt enable, bit 11)
-
-ESP32-C3 firmware uses the interrupt matrix (CLIC-like) instead of standard
-mie/mip. It doesn't set MIE.MEIE because it relies on the interrupt matrix's
-own enable/threshold mechanism.
-
-**Current workaround:** Force `cpu MIE 0x800` and `cpu MSTATUS 0x1808` after
-boot init completes.
-
-**Approach to eliminate:** If CLIC support were added to Renode, the interrupt
-matrix could directly trigger CPU interrupts without going through the standard
-MIE/MIP path. Without CLIC, the force-enable is necessary because our interrupt
-delivery uses MEIP (GPIO 11) which requires MIE.MEIE=1.
-
-**Verdict:** Tied to CLIC implementation. Cannot eliminate independently.
+With CLIC integrated, the firmware's own MSTATUS.MIE setting suffices.
+CLIC handles per-interrupt enable through its own registers. No manual
+MIE/MSTATUS force is needed.
 
 ## 5. Single Manual Interrupt Kick
 
-**Current state:** After boot init, we manually assert OnGPIO 37 (SYSTIMER)
-and OnGPIO 50 (FROM_CPU_INTR0) to deliver the first FreeRTOS tick. After that,
-the C# SYSTIMER auto-fires subsequent alarms.
+**Status: ELIMINATED (2026-04-05)**
 
-**Root cause:** During boot init, the firmware configures the interrupt matrix
-and SYSTIMER. The SYSTIMER starts firing alarms (confirmed by logs), but the
-first alarm delivery doesn't produce a FreeRTOS tick because:
-1. MIE is not yet enabled (firmware uses CLIC, not standard mie)
-2. The mcause override hook may not fire correctly for the first interrupt
-
-**Approach to eliminate:** Once MIE is properly enabled (either via CLIC or
-the current force-enable earlier in boot), the SYSTIMER auto-fire should work.
-The key is timing: MIE must be enabled before the first SYSTIMER alarm fires.
-
-**Verdict:** May be fixable by moving the MIE force-enable to a CPU hook
-at the point where firmware enables interrupts in the interrupt matrix.
+With CLIC integrated, the systimer fires naturally through the
+intmatrix → CLIC → CPU path. No manual kick is needed.
 
 ## 6. Memprot Skip
 
@@ -181,15 +149,15 @@ We patch them back after BSS clear.
 
 **Verdict:** Fixable with better ROM data initialization.
 
-## Summary: Workaround Elimination Feasibility
+## Summary: Workaround Status
 
-| # | Workaround | Feasibility | Requires |
+| # | Workaround | Status | Notes |
 |---|---|---|---|
-| W.1 | init_flash skip | Medium | Debug SPI MEM command sequence |
-| W.2 | Delay function skip | Hard | Renode cycle counter increment |
-| W.3 | Memprot skip | Easy | C# Sensitive peripheral |
-| W.4 | Brownout ISR skip | Easy | Verify RTC brownout model |
-| W.5 | Force MIE/MSTATUS | Hard | CLIC support or early hook |
-| W.6 | Manual interrupt kick | Medium | Fix MIE timing |
-| W.7 | mcause override | Hard | CLIC support |
-| W.8 | ROM function tables | Easy | Better ROM init |
+| W.1 | init_flash skip | **Eliminated** | SPI MEM C# + ROM spiflash data |
+| W.2 | Delay function skip | Active | Needs Renode cycle counter increment |
+| W.3 | Memprot skip | Active | Needs Sensitive peripheral improvements |
+| W.4 | Brownout ISR skip | **Eliminated** | RTC C# reports no brownout |
+| W.5 | Force MIE/MSTATUS | **Eliminated** | CLIC handles interrupt enable |
+| W.6 | Manual interrupt kick | **Eliminated** | CLIC delivers naturally |
+| W.7 | mcause override | **Eliminated** | CLIC sets mcause correctly |
+| W.8 | ROM function tables | Active (minor) | BSS clear patch still needed |
