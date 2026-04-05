@@ -53,10 +53,5 @@ if request.IsRead:
 """
 cpu RegisterCSRHandlerFromString 0x802 $cycle_counter_handler
 
-# Skip memprot + post-memprot init section
-set skip_memprot
-"""
-from Antmicro.Renode.Peripherals.CPU import RegisterValue
-cpu.PC = RegisterValue.Create(0x403804E4, 32)
-"""
-cpu AddHook 0x403804B2 $skip_memprot
+# Re-patch rom_cache_internal_table_ptr after memprot init overwrites it
+cpu AddHook 0x403804E4 "machine.SystemBus.WriteDoubleWord(0x3FCDFFD4, 0x50001D00)"

@@ -102,16 +102,23 @@ intmatrix → CLIC → CPU path. No manual kick is needed.
 
 ## 6. Memprot Skip
 
-**Current state:** Skip memprot section at 0x403804B2 via PC redirect to
-0x403804E4. The firmware tries to configure the Permission Management System
-(PMS/Sensitive peripheral at 0x600C1000).
+**Status: ELIMINATED (2026-04-05)**
 
-**Approach to eliminate:** Implement a C# Sensitive peripheral that accepts
-the PMS configuration writes without errors. The firmware writes permission
-boundaries and locks — a simple read/write register model would suffice.
+The firmware's `esp_memprot_init()` at 0x403804B2 configures the PMS
+(Permission Management System) via the Sensitive peripheral at 0x600C1000.
+The Sensitive C# peripheral (94 registers) accepts all PMS writes correctly.
 
-**Verdict:** Fixable with a C# peripheral implementation (similar to other
-stubs we've converted).
+**Root cause of previous failure:** The memprot code also writes to DRAM
+at 0x3FCDFFD4 (rom_cache_internal_table_ptr), overwriting the ROM function
+table stub installed by the BSS-clear hook. The fix is to re-patch the
+pointer immediately after memprot returns:
+
+```
+cpu AddHook 0x403804E4 "machine.SystemBus.WriteDoubleWord(0x3FCDFFD4, 0x50001D00)"
+```
+
+This lets memprot run fully (PMS registers configured correctly) while
+restoring the ROM table pointer that memprot's DRAM writes corrupted.
 
 ## 7. Brownout ISR Skip
 
@@ -150,7 +157,7 @@ We patch them back after BSS clear.
 |---|---|---|---|
 | W.1 | init_flash skip | **Eliminated** | SPI MEM C# + ROM spiflash data |
 | W.2 | Delay function skip | **Eliminated** | CSR 0x802 handler returns ExecutedInstructions |
-| W.3 | Memprot skip | Active | Needs Sensitive peripheral improvements |
+| W.3 | Memprot skip | **Eliminated** | Sensitive C# + ROM table re-patch after memprot |
 | W.4 | Brownout ISR skip | **Eliminated** | RTC C# reports no brownout |
 | W.5 | Force MIE/MSTATUS | **Eliminated** | CLIC handles interrupt enable |
 | W.6 | Manual interrupt kick | **Eliminated** | CLIC delivers naturally |
