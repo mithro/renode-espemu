@@ -76,18 +76,19 @@ sleep 1
 pause
 
 # === PHASE 2: Configure CLIC interrupt delivery ===
-# CLIC provides correct mcause = 0x80000000 | interrupt_number automatically,
-# eliminating the old mcause Python hook workaround (W.7).
+# CLIC provides correct mcause = 0x80000000 | interrupt_number automatically.
+# This eliminates three workarounds:
+#   W.5 (MIE force) — firmware sets MSTATUS.MIE, CLIC handles per-interrupt enable
+#   W.6 (manual kick) — CLIC delivers systimer interrupts naturally
+#   W.7 (mcause hook) — CLIC sets mcause correctly
 
 # Set mtvec to CLIC mode using firmware's own vector table.
 # Must use API (not csrw) — Renode TLIB checks raw register for CLIC mode.
 cpu MTVEC 0x40380003
-cpu MSTATUS 0x1808
 
 # CLIC dispatch hook at firmware's vector table entry 0 (0x40380000).
 # With SHV=0 (non-vectored), ALL CLIC interrupts jump to mtvec_base.
-# This hook checks mcause: interrupts go to _interrupt_handler,
-# exceptions fall through to the firmware's panic handler.
+# This hook routes: interrupts -> _interrupt_handler, exceptions -> _panic_handler.
 set dispatch_clic
 """
 from Antmicro.Renode.Peripherals.CPU import RegisterValue
@@ -98,7 +99,6 @@ if mcause & 0x80000000:
 cpu AddHook 0x40380000 $dispatch_clic
 
 # Enable all 32 CLIC interrupts: level-triggered, SHV=0, max priority
-# SHV=0 = non-vectored (all go to mtvec_base, dispatch hook handles routing)
 sysbus WriteByte 0x20001001 0x01
 sysbus WriteByte 0x20001002 0x00
 sysbus WriteByte 0x20001003 0xFF
@@ -196,22 +196,12 @@ sysbus WriteByte 0x2000107D 0x01
 sysbus WriteByte 0x2000107E 0x00
 sysbus WriteByte 0x2000107F 0xFF
 
-# WfiAsNop to avoid hangs
+# WfiAsNop to avoid hangs in idle loops
 cpu WfiAsNop true
 
-# Manual kick to start FreeRTOS ticking
-sysbus WriteDoubleWord 0x60023068 0x1
-sysbus.intmatrix OnGPIO 37 true
-sysbus.intmatrix OnGPIO 50 true
+# Let CLIC + SYSTIMER handle all interrupt ticks naturally
 start
-sleep 0.5
-pause
-sysbus.intmatrix OnGPIO 37 false
-sysbus.intmatrix OnGPIO 50 false
-
-# Let CLIC + SYSTIMER handle subsequent ticks
-start
-sleep 3
+sleep 4
 pause
 
 cpu PC
