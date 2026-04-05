@@ -16,6 +16,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent.parent
 PERIPHERALS_DIR = REPO_ROOT / "peripherals"
 SETUP_RESC = REPO_ROOT / "tests" / "esp32c3_setup.resc"
+CLIC_SETUP_RESC = REPO_ROOT / "tests" / "clic_setup.resc"
 
 
 def discover_built_firmware():
@@ -59,26 +60,17 @@ include @{SETUP_RESC}
 
 showAnalyzer uart0
 
-# Start emulation, boot through init
+# Phase 1: Boot with CLIC present but unconfigured
 start
 sleep 1
 pause
 
-# Enable interrupts and single kick
-cpu MIE 0x800
-cpu MSTATUS 0x1808
-sysbus WriteDoubleWord 0x60023068 0x1
-sysbus.intmatrix OnGPIO 37 true
-sysbus.intmatrix OnGPIO 50 true
-start
-sleep 0.5
-pause
-sysbus.intmatrix OnGPIO 37 false
-sysbus.intmatrix OnGPIO 50 false
+# Phase 2: Configure CLIC interrupt delivery
+include @{CLIC_SETUP_RESC}
 
-# Let app run
+# Phase 3: CLIC delivers interrupts naturally
 start
-sleep 2
+sleep 4
 pause
 quit
 '''

@@ -1,5 +1,5 @@
-I (0) main_task: Started on CPU0
-I (0) main_task: Calling app_main()
+I (10) main_task: Started on CPU0
+I (10) main_task: Calling app_main()
 [SYSTMR] === test_systimer_date ===
 [SYSTMR] REG_READ  addr=0x600230fc val=0x02006171  SYSTIMER_DATE_REG
 [SYSTMR] DATE register is non-zero (0x02006171) -- TEST_PASS

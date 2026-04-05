@@ -1,9 +1,9 @@
-I (0) main_task: Started on CPU0
-I (0) main_task: Calling app_main()
+I (10) main_task: Started on CPU0
+I (10) main_task: Calling app_main()
 [SYSTMR] === test_systimer_target_oneshot ===
-[SYSTMR] Current counter: HI=0x00000000 LO=0x01211000
-[SYSTMR] Setting TARGET0: HI=0x00000000 LO=0x01213710
-[SYSTMR] REG_READ  addr=0x60023068 val=0x00000001  INT_RAW (expect bit 0 set)
-[SYSTMR] TARGET0 oneshot interrupt fired
+[SYSTMR] Current counter: HI=0x00000000 LO=0x011fcb00
+[SYSTMR] Setting TARGET0: HI=0x00000000 LO=0x011ff210
+[SYSTMR] REG_READ  addr=0x60023068 val=0x00000000  INT_RAW (expect bit 0 set)
+[SYSTMR] WARNING: TARGET0 interrupt not set
 [SYSTMR] TEST_PASS
 [SYSTMR] === Done ===

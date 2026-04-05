@@ -500,6 +500,8 @@ namespace Antmicro.Renode.Peripherals.Timers
         // This gives reasonable alarm resolution without excessive overhead.
         private const long TimerTickInterval = 1600;
         // Default CONF: bit 30 (UNIT0_WORK_EN) = 1
+        // Note: stall-enable bits 25-28 reset to 0 per TRM; ROM code sets some of
+        // them during boot (e.g. bit 25 UNIT1_CORE1_STALL_EN on real hardware)
         private const uint DefaultConfReg = 0x40000000;
 
         private enum Registers : long

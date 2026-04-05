@@ -1,5 +1,5 @@
-I (0) main_task: Started on CPU0
-I (0) main_task: Calling app_main()
+I (10) main_task: Started on CPU0
+I (10) main_task: Calling app_main()
 [SYSTMR] === test_systimer_counter_load ===
 [SYSTMR] Writing UNIT0_LOAD_HI=0, UNIT0_LOAD_LO=0x1000
 [SYSTMR] REG_READ  addr=0x6002300c val=0x00000000  UNIT0_LOAD_HI

@@ -1,12 +1,12 @@
-I (0) main_task: Started on CPU0
-I (0) main_task: Calling app_main()
+I (10) main_task: Started on CPU0
+I (10) main_task: Calling app_main()
 [SYSTMR] === test_systimer_int_registers ===
 [SYSTMR] REG_READ  addr=0x60023064 val=0x00000001  INT_ENA (initial)
-[SYSTMR] REG_READ  addr=0x60023068 val=0x00000001  INT_RAW (initial)
-[SYSTMR] REG_READ  addr=0x60023070 val=0x00000001  INT_ST  (initial)
+[SYSTMR] REG_READ  addr=0x60023068 val=0x00000000  INT_RAW (initial)
+[SYSTMR] REG_READ  addr=0x60023070 val=0x00000000  INT_ST  (initial)
 [SYSTMR] Writing INT_ENA = 1
 [SYSTMR] REG_READ  addr=0x60023064 val=0x00000001  INT_ENA (after write)
-[SYSTMR] REG_READ  addr=0x60023070 val=0x00000001  INT_ST  (after ENA)
+[SYSTMR] REG_READ  addr=0x60023070 val=0x00000000  INT_ST  (after ENA)
 [SYSTMR] Writing INT_CLR = 7
 [SYSTMR] REG_READ  addr=0x60023068 val=0x00000000  INT_RAW (after clear)
 [SYSTMR] REG_READ  addr=0x60023070 val=0x00000000  INT_ST  (after clear)
