@@ -295,10 +295,8 @@ intmatrix: IRQControllers.ESP32C3_InterruptMatrix @ sysbus 0x600C2000
 extmem: Miscellaneous.ESP32C3_ExtMem @ sysbus 0x600C4000
 
 // MMU Table at 0x600C5000
-stub_mmu: Python.PythonPeripheral @ sysbus 0x600C5000
-    size: 0x1000
-    initable: true
-    script: "request.Value = 0x0"
+// C# peripheral: 128-entry page table for ICache/DCache flash mapping
+mmu: Miscellaneous.ESP32C3_MMU @ sysbus 0x600C5000
 
 // XTS-AES at 0x600CC000
 stub_xts_aes: Python.PythonPeripheral @ sysbus 0x600CC000
