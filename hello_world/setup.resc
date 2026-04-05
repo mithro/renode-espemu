@@ -1,3 +1,7 @@
+## ESP32-C3 hello_world setup script (used by test.robot)
+## Loads firmware and configures workarounds; does NOT start emulation.
+## The Boot And Kick keyword in test.robot handles CLIC setup and boot phases.
+
 using sysbus
 include @/home/tim/github/mithro/renode-espemu/peripherals/interrupt-matrix/ESP32C3_InterruptMatrix.cs
 include @/home/tim/github/mithro/renode-espemu/peripherals/efuse/ESP32C3_eFuse.cs
@@ -23,40 +27,30 @@ sysbus LoadBinary @/home/tim/github/mithro/renode-espemu/platforms/rom_data_segm
 cpu SP 0x3FCE0000
 sysbus LoadBinary @/home/tim/github/mithro/renode-espemu/platforms/rom_func_stubs.bin 0x50001D00
 
-# Patch rom function tables after BSS clear
-cpu AddHook 0x40380338 "machine.SystemBus.WriteDoubleWord(0x3FCDF5B8, 0x50001D00); machine.SystemBus.WriteDoubleWord(0x3FCDFFD4, 0x50001D00)"
+# Patch rom function tables and spiflash data after BSS clear
+cpu AddHook 0x40380338 "machine.SystemBus.WriteDoubleWord(0x3FCDF5B8, 0x50001D00); machine.SystemBus.WriteDoubleWord(0x3FCDFFD4, 0x50001D00); machine.SystemBus.WriteDoubleWord(0x3FCDFFF0, 0x50001E00)"
 
-# Patch init_flash to return ESP_OK immediately (li a0,0; ret)
-# TODO: Remove once SPI MEM peripheral fully handles flash init
-sysbus WriteWord 0x42000526 0x4501
-sysbus WriteWord 0x42000528 0x8082
+# Pre-populate rom_spiflash_legacy_data at 0x50001E00
+sysbus WriteDoubleWord 0x50001E00 0x001640EF
+sysbus WriteDoubleWord 0x50001E04 0x00400000
+sysbus WriteDoubleWord 0x50001E08 0x00010000
+sysbus WriteDoubleWord 0x50001E0C 0x00001000
+sysbus WriteDoubleWord 0x50001E10 0x00000100
+sysbus WriteDoubleWord 0x50001E14 0x0000FFFF
+sysbus WriteDoubleWord 0x50001E18 0x00000000
 
-# Skip delay functions (cycle counter doesn't increment)
-set skip_func
+# Cycle counter CSR 0x802: returns cpu.ExecutedInstructions for delay functions
+set cycle_counter_handler
 """
-cpu.PC = cpu.GetRegister(1).RawValue
+if request.IsRead:
+    request.Value = cpu.ExecutedInstructions
 """
-cpu AddHook 0x400462CC $skip_func
-cpu AddHook 0x40000050 $skip_func
+cpu RegisterCSRHandlerFromString 0x802 $cycle_counter_handler
 
-# Skip brownout ISR
-cpu AddHook 0x403805EE $skip_func
-
-# Skip memprot section
+# Skip memprot + post-memprot init section
 set skip_memprot
 """
 from Antmicro.Renode.Peripherals.CPU import RegisterValue
 cpu.PC = RegisterValue.Create(0x403804E4, 32)
 """
 cpu AddHook 0x403804B2 $skip_memprot
-
-# Fix mcause at _interrupt_handler entry
-set fix_mcause
-"""
-intmatrix = machine['sysbus.intmatrix']
-pending = intmatrix.PendingMcause
-if pending != 0:
-    from Antmicro.Renode.Peripherals.CPU import RegisterValue
-    cpu.SetRegister(9, RegisterValue.Create(pending, 32))
-"""
-cpu AddHook 0x4038022E $fix_mcause

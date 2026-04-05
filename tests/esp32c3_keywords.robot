@@ -1,6 +1,7 @@
 *** Variables ***
 ${BASE}                     /home/tim/github/mithro/renode-espemu
 ${SETUP}                    ${BASE}/tests/esp32c3_setup.resc
+${CLIC_SETUP}               ${BASE}/tests/clic_setup.resc
 ${UART}                     sysbus.uart0
 
 *** Keywords ***
@@ -18,20 +19,8 @@ Boot And Kick
     Start Emulation
     Execute Command         sleep 1
     Execute Command         pause
-    # Phase 2: Configure CLIC interrupt delivery
-    Execute Command         cpu MTVEC 0x40380003
-    # CLIC dispatch hook
-    Execute Command         set dispatch_clic\n"""\nfrom Antmicro.Renode.Peripherals.CPU import RegisterValue\nmcause = cpu.MCAUSE.RawValue\nif mcause & 0x80000000:\n    cpu.PC = RegisterValue.Create(0x403801DC, 32)\n"""
-    Execute Command         cpu AddHook 0x40380000 $dispatch_clic
-    # Enable all 32 CLIC interrupts: level-triggered, SHV=0, max priority
-    FOR    ${i}    IN RANGE    32
-        ${addr}=    Evaluate    hex(0x20001000 + ${i} * 4 + 1)
-        Execute Command    sysbus WriteByte ${addr} 0x01
-        ${addr}=    Evaluate    hex(0x20001000 + ${i} * 4 + 2)
-        Execute Command    sysbus WriteByte ${addr} 0x00
-        ${addr}=    Evaluate    hex(0x20001000 + ${i} * 4 + 3)
-        Execute Command    sysbus WriteByte ${addr} 0xFF
-    END
-    Execute Command         cpu WfiAsNop true
-    # CLIC delivers interrupts naturally — no manual kick needed
+    # Phase 2: Configure CLIC interrupt delivery (from .resc file —
+    # multi-line Python hooks don't work via Execute Command)
+    Execute Script          ${CLIC_SETUP}
+    # Phase 3: CLIC delivers systimer interrupts naturally — no manual kick needed
     Start Emulation
