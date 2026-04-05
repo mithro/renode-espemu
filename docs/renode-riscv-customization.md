@@ -32,31 +32,26 @@ The CPU uses `PrivilegedArchitecture.PrivUnratified` for CLIC CSR support.
 - SHV=1 (vectored) CLIC delivery doesn't work in the TLIB backend; SHV=0
   (non-vectored) works reliably with a dispatch hook at mtvec_base.
 
-## 2. Cycle Counter CSR (0xC00)
+## 2. Cycle Counter CSR (0x802)
 
-**Renode status: NOT AUTOMATICALLY INCREMENTED**
+**Status: ELIMINATED (2026-04-05)**
 
-The standard RISC-V `cycle` CSR (0xC00) is supposed to increment with each
-clock cycle. On ESP32-C3, the firmware reads this CSR in delay loops
-(`ets_delay_us`, `esp_rom_delay_us`). Without an incrementing counter, the
-delay loops spin forever.
+The ESP32-C3 maps its cycle counter to CSR 0x802 (not the standard 0xC00).
+The ROM's `ets_delay_us` reads this CSR in a spin loop.
 
-**Key finding:** Renode's CSR 0xC00 exists but is fixed at 0. It does NOT
-increment with instruction execution.
+**Fix:** `RegisterCSRHandlerFromString` for CSR 0x802 returns
+`cpu.ExecutedInstructions` as a monotonically incrementing proxy for cycles.
+This works because 0x802 is a vendor-specific CSR (not a standard one),
+so `RegisterCSRHandlerFromString` can handle it.
 
-**Current workaround:** Skip delay functions by hooking their entry addresses
-(0x400462CC, 0x40000050) and jumping to return address.
-
-**Approach to eliminate:**
-- `RegisterCSRHandlerFromString` CANNOT override standard CSRs (0xC00 is built-in)
-- Option 1: Modify Renode source to auto-increment cycle counter
-- Option 2: Hook all delay function call sites (current approach, fragile)
-- Option 3: Use a LimitTimer-based C# peripheral that provides a
-  monotonically incrementing value, mapped to a custom CSR that the firmware
-  reads. Requires patching the firmware's delay function to read our custom CSR.
-
-**Verdict:** Cannot fully eliminate without Renode core modification. The
-current hook-based skip is the practical approach.
+```python
+set cycle_counter_handler
+"""
+if request.IsRead:
+    request.Value = cpu.ExecutedInstructions
+"""
+cpu RegisterCSRHandlerFromString 0x802 $cycle_counter_handler
+```
 
 ## 3. Custom CSR Callbacks
 
@@ -154,7 +149,7 @@ We patch them back after BSS clear.
 | # | Workaround | Status | Notes |
 |---|---|---|---|
 | W.1 | init_flash skip | **Eliminated** | SPI MEM C# + ROM spiflash data |
-| W.2 | Delay function skip | Active | Needs Renode cycle counter increment |
+| W.2 | Delay function skip | **Eliminated** | CSR 0x802 handler returns ExecutedInstructions |
 | W.3 | Memprot skip | Active | Needs Sensitive peripheral improvements |
 | W.4 | Brownout ISR skip | **Eliminated** | RTC C# reports no brownout |
 | W.5 | Force MIE/MSTATUS | **Eliminated** | CLIC handles interrupt enable |

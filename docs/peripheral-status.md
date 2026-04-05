@@ -15,7 +15,7 @@
 | HW vs Renode comparison | 49/81 match (60%, excluding expected diffs) |
 | Robot Framework test suites | 8 (12 test cases, all passing) |
 | Python stubs remaining | 27 |
-| Boot workarounds | 2 active (delay, memprot); 5 eliminated via CLIC + SPI MEM + RTC |
+| Boot workarounds | 1 active (memprot); 6 eliminated via CLIC + cycle counter + SPI MEM + RTC |
 
 ## C# Peripherals (12 Implemented)
 
@@ -85,7 +85,7 @@ ground truth for future C# implementations.
 | # | Workaround | Status |
 |---|---|---|
 | 1 | ~~Patch init_flash to return ESP_OK~~ | **Eliminated** — SPI MEM C# + ROM data |
-| 2 | Skip delay functions (cycle counter) | Active — needs Renode cycle counter |
+| 2 | ~~Skip delay functions (cycle counter)~~ | **Eliminated** — CSR 0x802 handler returns ExecutedInstructions |
 | 3 | Skip memprot section | Active — needs Sensitive peripheral work |
 | 4 | ~~Skip brownout ISR~~ | **Eliminated** — RTC C# reports no brownout |
 | 5 | ~~Force MIE/MSTATUS enable~~ | **Eliminated** — CLIC handles enable |

@@ -14,7 +14,7 @@ register-level accuracy validated against real hardware.
 | Per-feature test firmware | 120 (93 functional + 27 stub reset-value) |
 | HW vs Renode register match | 49/81 (60%, excluding expected diffs) |
 | Robot Framework tests | All passing |
-| Boot workarounds remaining | 2 |
+| Boot workarounds remaining | 1 |
 
 ### Boot workarounds
 
@@ -24,8 +24,8 @@ fixed up at runtime:
 
 | Workaround | Status | Description |
 |---|---|---|
-| `delay` | Active | Delay functions skipped (cycle counter doesn't increment) |
-| `memprot` | Active | Memory protection setup skipped |
+| `delay` | **Eliminated** | Cycle counter CSR 0x802 returns cpu.ExecutedInstructions |
+| `memprot` | Active | Post-memprot init section skipped (ROM table corruption) |
 | `init_flash` | **Eliminated** | SPI MEM C# handles RDID + ROM spiflash data |
 | `brownout` | **Eliminated** | RTC C# correctly reports no brownout |
 | `MIE` | **Eliminated** | CLIC handles interrupt enable |

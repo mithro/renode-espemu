@@ -45,15 +45,15 @@ sysbus WriteDoubleWord 0x50001E10 0x00000100
 sysbus WriteDoubleWord 0x50001E14 0x0000FFFF
 sysbus WriteDoubleWord 0x50001E18 0x00000000
 
-# Skip delay functions (cycle counter doesn't increment)
-set skip_func
+# Cycle counter CSR 0x802: returns cpu.ExecutedInstructions for delay functions
+set cycle_counter_handler
 """
-cpu.PC = cpu.GetRegister(1).RawValue
+if request.IsRead:
+    request.Value = cpu.ExecutedInstructions
 """
-cpu AddHook 0x400462CC $skip_func
-cpu AddHook 0x40000050 $skip_func
+cpu RegisterCSRHandlerFromString 0x802 $cycle_counter_handler
 
-# Skip memprot section
+# Skip memprot + post-memprot init section
 set skip_memprot
 """
 from Antmicro.Renode.Peripherals.CPU import RegisterValue
