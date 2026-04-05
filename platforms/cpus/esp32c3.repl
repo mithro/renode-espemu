@@ -9,7 +9,7 @@
 
 cpu: CPU.RiscV32 @ sysbus
     cpuType: "rv32imc_zicsr_zifencei"
-    privilegedArchitecture: PrivilegedArchitecture.Priv1_10
+    privilegedArchitecture: PrivilegedArchitecture.PrivUnratified
     timeProvider: clint
     init:
         RegisterCustomCSR "MPCER" 0x7E2 Machine
@@ -19,10 +19,21 @@ cpu: CPU.RiscV32 @ sysbus
         RegisterCustomCSR "PMACFG0" 0x802 Machine
 
 // CLINT (Core Local Interruptor) for timer interrupts.
-// IRQ 3 = software interrupt, IRQ 7 = timer interrupt (needed for FreeRTOS tick)
+// Wired through CLIC for unified interrupt delivery.
 clint: IRQControllers.CoreLevelInterruptor @ sysbus 0x60801000
     frequency: 16000000
-    [0, 1] -> cpu@[3, 7]
+    [0, 1] -> clic@[3, 7]
+
+// CLIC for interrupt delivery with correct mcause
+clic: IRQControllers.CoreLocalInterruptController @ {
+        sysbus <0x20000000, +0x10000>;
+        cpu <0x1000, +0x4A1>
+    }
+    cpu: cpu
+    numberOfInterrupts: 32
+    machineLevelBits: 4
+    supervisorLevelBits: 0
+    modeBits: 0
 
 // === WORKAROUND MEMORY ===
 
@@ -38,15 +49,15 @@ null_guard: Memory.MappedMemory @ sysbus 0x0
 // === MEMORY REGIONS ===
 
 // Internal SRAM (used as both IRAM and DRAM)
-// DRAM: 0x3FC70000 - 0x3FCE0000 (448 KB -- extended below nominal 0x3FC80000 to catch stack)
+// DRAM: 0x3FC70000 - 0x3CE10000 (480 KB -- extended to cover stack/heap overflow reads)
 // IRAM: 0x40370000 - 0x403E0000 (mapped as alias of DRAM)
-// The ESP32-C3 physical SRAM is 400KB; we over-provision slightly to avoid
-// stack underflow crashes. The firmware's linker may set SP above our nominal boundary.
+// The ESP32-C3 physical SRAM is 400KB; we over-provision to avoid crashes from
+// firmware reads past nominal boundaries (seen at 0x3FCE0000+ during boot).
 dram: Memory.MappedMemory @ {
         sysbus 0x3FC70000;
         sysbus 0x40370000
     }
-    size: 0x70000
+    size: 0x78000
 
 // Internal ROM (boot ROM)
 // The ESP32-C3 ROM is 384KB of physical memory, accessible via two bus views:
@@ -279,9 +290,8 @@ sensitive: Miscellaneous.ESP32C3_Sensitive @ sysbus 0x600C1000
 // Interrupt Matrix at 0x600C2000
 // C# peripheral: routes 64 peripheral sources to 32 CPU interrupt lines
 intmatrix: IRQControllers.ESP32C3_InterruptMatrix @ sysbus 0x600C2000
-    // Interrupt delivery: matrix overrides mcause with the CPU line number,
-    // then pulses GPIO output 11 (MEIP) to trigger the CPU.
-    11 -> cpu@11
+    // Interrupt delivery via CLIC for correct mcause
+    [0-31] -> clic@[0-31]
 
 // External Memory (cache control) at 0x600C4000
 // C# peripheral: ICache control, sync/preload done bits, cache state

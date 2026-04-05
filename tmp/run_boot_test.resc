@@ -37,8 +37,6 @@ sysbus WriteDoubleWord 0x50001E10 0x00000100
 sysbus WriteDoubleWord 0x50001E14 0x0000FFFF
 sysbus WriteDoubleWord 0x50001E18 0x00000000
 
-# ELIMINATED: init_flash (SPI MEM RDID works), brownout ISR (RTC reports no brownout)
-
 # Skip delay functions (cycle counter doesn't increment)
 set skip_func
 """
@@ -47,24 +45,13 @@ cpu.PC = cpu.GetRegister(1).RawValue
 cpu AddHook 0x400462CC $skip_func
 cpu AddHook 0x40000050 $skip_func
 
-# Skip memprot section (Sensitive C# in place but init has alignment issues)
+# Skip memprot section
 set skip_memprot
 """
 from Antmicro.Renode.Peripherals.CPU import RegisterValue
 cpu.PC = RegisterValue.Create(0x403804E4, 32)
 """
 cpu AddHook 0x403804B2 $skip_memprot
-
-# Fix mcause at _interrupt_handler entry
-set fix_mcause
-"""
-intmatrix = machine['sysbus.intmatrix']
-pending = intmatrix.PendingMcause
-if pending != 0:
-    from Antmicro.Renode.Peripherals.CPU import RegisterValue
-    cpu.SetRegister(9, RegisterValue.Create(pending, 32))
-"""
-cpu AddHook 0x4038022E $fix_mcause
 
 # Capture esp_rom_printf output
 set printf_hook
@@ -82,24 +69,147 @@ if fmt_ptr > 0x3C000000 and fmt_ptr < 0x42800000:
 """
 cpu AddHook 0x40000040 $printf_hook
 
-# Boot through all init
+# === PHASE 1: Boot with CLIC present but unconfigured ===
+# PrivUnratified CPU boots fine — CLIC doesn't interfere when unconfigured.
 start
 sleep 1
 pause
 
-# Enable MEIE and fire single manual kick
-cpu MIE 0x800
+# === PHASE 2: Configure CLIC interrupt delivery ===
+# CLIC provides correct mcause = 0x80000000 | interrupt_number automatically,
+# eliminating the old mcause Python hook workaround (W.7).
+
+# Set mtvec to CLIC mode using firmware's own vector table.
+# Must use API (not csrw) — Renode TLIB checks raw register for CLIC mode.
+cpu MTVEC 0x40380003
 cpu MSTATUS 0x1808
+
+# CLIC dispatch hook at firmware's vector table entry 0 (0x40380000).
+# With SHV=0 (non-vectored), ALL CLIC interrupts jump to mtvec_base.
+# This hook checks mcause: interrupts go to _interrupt_handler,
+# exceptions fall through to the firmware's panic handler.
+set dispatch_clic
+"""
+from Antmicro.Renode.Peripherals.CPU import RegisterValue
+mcause = cpu.MCAUSE.RawValue
+if mcause & 0x80000000:
+    cpu.PC = RegisterValue.Create(0x403801DC, 32)
+"""
+cpu AddHook 0x40380000 $dispatch_clic
+
+# Enable all 32 CLIC interrupts: level-triggered, SHV=0, max priority
+# SHV=0 = non-vectored (all go to mtvec_base, dispatch hook handles routing)
+sysbus WriteByte 0x20001001 0x01
+sysbus WriteByte 0x20001002 0x00
+sysbus WriteByte 0x20001003 0xFF
+sysbus WriteByte 0x20001005 0x01
+sysbus WriteByte 0x20001006 0x00
+sysbus WriteByte 0x20001007 0xFF
+sysbus WriteByte 0x20001009 0x01
+sysbus WriteByte 0x2000100A 0x00
+sysbus WriteByte 0x2000100B 0xFF
+sysbus WriteByte 0x2000100D 0x01
+sysbus WriteByte 0x2000100E 0x00
+sysbus WriteByte 0x2000100F 0xFF
+sysbus WriteByte 0x20001011 0x01
+sysbus WriteByte 0x20001012 0x00
+sysbus WriteByte 0x20001013 0xFF
+sysbus WriteByte 0x20001015 0x01
+sysbus WriteByte 0x20001016 0x00
+sysbus WriteByte 0x20001017 0xFF
+sysbus WriteByte 0x20001019 0x01
+sysbus WriteByte 0x2000101A 0x00
+sysbus WriteByte 0x2000101B 0xFF
+sysbus WriteByte 0x2000101D 0x01
+sysbus WriteByte 0x2000101E 0x00
+sysbus WriteByte 0x2000101F 0xFF
+sysbus WriteByte 0x20001021 0x01
+sysbus WriteByte 0x20001022 0x00
+sysbus WriteByte 0x20001023 0xFF
+sysbus WriteByte 0x20001025 0x01
+sysbus WriteByte 0x20001026 0x00
+sysbus WriteByte 0x20001027 0xFF
+sysbus WriteByte 0x20001029 0x01
+sysbus WriteByte 0x2000102A 0x00
+sysbus WriteByte 0x2000102B 0xFF
+sysbus WriteByte 0x2000102D 0x01
+sysbus WriteByte 0x2000102E 0x00
+sysbus WriteByte 0x2000102F 0xFF
+sysbus WriteByte 0x20001031 0x01
+sysbus WriteByte 0x20001032 0x00
+sysbus WriteByte 0x20001033 0xFF
+sysbus WriteByte 0x20001035 0x01
+sysbus WriteByte 0x20001036 0x00
+sysbus WriteByte 0x20001037 0xFF
+sysbus WriteByte 0x20001039 0x01
+sysbus WriteByte 0x2000103A 0x00
+sysbus WriteByte 0x2000103B 0xFF
+sysbus WriteByte 0x2000103D 0x01
+sysbus WriteByte 0x2000103E 0x00
+sysbus WriteByte 0x2000103F 0xFF
+sysbus WriteByte 0x20001041 0x01
+sysbus WriteByte 0x20001042 0x00
+sysbus WriteByte 0x20001043 0xFF
+sysbus WriteByte 0x20001045 0x01
+sysbus WriteByte 0x20001046 0x00
+sysbus WriteByte 0x20001047 0xFF
+sysbus WriteByte 0x20001049 0x01
+sysbus WriteByte 0x2000104A 0x00
+sysbus WriteByte 0x2000104B 0xFF
+sysbus WriteByte 0x2000104D 0x01
+sysbus WriteByte 0x2000104E 0x00
+sysbus WriteByte 0x2000104F 0xFF
+sysbus WriteByte 0x20001051 0x01
+sysbus WriteByte 0x20001052 0x00
+sysbus WriteByte 0x20001053 0xFF
+sysbus WriteByte 0x20001055 0x01
+sysbus WriteByte 0x20001056 0x00
+sysbus WriteByte 0x20001057 0xFF
+sysbus WriteByte 0x20001059 0x01
+sysbus WriteByte 0x2000105A 0x00
+sysbus WriteByte 0x2000105B 0xFF
+sysbus WriteByte 0x2000105D 0x01
+sysbus WriteByte 0x2000105E 0x00
+sysbus WriteByte 0x2000105F 0xFF
+sysbus WriteByte 0x20001061 0x01
+sysbus WriteByte 0x20001062 0x00
+sysbus WriteByte 0x20001063 0xFF
+sysbus WriteByte 0x20001065 0x01
+sysbus WriteByte 0x20001066 0x00
+sysbus WriteByte 0x20001067 0xFF
+sysbus WriteByte 0x20001069 0x01
+sysbus WriteByte 0x2000106A 0x00
+sysbus WriteByte 0x2000106B 0xFF
+sysbus WriteByte 0x2000106D 0x01
+sysbus WriteByte 0x2000106E 0x00
+sysbus WriteByte 0x2000106F 0xFF
+sysbus WriteByte 0x20001071 0x01
+sysbus WriteByte 0x20001072 0x00
+sysbus WriteByte 0x20001073 0xFF
+sysbus WriteByte 0x20001075 0x01
+sysbus WriteByte 0x20001076 0x00
+sysbus WriteByte 0x20001077 0xFF
+sysbus WriteByte 0x20001079 0x01
+sysbus WriteByte 0x2000107A 0x00
+sysbus WriteByte 0x2000107B 0xFF
+sysbus WriteByte 0x2000107D 0x01
+sysbus WriteByte 0x2000107E 0x00
+sysbus WriteByte 0x2000107F 0xFF
+
+# WfiAsNop to avoid hangs
+cpu WfiAsNop true
+
+# Manual kick to start FreeRTOS ticking
 sysbus WriteDoubleWord 0x60023068 0x1
 sysbus.intmatrix OnGPIO 37 true
 sysbus.intmatrix OnGPIO 50 true
 start
-sleep 0.1
+sleep 0.5
 pause
 sysbus.intmatrix OnGPIO 37 false
 sysbus.intmatrix OnGPIO 50 false
 
-# Let SYSTIMER auto-fire handle subsequent ticks
+# Let CLIC + SYSTIMER handle subsequent ticks
 start
 sleep 3
 pause

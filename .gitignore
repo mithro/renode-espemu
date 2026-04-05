@@ -13,3 +13,9 @@ snapshots/
 # Python
 __pycache__/
 *.pyc
+
+# Claude Code
+.claude/
+
+# Local temporary files
+tmp/

@@ -123,21 +123,13 @@ namespace Antmicro.Renode.Peripherals.IRQControllers
                 return;
             }
 
-            // Fire the interrupt via MEIP (GPIO output 11).
-            // We set mcause on the CPU to the correct line number before
-            // triggering, so the vectored handler dispatches to the right entry.
+            // Fire the interrupt via CLIC (per-line GPIO).
+            // CLIC sets mcause = 0x80000000 | line automatically.
             irqPending |= lineBit;
-
-            // Store mcause for the Python hook to read.
-            // Standard RISC-V sets mcause=0x8000000B for MEIP, but ESP32-C3
-            // firmware expects mcause = 0x80000000 | cpu_line_number.
             pendingMcause = 0x80000000u | line;
 
-            // Assert MEIP and keep it high until firmware clears the interrupt
-            Connections[MeipLine].Set(true);
-            meipAsserted = true;
-
-            this.Log(LogLevel.Info, "Asserted MEIP for CPU line {0}", line);
+            Connections[(int)line].Set(true);
+            this.Log(LogLevel.Info, "Asserted CLIC line {0}", line);
         }
 
         private void ClearPendingForLine(uint line)
@@ -246,14 +238,7 @@ namespace Antmicro.Renode.Peripherals.IRQControllers
                     writeCallback: (_, value) =>
                     {
                         irqPending &= ~(uint)value;
-                        // Deassert MEIP if all pending interrupts cleared
-                        if (meipAsserted && (irqPending & cpuIntEnable) == 0)
-                        {
-                            Connections[MeipLine].Set(false);
-                            meipAsserted = false;
-                            this.Log(LogLevel.Info, "Deasserted MEIP");
-                        }
-                        // Also deassert individual lines (for GPIO wiring)
+                        // Deassert CLIC inputs for cleared lines
                         for (int i = 0; i < NumCpuInterrupts; i++)
                         {
                             if (((uint)value & (1u << i)) != 0)
@@ -284,30 +269,13 @@ namespace Antmicro.Renode.Peripherals.IRQControllers
                     writeCallback: (_, value) =>
                     {
                         cpuIntThreshold = (uint)value;
-                        // When threshold rises (ISR entry), deassert MEIP to prevent re-entry.
-                        // When threshold drops (ISR exit), check pending and maybe re-assert.
-                        if (meipAsserted)
+                        // Re-evaluate: deassert lines below threshold, assert above
+                        for (int i = 1; i < NumCpuInterrupts; i++)
                         {
-                            // Check if any pending interrupt still meets the new threshold
-                            bool anyAboveThresh = false;
-                            for (int i = 1; i < NumCpuInterrupts; i++)
-                            {
-                                uint bit = 1u << i;
-                                if ((irqPending & cpuIntEnable & bit) != 0 && cpuIntPriority[i] >= cpuIntThreshold)
-                                {
-                                    anyAboveThresh = true;
-                                    break;
-                                }
-                            }
-                            if (!anyAboveThresh)
-                            {
-                                Connections[MeipLine].Set(false);
-                                meipAsserted = false;
-                            }
-                        }
-                        else
-                        {
-                            CheckPendingInterrupts();
+                            uint bit = 1u << i;
+                            bool shouldAssert = (irqPending & cpuIntEnable & bit) != 0
+                                && cpuIntPriority[i] >= cpuIntThreshold;
+                            Connections[i].Set(shouldAssert);
                         }
                     },
                     valueProviderCallback: _ => cpuIntThreshold);
@@ -328,7 +296,7 @@ namespace Antmicro.Renode.Peripherals.IRQControllers
         private uint irqPending;
         private bool[] sourceLevel;
 
-        private bool meipAsserted;
+        // meipAsserted removed — CLIC handles per-line delivery
         private bool clockGateClkEn;
         private uint interruptDate;
 
