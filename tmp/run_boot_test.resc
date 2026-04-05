@@ -48,7 +48,17 @@ if request.IsRead:
 """
 cpu RegisterCSRHandlerFromString 0x802 $cycle_counter_handler
 
-# Skip memprot section — esp_mprot_set_prot returns error, needs debugging
+# ROM function at 0x400514AC reads rom_cache_internal_table_ptr (0x3FCDFFD4)
+# into a5, then loads a function pointer at offset 44. The memprot/cache init
+# overwrites 0x3FCDFFD4 with PMS config data. Fix a5 if it's been corrupted.
+# Also hook 0x400514AC (the instruction that loads the table pointer)
+# to ensure the memory contains the right value
+# Skip memprot + post-memprot init section (0x403804B2 → 0x403804E4).
+# This skips esp_mprot_set_prot return handling AND the subsequent version
+# check / app descriptor validation code. The post-memprot code calls ROM
+# cache functions that read rom_cache_internal_table_ptr, which gets
+# corrupted during PMS configuration. Until the Sensitive peripheral
+# properly handles PMS, this section must be skipped entirely.
 set skip_memprot
 """
 from Antmicro.Renode.Peripherals.CPU import RegisterValue
