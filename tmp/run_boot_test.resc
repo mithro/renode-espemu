@@ -37,15 +37,18 @@ sysbus WriteDoubleWord 0x50001E10 0x00000100
 sysbus WriteDoubleWord 0x50001E14 0x0000FFFF
 sysbus WriteDoubleWord 0x50001E18 0x00000000
 
-# Skip delay functions (cycle counter doesn't increment)
-set skip_func
+# CSR 0x802: cycle counter (ESP32-C3 maps mcycle to this address).
+# The ROM's ets_delay_us reads this CSR in a spin loop. Without an
+# incrementing value, delay functions hang forever.
+# Returns cpu.ExecutedInstructions as a proxy for elapsed cycles.
+set cycle_counter_handler
 """
-cpu.PC = cpu.GetRegister(1).RawValue
+if request.IsRead:
+    request.Value = cpu.ExecutedInstructions
 """
-cpu AddHook 0x400462CC $skip_func
-cpu AddHook 0x40000050 $skip_func
+cpu RegisterCSRHandlerFromString 0x802 $cycle_counter_handler
 
-# Skip memprot section
+# Skip memprot section — esp_mprot_set_prot returns error, needs debugging
 set skip_memprot
 """
 from Antmicro.Renode.Peripherals.CPU import RegisterValue

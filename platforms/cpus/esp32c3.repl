@@ -16,7 +16,6 @@ cpu: CPU.RiscV32 @ sysbus
         RegisterCustomCSR "MPCMR" 0x7E3 Machine
         RegisterCustomCSR "PMAADDR0" 0x800 Machine
         RegisterCustomCSR "PMAADDR1" 0x801 Machine
-        RegisterCustomCSR "PMACFG0" 0x802 Machine
 
 // CLINT (Core Local Interruptor) for timer interrupts.
 // Wired through CLIC for unified interrupt delivery.
