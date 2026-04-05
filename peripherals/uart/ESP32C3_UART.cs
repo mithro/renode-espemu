@@ -165,11 +165,15 @@ namespace Antmicro.Renode.Peripherals.UART
                 },
 
                 // UART_CONF0_REG: 0x20
+                // Note: default 0x1000001C differs from HW post-boot (0x0400001C) because
+                // firmware R-M-W depends on this starting value. Changing it breaks boot.
                 {(long)Registers.Conf0, new DoubleWordRegister(this, 0x1000001C)
                     .WithValueField(0, 32, name: "CONF0")
                 },
 
                 // UART_CONF1_REG: 0x24
+                // Note: default 0xC060 differs from HW post-boot (0x00000001) because
+                // firmware R-M-W depends on this starting value. Changing it breaks boot.
                 {(long)Registers.Conf1, new DoubleWordRegister(this, 0x0000C060)
                     .WithValueField(0, 32, name: "CONF1")
                 },
@@ -265,6 +269,8 @@ namespace Antmicro.Renode.Peripherals.UART
                 },
 
                 // UART_FSM_STATUS_REG: 0x6C (read-only FSM state)
+                // Note: HW returns 0x20 (TX FSM idle state=2), but changing from 0
+                // may affect firmware behavior. Left as 0 for boot compatibility.
                 {(long)Registers.FsmStatus, new DoubleWordRegister(this)
                     .WithValueField(0, 32, FieldMode.Read, name: "FSM_STATUS",
                         valueProviderCallback: _ => 0u) // idle

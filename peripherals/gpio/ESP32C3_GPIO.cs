@@ -47,6 +47,12 @@ namespace Antmicro.Renode.Peripherals.GPIOPort
             funcInSelCfg = new uint[NumberOfInputSignals];
             funcOutSelCfg = new uint[NumberOfPins];
 
+            // Default: IN_SEL = 0x1F (input disconnected), matches hardware
+            for (int i = 0; i < NumberOfInputSignals; i++)
+            {
+                funcInSelCfg[i] = 0x1F;
+            }
+
             // Default: OUT_SEL = 0x80 (no function selected)
             for (int i = 0; i < NumberOfPins; i++)
             {
