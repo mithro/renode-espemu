@@ -257,10 +257,8 @@ stub_hmac: Python.PythonPeripheral @ sysbus 0x6003E000
     script: "request.Value = 0x0"
 
 // GDMA at 0x6003F000
-stub_gdma: Python.PythonPeripheral @ sysbus 0x6003F000
-    size: 0x1000
-    initable: true
-    script: "request.Value = 0x0"
+// C# peripheral: 3-channel DMA controller (register storage, no transfers)
+gdma: DMA.ESP32C3_GDMA @ sysbus 0x6003F000
 
 // APB SAR ADC at 0x60040000
 stub_adc: Python.PythonPeripheral @ sysbus 0x60040000
@@ -309,10 +307,8 @@ stub_xts_aes: Python.PythonPeripheral @ sysbus 0x600CC000
     script: "request.Value = 0x0"
 
 // Assist Debug at 0x600CE000
-stub_assist_debug: Python.PythonPeripheral @ sysbus 0x600CE000
-    size: 0x1000
-    initable: true
-    script: "request.Value = 0x0"
+// C# peripheral: SP monitoring, PC recording, exception logging
+assist_debug: Miscellaneous.ESP32C3_AssistDebug @ sysbus 0x600CE000
 
 // World Controller at 0x600D0000
 stub_wcl: Python.PythonPeripheral @ sysbus 0x600D0000
