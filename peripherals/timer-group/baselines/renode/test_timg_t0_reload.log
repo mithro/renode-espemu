@@ -1,5 +1,5 @@
-I (0) main_task: Started on CPU0
-I (0) main_task: Calling app_main()
+I (10) main_task: Started on CPU0
+I (10) main_task: Calling app_main()
 [TIMG] === test_timg_t0_reload ===
 [TIMG] Writing T0LOADLO=0x5555, T0LOADHI=0
 [TIMG] REG_READ  addr=0x6001f018 val=0x00005555  T0LOADLO

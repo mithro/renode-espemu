@@ -1,5 +1,5 @@
-I (0) main_task: Started on CPU0
-I (0) main_task: Calling app_main()
+I (10) main_task: Started on CPU0
+I (10) main_task: Calling app_main()
 [TIMG] === test_timg_int_registers ===
 [TIMG] REG_READ  addr=0x6001f070 val=0x00000002  INT_ENA_TIMERS (initial)
 [TIMG] REG_READ  addr=0x6001f074 val=0x00000000  INT_RAW_TIMERS (initial)

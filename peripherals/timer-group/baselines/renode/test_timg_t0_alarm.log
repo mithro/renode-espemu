@@ -1,12 +1,12 @@
-I (0) main_task: Started on CPU0
-I (0) main_task: Calling app_main()
+I (10) main_task: Started on CPU0
+I (10) main_task: Calling app_main()
 [TIMG] === test_timg_t0_alarm ===
 [TIMG] Setting alarm HI=0, LO=0x5000
 [TIMG] REG_READ  addr=0x6001f014 val=0x00000000  T0ALARMHI
 [TIMG] REG_READ  addr=0x6001f010 val=0x00005000  T0ALARMLO
 [TIMG] REG_READ  addr=0x6001f000 val=0xe0002400  T0CONFIG (alarm+timer enabled)
 [TIMG] Waiting for alarm interrupt...
-[TIMG] REG_READ  addr=0x6001f074 val=0x00000000  INT_RAW_TIMERS
-[TIMG] WARNING: alarm interrupt not set
+[TIMG] REG_READ  addr=0x6001f074 val=0x00000001  INT_RAW_TIMERS
+[TIMG] Alarm interrupt fired
 [TIMG] TEST_PASS
 [TIMG] === Done ===

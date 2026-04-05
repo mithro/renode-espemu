@@ -1,10 +1,10 @@
-I (0) main_task: Started on CPU0
-I (0) main_task: Calling app_main()
+I (10) main_task: Started on CPU0
+I (10) main_task: Calling app_main()
 [TIMG] === test_timg_t0_counter ===
 [TIMG] Enabling T0 (EN=1, INCREASE=1)
-[TIMG] REG_READ  addr=0x6001f004 val=0x000003e8  T0LO (1st)
+[TIMG] REG_READ  addr=0x6001f004 val=0x000f4240  T0LO (1st)
 [TIMG] REG_READ  addr=0x6001f008 val=0x00000000  T0HI (1st)
-[TIMG] REG_READ  addr=0x6001f004 val=0x000007d0  T0LO (2nd)
+[TIMG] REG_READ  addr=0x6001f004 val=0x001e8480  T0LO (2nd)
 [TIMG] REG_READ  addr=0x6001f008 val=0x00000000  T0HI (2nd)
 [TIMG] Counter advanced correctly
 [TIMG] TEST_PASS

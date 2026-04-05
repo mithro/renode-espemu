@@ -6,39 +6,13 @@
 //   - One Main Watchdog Timer (MWDT) -- stubbed for emulation
 //   - RTC calibration registers (used during boot for clock calibration)
 //
-// Register map (from timer_group_reg.h):
-//   0x00: T0CONFIG     - Timer 0 configuration (divider, enable, direction, alarm)
-//   0x04: T0LO         - Timer 0 counter low 32 bits (latched, read-only)
-//   0x08: T0HI         - Timer 0 counter high 22 bits (latched, read-only)
-//   0x0C: T0UPDATE     - Write to latch current counter into LO/HI
-//   0x10: T0ALARMLO    - Alarm value low 32 bits
-//   0x14: T0ALARMHI    - Alarm value high 22 bits
-//   0x18: T0LOADLO     - Reload value low 32 bits
-//   0x1C: T0LOADHI     - Reload value high 22 bits
-//   0x20: T0LOAD       - Write any value to trigger reload from LOADLO/LOADHI
-//   0x48: WDTCONFIG0   - WDT configuration (stubbed)
-//   0x4C: WDTCONFIG1   - WDT prescaler (stubbed)
-//   0x50: WDTCONFIG2   - WDT stage 0 timeout (stubbed)
-//   0x54: WDTCONFIG3   - WDT stage 1 timeout (stubbed)
-//   0x58: WDTCONFIG4   - WDT stage 2 timeout (stubbed)
-//   0x5C: WDTCONFIG5   - WDT stage 3 timeout (stubbed)
-//   0x60: WDTFEED      - WDT feed (stubbed)
-//   0x64: WDTWPROTECT  - WDT write protect (stubbed)
-//   0x68: RTCCALICFG   - RTC calibration config (bit 15 = RDY, must return 1)
-//   0x6C: RTCCALICFG1  - RTC calibration result value
-//   0x70: INT_ENA      - Interrupt enable (bit 0 = T0, bit 1 = WDT)
-//   0x74: INT_RAW      - Raw interrupt status
-//   0x78: INT_ST       - Masked interrupt status (RAW & ENA)
-//   0x7C: INT_CLR      - Interrupt clear (write-1-to-clear)
-//   0x80: RTCCALICFG2  - RTC calibration timeout config
-//   0xF8: NTIMERS_DATE - Version control register
-//   0xFC: REGCLK       - Clock gate register
-//
-// Boot-critical behavior:
-//   ROM/bootloader reads RTCCALICFG to check RTC_CALI_RDY (bit 15).
-//   We always return RDY=1 with a reasonable calibration value.
+// Counter advancement: The counter advances by a scaled step on each T0UPDATE
+// write and INT_RAW/INT_ST read, using a fixed time assumption per access.
+// This avoids LimitTimer overhead (which stalls emulation) and deadlocks from
+// accessing machine.ElapsedVirtualTime inside register callbacks.
 
 using System;
+using System.Collections.Generic;
 using Antmicro.Renode.Core;
 using Antmicro.Renode.Core.Structure.Registers;
 using Antmicro.Renode.Logging;
@@ -46,24 +20,18 @@ using Antmicro.Renode.Peripherals.Bus;
 
 namespace Antmicro.Renode.Peripherals.Timers
 {
-    public class ESP32C3_TimerGroup : BasicDoubleWordPeripheral, IKnownSize
+    public class ESP32C3_TimerGroup : BasicDoubleWordPeripheral, IKnownSize, INumberedGPIOOutput
     {
         public ESP32C3_TimerGroup(Machine machine) : base(machine)
         {
-            timerCounter = 0;
-            latchedCounter = 0;
-            timerEnabled = false;
-            timerIncrease = true;
-            timerDivider = 1;
-            alarmLo = 0;
-            alarmHi = 0;
-            alarmEnabled = false;
-            loadLo = 0;
-            loadHi = 0;
-            intEna = 0;
-            intRaw = 0;
-            wdtWriteProtect = 0x50D83AA1; // default: locked
+            // GPIO outputs for interrupts (0=T0, 1=WDT)
+            var dict = new Dictionary<int, IGPIO>();
+            dict[0] = new GPIO();
+            dict[1] = new GPIO();
+            Connections = dict;
+
             DefineRegisters();
+            Reset();
         }
 
         public override void Reset()
@@ -82,22 +50,37 @@ namespace Antmicro.Renode.Peripherals.Timers
             intEna = 0;
             intRaw = 0;
             wdtWriteProtect = 0x50D83AA1;
+            // START_CYCLING=1 in default 0x00013000, so calibration is running at reset
+            rtcCaliStarted = true;
+            UpdateInterrupt();
         }
+
+        public IReadOnlyDictionary<int, IGPIO> Connections { get; }
 
         public long Size => 0x100;
 
+        /// <summary>
+        /// Advance the timer counter by a scaled step.
+        /// Called on T0UPDATE writes and INT_RAW/INT_ST reads.
+        /// Each call represents one "time quantum" of emulation progress.
+        /// </summary>
         private void AdvanceTimer()
         {
             if (!timerEnabled)
                 return;
 
-            // Advance scaled by divider (APB_CLK / divider ticks per step)
-            ulong step = 1000 / (ulong)timerDivider;
+            // Each access represents roughly 100us of emulated time.
+            // At APB_CLK = 80MHz, that's 8000 ticks before divider.
+            // The divider scales this down: step = 8000 / divider.
+            ulong step = TicksPerAccess / (ulong)timerDivider;
             if (step == 0) step = 1;
+
             if (timerIncrease)
                 timerCounter += step;
             else if (timerCounter >= step)
                 timerCounter -= step;
+
+            timerCounter &= CounterMask;
         }
 
         private void CheckAlarm()
@@ -111,7 +94,14 @@ namespace Antmicro.Renode.Peripherals.Timers
                 intRaw |= 0x1; // T0_INT_RAW
                 alarmEnabled = false; // auto-clear on alarm
                 this.Log(LogLevel.Debug, "Timer 0 alarm triggered at counter=0x{0:X}", timerCounter);
+                UpdateInterrupt();
             }
+        }
+
+        private void UpdateInterrupt()
+        {
+            bool t0Active = (intRaw & 0x1) != 0 && (intEna & 0x1) != 0;
+            Connections[0].Set(t0Active);
         }
 
         private void DefineRegisters()
@@ -119,8 +109,6 @@ namespace Antmicro.Renode.Peripherals.Timers
             // --- Timer 0 registers ---
 
             // T0CONFIG: 0x00
-            // [9]=USE_XTAL, [10]=ALARM_EN, [12]=DIVCNT_RST, [28:13]=DIVIDER,
-            // [29]=AUTORELOAD, [30]=INCREASE, [31]=EN
             Registers.T0Config.Define(this, 0x60002000) // default: divider=1, autoreload=1, increase=1
                 .WithValueField(0, 9, name: "T0CONFIG_RESERVED_0_8")
                 .WithFlag(9, name: "T0_USE_XTAL")
@@ -151,19 +139,18 @@ namespace Antmicro.Renode.Peripherals.Timers
                 .WithValueField(0, 22, mode: FieldMode.Read, name: "T0_HI",
                     valueProviderCallback: _ => (uint)((latchedCounter >> 32) & 0x003FFFFF));
 
-            // T0UPDATE: 0x0C (write bit 31 to latch counter)
+            // T0UPDATE: 0x0C (write to latch counter; advances + checks alarm)
             Registers.T0Update.Define(this)
                 .WithValueField(0, 30, name: "T0UPDATE_RESERVED")
                 .WithTag("T0UPDATE_RESERVED_30", 30, 1)
                 .WithFlag(31, name: "T0_UPDATE",
                     writeCallback: (_, value) =>
                     {
-                        // Any write triggers latch (per TRM: "After writing 0 or 1")
                         AdvanceTimer();
                         latchedCounter = timerCounter;
                         CheckAlarm();
                     },
-                    valueProviderCallback: _ => false); // always reads 0 (latch complete)
+                    valueProviderCallback: _ => false);
 
             // T0ALARMLO: 0x10
             Registers.T0AlarmLo.Define(this)
@@ -200,12 +187,7 @@ namespace Antmicro.Renode.Peripherals.Timers
 
             // --- Watchdog Timer registers ---
 
-            // WDTCONFIG0: 0x48
-            // [12]=APPCPU_RESET_EN, [13]=PROCPU_RESET_EN, [14]=FLASHBOOT_MOD_EN,
-            // [17:15]=SYS_RESET_LENGTH, [20:18]=CPU_RESET_LENGTH, [21]=USE_XTAL,
-            // [22]=CONF_UPDATE_EN, [24:23]=STG3, [26:25]=STG2, [28:27]=STG1,
-            // [30:29]=STG0, [31]=EN
-            Registers.WdtConfig0.Define(this, 0x0004C000) // FLASHBOOT_MOD_EN=1, SYS_RESET_LENGTH=1, CPU_RESET_LENGTH=1
+            Registers.WdtConfig0.Define(this, 0x0004C000)
                 .WithValueField(0, 12, name: "WDTCONFIG0_RESERVED_0_11")
                 .WithFlag(12, name: "WDT_APPCPU_RESET_EN")
                 .WithFlag(13, name: "WDT_PROCPU_RESET_EN")
@@ -220,35 +202,27 @@ namespace Antmicro.Renode.Peripherals.Timers
                 .WithValueField(29, 2, name: "WDT_STG0")
                 .WithFlag(31, name: "WDT_EN");
 
-            // WDTCONFIG1: 0x4C
-            // [0]=DIVCNT_RST(WT), [15:1]=reserved, [31:16]=CLK_PRESCALE
-            Registers.WdtConfig1.Define(this, 0x00010000) // CLK_PRESCALE=1
+            Registers.WdtConfig1.Define(this, 0x00010000)
                 .WithFlag(0, mode: FieldMode.Write, name: "WDT_DIVCNT_RST",
                     writeCallback: (_, value) => { if (value) this.Log(LogLevel.Debug, "WDT divider counter reset"); })
                 .WithValueField(1, 15, name: "WDTCONFIG1_RESERVED_1_15")
                 .WithValueField(16, 16, name: "WDT_CLK_PRESCALE");
 
-            // WDTCONFIG2: 0x50 (stage 0 timeout, default 26000000)
             Registers.WdtConfig2.Define(this, 0x018CBA80)
                 .WithValueField(0, 32, name: "WDT_STG0_HOLD");
 
-            // WDTCONFIG3: 0x54 (stage 1 timeout, default 0x07FFFFFF)
             Registers.WdtConfig3.Define(this, 0x07FFFFFF)
                 .WithValueField(0, 32, name: "WDT_STG1_HOLD");
 
-            // WDTCONFIG4: 0x58 (stage 2 timeout, default 0x000FFFFF)
             Registers.WdtConfig4.Define(this, 0x000FFFFF)
                 .WithValueField(0, 32, name: "WDT_STG2_HOLD");
 
-            // WDTCONFIG5: 0x5C (stage 3 timeout, default 0x000FFFFF)
             Registers.WdtConfig5.Define(this, 0x000FFFFF)
                 .WithValueField(0, 32, name: "WDT_STG3_HOLD");
 
-            // WDTFEED: 0x60
             Registers.WdtFeed.Define(this)
                 .WithValueField(0, 32, mode: FieldMode.Write, name: "WDT_FEED");
 
-            // WDTWPROTECT: 0x64 (write 0x50D83AA1 to unlock WDT registers)
             Registers.WdtWProtect.Define(this, 0x50D83AA1)
                 .WithValueField(0, 32, name: "WDT_WKEY",
                     writeCallback: (_, value) =>
@@ -263,74 +237,59 @@ namespace Antmicro.Renode.Peripherals.Timers
 
             // --- RTC Calibration registers ---
 
-            // RTCCALICFG: 0x68
-            // [12]=START_CYCLING, [14:13]=CLK_SEL, [15]=RDY(RO), [30:16]=MAX, [31]=START
-            Registers.RtcCaliCfg.Define(this, 0x00013000) // default: START_CYCLING=1, CLK_SEL=1
+            Registers.RtcCaliCfg.Define(this, 0x00013000)
                 .WithValueField(0, 12, name: "RTCCALICFG_RESERVED_0_11")
-                .WithFlag(12, name: "RTC_CALI_START_CYCLING")
+                .WithFlag(12, name: "RTC_CALI_START_CYCLING",
+                    writeCallback: (_, val) => { if (val) rtcCaliStarted = true; })
                 .WithValueField(13, 2, name: "RTC_CALI_CLK_SEL")
                 .WithFlag(15, mode: FieldMode.Read, name: "RTC_CALI_RDY",
-                    valueProviderCallback: _ => true) // always ready
+                    valueProviderCallback: _ => rtcCaliStarted)
                 .WithValueField(16, 15, name: "RTC_CALI_MAX")
-                .WithFlag(31, name: "RTC_CALI_START");
+                .WithFlag(31, name: "RTC_CALI_START",
+                    writeCallback: (_, val) => { if (val) rtcCaliStarted = true; });
 
-            // RTCCALICFG1: 0x6C
-            // [0]=CYCLING_DATA_VLD(RO), [31:7]=VALUE(RO)
             Registers.RtcCaliCfg1.Define(this)
                 .WithFlag(0, mode: FieldMode.Read, name: "RTC_CALI_CYCLING_DATA_VLD",
-                    valueProviderCallback: _ => true) // valid
+                    valueProviderCallback: _ => rtcCaliStarted)
                 .WithValueField(1, 6, name: "RTCCALICFG1_RESERVED_1_6")
                 .WithValueField(7, 25, mode: FieldMode.Read, name: "RTC_CALI_VALUE",
-                    valueProviderCallback: _ =>
-                    {
-                        // Return a reasonable calibration value.
-                        // For 8MHz internal RC vs XTAL: ~(8M/150kHz)*cycles
-                        // The Python stub returned 0x01000000 which is value=0x20000 at bits [31:7].
-                        // Use a value that indicates roughly correct clock ratio.
-                        return 0x20000u;
-                    });
+                    valueProviderCallback: _ => rtcCaliStarted ? 0x20000u : 0u);
 
             // --- Interrupt registers ---
 
-            // INT_ENA: 0x70 (bit 0 = T0, bit 1 = WDT)
             Registers.IntEna.Define(this)
                 .WithValueField(0, 2, name: "INT_ENA",
-                    writeCallback: (_, value) => intEna = (uint)value,
+                    writeCallback: (_, value) => { intEna = (uint)value; UpdateInterrupt(); },
                     valueProviderCallback: _ => intEna);
 
-            // INT_RAW: 0x74 (bit 0 = T0, bit 1 = WDT; read-only, set by hardware)
+            // INT_RAW: advance timer and check alarm before returning
             Registers.IntRaw.Define(this)
                 .WithValueField(0, 2, mode: FieldMode.Read, name: "INT_RAW",
-                    valueProviderCallback: _ => intRaw);
+                    valueProviderCallback: _ => { AdvanceTimer(); CheckAlarm(); return intRaw; });
 
-            // INT_ST: 0x78 (masked: RAW & ENA, read-only)
+            // INT_ST: advance timer and check alarm before returning
             Registers.IntSt.Define(this)
                 .WithValueField(0, 2, mode: FieldMode.Read, name: "INT_ST",
-                    valueProviderCallback: _ => intRaw & intEna);
+                    valueProviderCallback: _ => { AdvanceTimer(); CheckAlarm(); return intRaw & intEna; });
 
-            // INT_CLR: 0x7C (write-1-to-clear)
             Registers.IntClr.Define(this)
                 .WithValueField(0, 2, mode: FieldMode.Write, name: "INT_CLR",
-                    writeCallback: (_, value) => intRaw &= ~(uint)value);
+                    writeCallback: (_, value) => { intRaw &= ~(uint)value; UpdateInterrupt(); });
 
             // --- RTCCALICFG2: 0x80 ---
-            // [0]=TIMEOUT(RO), [6:3]=TIMEOUT_RST_CNT, [31:7]=TIMEOUT_THRES
-            Registers.RtcCaliCfg2.Define(this, 0xFFFFFF18) // default: RST_CNT=3, THRES=0x1FFFFFF
+            Registers.RtcCaliCfg2.Define(this, 0xFFFFFF18)
                 .WithFlag(0, mode: FieldMode.Read, name: "RTC_CALI_TIMEOUT",
-                    valueProviderCallback: _ => false) // no timeout
+                    valueProviderCallback: _ => false)
                 .WithValueField(1, 2, name: "RTCCALICFG2_RESERVED_1_2")
                 .WithValueField(3, 4, name: "RTC_CALI_TIMEOUT_RST_CNT")
                 .WithValueField(7, 25, name: "RTC_CALI_TIMEOUT_THRES");
 
             // --- Date and Clock registers ---
 
-            // NTIMERS_DATE: 0xF8 (version register, default 0x02006191 = 33579409)
             Registers.NTimersDate.Define(this, 0x02006191)
                 .WithValueField(0, 28, name: "NTIMGS_DATE");
 
-            // REGCLK: 0xFC (clock gate)
-            // [29]=WDT_CLK_IS_ACTIVE, [30]=TIMER_CLK_IS_ACTIVE, [31]=CLK_EN
-            Registers.RegClk.Define(this, 0x60000000) // default: WDT + timer clocks active
+            Registers.RegClk.Define(this, 0x60000000)
                 .WithValueField(0, 29, name: "REGCLK_RESERVED_0_28")
                 .WithFlag(29, name: "WDT_CLK_IS_ACTIVE")
                 .WithFlag(30, name: "TIMER_CLK_IS_ACTIVE")
@@ -355,6 +314,17 @@ namespace Antmicro.Renode.Peripherals.Timers
 
         // WDT state
         private uint wdtWriteProtect;
+
+        // RTC calibration state
+        private bool rtcCaliStarted;
+
+        private const ulong CounterMask = (1UL << 54) - 1; // 54-bit counter
+        // APB ticks advanced per register access (T0UPDATE write or INT_RAW read).
+        // At 80MHz APB with divider=1, 1000000 ticks ≈ 12.5ms per access.
+        // Large enough that alarms fire within 1-2 register reads, matching
+        // real hardware behavior where significant time passes between accesses.
+        // Counter values are timing-dependent and excluded from HW comparisons.
+        private const ulong TicksPerAccess = 1_000_000;
 
         private enum Registers : long
         {
