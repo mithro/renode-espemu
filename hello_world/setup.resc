@@ -27,7 +27,10 @@ sysbus LoadELF @/home/tim/github/mithro/renode-espemu/hello_world/firmware/hello
 sysbus LoadBinary @/home/tim/github/mithro/renode-espemu/hello_world/firmware/flash_header_128k.bin 0x3C000000
 sysbus LoadBinary @/home/tim/github/mithro/renode-espemu/hello_world/firmware/hello_world.bin 0x3C020000
 sysbus LoadBinary @/home/tim/github/mithro/renode-espemu/platforms/rom_data_segment.bin 0x3FF00000
-cpu SP 0x3FCE0000
+# SP must match ROM's value (0x3FCDE710) — NOT 0x3FCE0000.
+# call_start_cpu0 allocates 64 bytes on stack; at SP=0x3FCE0000 the frame
+# at 0x3FCDFFC0 overlaps rom_cache_internal_table_ptr at 0x3FCDFFD4.
+cpu SP 0x3FCDE710
 sysbus LoadBinary @/home/tim/github/mithro/renode-espemu/platforms/rom_func_stubs.bin 0x50001D00
 
 # Patch rom function tables and spiflash data after BSS clear
@@ -50,5 +53,3 @@ if request.IsRead:
 """
 cpu RegisterCSRHandlerFromString 0x802 $cycle_counter_handler
 
-# Re-patch rom_cache_internal_table_ptr after memprot init overwrites it
-cpu AddHook 0x403804E4 "machine.SystemBus.WriteDoubleWord(0x3FCDFFD4, 0x50001D00)"

@@ -33,7 +33,7 @@ sysbus LoadELF $firmware_elf
 sysbus LoadBinary @/home/tim/github/mithro/renode-espemu/hello_world/firmware/flash_header_128k.bin 0x3C000000
 sysbus LoadBinary $firmware_bin 0x3C020000
 sysbus LoadBinary @/home/tim/github/mithro/renode-espemu/platforms/rom_data_segment.bin 0x3FF00000
-cpu SP 0x3FCE0000
+cpu SP 0x3FCDE710
 sysbus LoadBinary @/home/tim/github/mithro/renode-espemu/platforms/rom_func_stubs.bin 0x50001D00
 
 # Patch rom function tables and spiflash data after BSS clear
