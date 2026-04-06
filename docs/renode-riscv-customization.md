@@ -135,21 +135,27 @@ interrupt matrix delivers it spuriously. Need to verify.
 
 ## 8. ROM Function Table Stubs
 
-**Current state:** Patch rom_phyFuns (0x3FCDF5B8) and
-rom_cache_internal_table_ptr (0x3FCDFFD4) after BSS clear with CPU hook
-at 0x40380338.
+**Status: ELIMINATED (2026-04-06)**
 
-**Root cause:** ROM ELF has BSS segments at address 0 which the firmware
-clears during startup. This zeroes out the ROM function table pointers.
-We patch them back after BSS clear.
+The CPU now starts at ROM `_init` (0x40001E90), which runs the CRT0
+`unpackloop` (data copy from IRAM to DRAM) and `clearloop` (BSS zero).
+This naturally initializes all ROM function table pointers:
+- `rom_phyFuns` (0x3FCDF5B8) — ROM PHY functions work with Python stubs
+- `rom_cache_internal_table_ptr` (0x3FCDFFD4) — works after FREEZE_DONE fix
+- `rom_spiflash_legacy_data` (0x3FCDFFF0) — works with SPI MEM peripheral
 
-**Approach to eliminate:** Instead of patching after BSS clear:
-- Option 1: Map the ROM function tables to a non-BSS address
-- Option 2: Pre-initialize the function table pointers in the ROM data segment
-- Option 3: Use a CPU hook at the ROM BSS clear routine to skip zeroing
-  the function table region
+**Root cause analysis:** The ROM ELF's IRAM LOAD segment ends at 0x40059590,
+but the CRT0 data-copy sources are at 0x40059590-0x40059AC4 (1332 bytes).
+These are in ELF sections but not LOAD segments, so `LoadELF` skips them.
+Loading `rom_iram_data.bin` at 0x40059590 provides this data.
 
-**Verdict:** Fixable with better ROM data initialization.
+The previous SP value (0x3FCE0000) caused the firmware's stack frame to
+overlap `rom_cache_internal_table_ptr` at 0x3FCDFFD4. Fixing SP to
+0x3FCDE710 (matching real ROM) eliminated this. The `ICACHE_FREEZE_DONE`
+bit fix in ExtMem allowed the ROM cache functions to work.
+
+See `tools/parse_rom_crt0_tables.py` and `tools/extract_rom_iram_data.py`
+for the CRT0 table analysis and data extraction tools.
 
 ## Summary: Workaround Status
 
@@ -157,9 +163,10 @@ We patch them back after BSS clear.
 |---|---|---|---|
 | W.1 | init_flash skip | **Eliminated** | SPI MEM C# + ROM spiflash data |
 | W.2 | Delay function skip | **Eliminated** | CSR 0x802 handler returns ExecutedInstructions |
-| W.3 | Memprot skip | **Eliminated** | Sensitive C# + ROM table re-patch after memprot |
+| W.3 | Memprot skip | **Eliminated** | Sensitive C# accepts PMS writes |
 | W.4 | Brownout ISR skip | **Eliminated** | RTC C# reports no brownout |
 | W.5 | Force MIE/MSTATUS | **Eliminated** | CLIC handles interrupt enable |
 | W.6 | Manual interrupt kick | **Eliminated** | CLIC delivers naturally |
 | W.7 | mcause override | **Eliminated** | CLIC sets mcause correctly |
+| W.8 | ROM function table stubs | **Eliminated** | ROM CRT0 + SP fix + FREEZE_DONE |
 | W.8 | ROM function tables | Active (minor) | BSS clear patch still needed |

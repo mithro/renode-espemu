@@ -10,27 +10,26 @@ register-level accuracy validated against real hardware.
 | Metric | Value |
 |---|---|
 | Boot progress | **Full** -- ROM init through FreeRTOS `app_main()` |
-| C# peripherals | 13 of 40 |
+| C# peripherals | 16 of 39 |
 | Per-feature test firmware | 120 (93 functional + 27 stub reset-value) |
 | HW vs Renode register match | 49/81 (60%, excluding expected diffs) |
-| Robot Framework tests | All passing |
-| Boot workarounds remaining | 0 (ROM table patch still needed) |
+| Robot Framework tests | 12 tests, all passing |
+| GitHub Actions CI | Passing (hello_world suite on all branches + PRs) |
+| Boot workarounds | **0** -- CPU starts at ROM `_init`, no patches |
 
-### Boot workarounds
+### Boot sequence
 
-These CPU hooks patch around gaps where Renode doesn't yet match real
-hardware. Each is a specific function or code path that gets skipped or
-fixed up at runtime:
+The CPU starts at the ROM reset vector (`_init` at 0x40001E90), matching
+real hardware. The ROM CRT0 runs fully:
 
-| Workaround | Status | Description |
-|---|---|---|
-| `delay` | **Eliminated** | Cycle counter CSR 0x802 returns cpu.ExecutedInstructions |
-| `memprot` | **Eliminated** | Sensitive C# accepts PMS writes; ROM table re-patched after |
-| `init_flash` | **Eliminated** | SPI MEM C# handles RDID + ROM spiflash data |
-| `brownout` | **Eliminated** | RTC C# correctly reports no brownout |
-| `MIE` | **Eliminated** | CLIC handles interrupt enable |
-| `kick` | **Eliminated** | CLIC delivers systimer interrupts naturally |
-| `mcause` | **Eliminated** | CLIC sets mcause = 0x80000000 \| cpu_line correctly |
+1. **HW init** -- CSR setup, mtvec, interrupt matrix, stack pointer
+2. **Data copy** (`unpackloop`) -- copies ROM data from IRAM to DRAM
+3. **BSS clear** (`clearloop`) -- zeroes ROM BSS sections
+4. **ROM main** -- redirected to firmware entry (we load firmware directly
+   rather than booting from flash)
+
+No `WriteDoubleWord`, no `cpu AddHook` for ROM data patching. All ROM
+function tables (PHY, cache, spiflash) use their original unmodified values.
 
 ### Interrupt delivery (CLIC)
 
@@ -39,9 +38,9 @@ specific CPU interrupt line number. Renode's built-in
 `CoreLocalInterruptController` provides this automatically:
 
 ```
-Peripheral → GPIO → IntMatrix (source mapping) → CLIC → CPU
-                                                   ↓
-                                          mcause = 0x80000000 | line
+Peripheral -> GPIO -> IntMatrix (source mapping) -> CLIC -> CPU
+                                                      |
+                                             mcause = 0x80000000 | line
 ```
 
 The platform uses `PrivilegedArchitecture.PrivUnratified` with CLIC
@@ -52,29 +51,32 @@ firmware's vector table entry point.
 
 ```
 renode-espemu/
++-- .github/workflows/    # GitHub Actions CI
 +-- peripherals/          # Peripheral implementations
+|   +-- assist-debug/     # C# peripheral
 |   +-- efuse/            # C# peripheral + test firmware + baselines
-|   +-- extmem/           # ...
-|   +-- gpio/
-|   +-- interrupt-matrix/
-|   +-- iomux/
-|   +-- rng/
-|   +-- rtc/
-|   +-- sensitive/
-|   +-- spi-flash/
-|   +-- stubs/            # 27 Python stub peripherals
-|   +-- system/
-|   +-- systimer/
-|   +-- timer-group/
-|   +-- uart/
+|   +-- extmem/           # C# peripheral + test firmware + baselines
+|   +-- gdma/             # C# peripheral
+|   +-- gpio/             # C# peripheral + test firmware + baselines
+|   +-- interrupt-matrix/ # C# peripheral + test firmware + baselines
+|   +-- iomux/            # C# peripheral
+|   +-- mmu/              # C# peripheral
+|   +-- rng/              # C# peripheral + test firmware + baselines
+|   +-- rtc/              # C# peripheral + test firmware + baselines
+|   +-- sensitive/        # C# peripheral
+|   +-- spi-flash/        # C# peripheral
+|   +-- stubs/            # Python stub peripherals
+|   +-- system/           # C# peripheral + test firmware + baselines
+|   +-- systimer/         # C# peripheral + test firmware + baselines
+|   +-- timer-group/      # C# peripheral + test firmware + baselines
+|   +-- uart/             # C# peripheral + test firmware + baselines
 +-- platforms/
 |   +-- cpus/esp32c3.repl  # Renode platform description
-|   +-- rom_data_segment.bin
-|   +-- rom_func_stubs.bin
+|   +-- rom_data_segment.bin  # ROM data bus segment (0x3FF00000)
+|   +-- rom_iram_data.bin     # ROM CRT0 data-copy sources (0x40059590)
 +-- hello_world/           # Full boot demo (ELF, Robot tests)
 +-- tests/                 # Robot Framework test infrastructure
-+-- scripts/               # CI, build, capture, and comparison tools
-+-- tools/                 # Additional Python tooling
++-- tools/                 # Python tooling (build, capture, compare, CI)
 +-- docs/                  # Architecture docs and peripheral references
 ```
 
@@ -96,7 +98,7 @@ peripherals/<name>/
     +-- renode/<test>.log      # Captured from Renode simulation
 ```
 
-## C# peripherals (13 implemented)
+## C# peripherals (16 implemented)
 
 | # | Peripheral | Address | Registers | Tests | Description |
 |---|---|---|---|---|---|
@@ -108,13 +110,16 @@ peripherals/<name>/
 | 6 | SYSTEM (DPORT) | `0x600C0000` | 40 | 8 | Clock gating, reset, FROM_CPU interrupts |
 | 7 | RNG / SYSCON | `0x60026000` | 39 | 6 | PRNG, WiFi/BT clock control |
 | 8 | GPIO | `0x60004000` | 199 | 10 | 26 pins, output/input, interrupts, muxing |
-| 9 | ExtMem (Cache) | `0x600C4000` | 66 | 10 | ICache control, MMU, preload/sync |
+| 9 | ExtMem (Cache) | `0x600C4000` | 66 | 10 | ICache control, MMU, preload/sync, freeze |
 | 10 | UART0 | `0x60000000` | 33 | 10 | Serial TX/RX with interrupt support |
 | 11 | IO MUX | `0x60009000` | 23 | 3 | Pin function select, pull-up/down, drive |
 | 12 | SPI MEM | `0x60002000` | ~30 | -- | Flash controller (RDID, status, data buffer) |
 | 13 | Sensitive (PMS) | `0x600C1000` | 94 | -- | Permission management / memory protection |
+| 14 | GDMA | `0x6003F000` | 60+ | -- | 3-channel DMA controller (register storage) |
+| 15 | Assist Debug | `0x600CE000` | 40 | -- | SP monitoring, PC recording, exception logging |
+| 16 | MMU Table | `0x600C5000` | 128 | -- | ICache/DCache page table (128 entries) |
 
-## Python stub peripherals (27 remaining)
+## Python stub peripherals (23 remaining)
 
 Minimal placeholders that return reset values and log accesses. Each has a
 reset-value test firmware that reads 16 registers to establish ground truth
@@ -125,13 +130,11 @@ for future C# implementations.
 | Communication | UART1, I2C, SPI2, UHCI0, TWAI, I2S |
 | Wireless | FE, FE2, NRX, BB |
 | Crypto | AES, SHA, RSA, Digital Signature, HMAC, XTS-AES |
-| DMA | GDMA |
 | Analog | RTC I2C, APB SAR ADC |
 | Storage | SPI0 |
 | Peripheral | RMT, LEDC |
-| Memory | MMU Table |
 | Security | World Controller |
-| Debug | USB Serial/JTAG, Assist Debug |
+| Debug | USB Serial/JTAG |
 
 ## Validation methodology
 
@@ -148,38 +151,37 @@ and a real ESP32-C3 chip:
 
 ## Prerequisites
 
-- [Renode](https://renode.io/) (latest)
+- [Renode](https://renode.io/) (v1.16.1+)
 - [ESP-IDF](https://docs.espressif.com/projects/esp-idf/en/stable/esp32c3/get-started/)
-  v5.4.1 at `~/esp/esp-idf`
+  v5.4.1 at `~/esp/esp-idf` (for building test firmware)
 - [uv](https://docs.astral.sh/uv/) for Python tooling
 - ESP32-C3 ROM ELF at `~/esp/esp-rom-elfs/esp32c3_rev3_rom.elf`
+  (from [espressif/esp-rom-elfs](https://github.com/espressif/esp-rom-elfs/releases))
 
 ## Quick start
 
 Run the hello world demo in Renode:
 
 ```bash
-renode hello_world/setup.resc
-# In Renode monitor:
-start
-```
-
-Build all test firmware:
-
-```bash
-uv run scripts/build_all_firmware.py
+renode hello_world/boot.resc
 ```
 
 Run Robot Framework tests:
 
 ```bash
-uv run scripts/run_renode_tests.py
+uv run tools/run_renode_tests.py
+```
+
+Build all test firmware (requires ESP-IDF):
+
+```bash
+uv run tools/build_all_firmware.py
 ```
 
 Compare hardware vs Renode baselines:
 
 ```bash
-uv run scripts/compare_all_baselines.py -v
+uv run tools/compare_all_baselines.py -v
 ```
 
 ## Documentation
@@ -194,3 +196,4 @@ See [`docs/`](docs/) for detailed documentation:
 - [Test station hardware](docs/06-test-station-hardware.md) -- rpi4-esp board inventory
 - [Peripheral status](docs/peripheral-status.md) -- detailed per-peripheral implementation state
 - [Peripheral test plan](docs/peripheral-test-plan.md) -- test conventions and per-feature breakdown
+- [RISC-V customization](docs/renode-riscv-customization.md) -- CSR handlers, CLIC, ROM CRT0 analysis
