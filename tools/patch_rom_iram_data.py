@@ -22,9 +22,9 @@ IRAM_BASE = 0x40059590
 # DRAM addr → IRAM source addr → binary offset
 PATCHES = [
     # (name, iram_addr, new_value)
-    ("rom_phyFuns",                 0x40059A94, 0x50001D00),  # PHY stubs
-    ("rom_cache_internal_table_ptr", 0x4005964C, 0x50001D00),  # cache stubs
-    ("rom_spiflash_legacy_data[0]", 0x40059658, 0x50001E00),  # spiflash data
+    ("rom_phyFuns",                 0x40059A94, 0x50001D00),  # PHY stubs (ROM PHY functions crash)
+    ("rom_cache_internal_table_ptr", 0x4005964C, 0x50001D00),  # cache stubs (ROM table causes reboot)
+    # spiflash_legacy keeps original ROM value (0x3FCDF5C0) — works with SPI MEM
 ]
 
 

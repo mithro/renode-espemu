@@ -31,14 +31,13 @@ sysbus LoadBinary @/home/tim/github/mithro/renode-espemu/platforms/rom_data_segm
 # call_start_cpu0 allocates 64 bytes on stack; at SP=0x3FCE0000 the frame
 # at 0x3FCDFFC0 overlaps rom_cache_internal_table_ptr at 0x3FCDFFD4.
 cpu SP 0x3FCDE710
+sysbus LoadBinary @/home/tim/github/mithro/renode-espemu/platforms/rom_iram_data.bin 0x40059590
 sysbus LoadBinary @/home/tim/github/mithro/renode-espemu/platforms/rom_func_stubs.bin 0x50001D00
 
-# Restore ROM DRAM pointers after firmware BSS clear (they're zero because
-# the ROM CRT0 never runs — CPU starts at firmware entry, not ROM _init).
-# rom_phyFuns → stub (ROM PHY functions crash accessing wireless HW)
-# cache_table_ptr → original ROM value (0x3FF1E434, slower but works)
-# spiflash_legacy → original ROM value (0x3FCDF5C0, works with SPI MEM)
-cpu AddHook 0x40380338 "machine.SystemBus.WriteDoubleWord(0x3FCDF5B8, 0x50001D00); machine.SystemBus.WriteDoubleWord(0x3FCDFFD4, 0x50001D00); machine.SystemBus.WriteDoubleWord(0x3FCDFFF0, 0x3FCDF5C0)"
+# Initialize ROM DRAM pointers (static, no hooks needed with correct SP)
+sysbus WriteDoubleWord 0x3FCDF5B8 0x50001D00
+sysbus WriteDoubleWord 0x3FCDFFD4 0x50001D00
+sysbus WriteDoubleWord 0x3FCDFFF0 0x3FCDF5C0
 
 # Cycle counter CSR 0x802: returns cpu.ExecutedInstructions for delay functions
 set cycle_counter_handler

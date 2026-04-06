@@ -12,6 +12,8 @@ cpu: CPU.RiscV32 @ sysbus
     privilegedArchitecture: PrivilegedArchitecture.PrivUnratified
     timeProvider: clint
     init:
+        // ROM _init writes csrw 0x000 (USTATUS) — must not trap
+        RegisterCustomCSR "USTATUS" 0x000 Machine
         RegisterCustomCSR "MPCER" 0x7E2 Machine
         RegisterCustomCSR "MPCMR" 0x7E3 Machine
         RegisterCustomCSR "PMAADDR0" 0x800 Machine
