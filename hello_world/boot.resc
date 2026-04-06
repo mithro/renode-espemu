@@ -27,8 +27,6 @@ sysbus LoadBinary $base/hello_world/firmware/flash_header_128k.bin 0x3C000000
 sysbus LoadBinary $base/hello_world/firmware/hello_world.bin 0x3C020000
 sysbus LoadBinary $base/platforms/rom_data_segment.bin 0x3FF00000
 # ROM CRT0 data-copy sources (IRAM gap not in LOAD segments).
-# Patched: phyFuns → 0x50001D00 (stub), cache_table → 0x50001D00 (stub).
-# See tools/extract_rom_iram_data.py and tools/patch_rom_iram_data.py.
 sysbus LoadBinary $base/platforms/rom_iram_data.bin 0x40059590
 
 

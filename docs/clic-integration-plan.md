@@ -69,14 +69,6 @@ pre-configured CLIC interrupts firing during ROM init).
 4. Set `cpu WfiAsNop true` to avoid idle loop hangs
 5. CLIC + SYSTIMER deliver interrupts naturally — no manual kick needed
 
-## Workarounds Eliminated
-
-| Workaround | How CLIC eliminates it |
-|---|---|
-| W.5 MIE force | Firmware sets MSTATUS.MIE during init; CLIC handles per-interrupt enable |
-| W.6 Manual kick | SYSTIMER fires naturally through intmatrix → CLIC → CPU |
-| W.7 mcause hook | CLIC sets mcause = 0x80000000 \| cpu_line automatically |
-
 ## Key Technical Findings
 
 ### mtvec must be set via Renode API, not csrw

@@ -16,7 +16,7 @@
 | Robot Framework test suites | 8 (12 test cases, all passing) |
 | GitHub Actions CI | Passing (hello_world suite on all branches + PRs) |
 | Python stubs remaining | 23 |
-| Boot workarounds | **0** — CPU starts at ROM `_init`, all ROM data unmodified |
+| Boot | Hardware-like — CPU starts at ROM `_init`, no patches |
 
 ## C# Peripherals (16 Implemented)
 
@@ -86,23 +86,13 @@ ground truth for future C# implementations.
 The CPU starts at the ROM reset vector (`_init` at 0x40001E90). The ROM
 CRT0 runs fully, initializing all DRAM data structures from IRAM sources.
 At the jump to ROM `main`, execution redirects to the firmware entry point
-(`call_start_cpu0`). This is the only non-hardware-like hook.
+(`call_start_cpu0`) since we load firmware directly rather than booting
+from flash.
 
 All ROM function tables use original unmodified values:
 - `rom_phyFuns` -- ROM PHY functions work with Python stubs for FE/FE2/NRX/BB
-- `rom_cache_internal_table_ptr` -- ROM cache functions work (ICACHE_FREEZE_DONE fix)
+- `rom_cache_internal_table_ptr` -- ROM cache functions work with ExtMem peripheral
 - `rom_spiflash_legacy_data` -- original ROM spiflash data works with SPI MEM
-
-| # | Previous workaround | Status |
-|---|---|---|
-| 1 | ~~Patch init_flash to return ESP_OK~~ | **Eliminated** -- SPI MEM C# + ROM data |
-| 2 | ~~Skip delay functions (cycle counter)~~ | **Eliminated** -- CSR 0x802 handler |
-| 3 | ~~Skip memprot section~~ | **Eliminated** -- Sensitive C# accepts PMS writes |
-| 4 | ~~Skip brownout ISR~~ | **Eliminated** -- RTC C# reports no brownout |
-| 5 | ~~Force MIE/MSTATUS enable~~ | **Eliminated** -- CLIC handles enable |
-| 6 | ~~Single manual interrupt kick~~ | **Eliminated** -- CLIC delivers naturally |
-| 7 | ~~mcause override hook~~ | **Eliminated** -- CLIC sets mcause correctly |
-| 8 | ~~ROM function table stubs~~ | **Eliminated** -- ROM CRT0 + FREEZE_DONE fix |
 
 ## CI Pipeline
 

@@ -15,7 +15,7 @@ register-level accuracy validated against real hardware.
 | HW vs Renode register match | 49/81 (60%, excluding expected diffs) |
 | Robot Framework tests | 12 tests, all passing |
 | GitHub Actions CI | Passing (hello_world suite on all branches + PRs) |
-| Boot workarounds | **0** -- CPU starts at ROM `_init`, no patches |
+| Boot | Hardware-like -- CPU starts at ROM `_init`, no patches |
 
 ### Boot sequence
 

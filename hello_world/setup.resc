@@ -1,5 +1,5 @@
 ## ESP32-C3 hello_world setup script (used by test.robot)
-## Loads firmware and configures workarounds; does NOT start emulation.
+## Loads firmware and configures emulation; does NOT start emulation.
 ## The Boot And Kick keyword in test.robot handles CLIC setup and boot phases.
 
 $base?="/home/tim/github/mithro/renode-espemu"

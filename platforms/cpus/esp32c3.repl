@@ -36,14 +36,9 @@ clic: IRQControllers.CoreLocalInterruptController @ {
     supervisorLevelBits: 0
     modeBits: 0
 
-// === WORKAROUND MEMORY ===
-
-// Null-pointer dereference guard: ROM code (rom_i2c_writeReg_Mask) reads
-// through a function table pointer (rom_phyFuns at 0x3FCDF5B8) that is
-// uninitialised (zero) in emulation. This causes reads from low addresses
-// (0x0-0x1FFF) and eventual jump to PC=0x0. Mapping a small region here
-// prevents CPU abort and lets the firmware continue past these calls.
-// TODO: Replace with proper rom_phyFuns initialisation when PHY stubs are added.
+// Low address guard: prevents CPU abort on null-pointer dereferences.
+// ROM PHY init (rom_i2c_writeReg_Mask) may read through stale pointers
+// during early startup before all function tables are fully initialised.
 null_guard: Memory.MappedMemory @ sysbus 0x0
     size: 0x2000
 
@@ -96,10 +91,9 @@ rtc_slow: Memory.MappedMemory @ sysbus 0x50000000
 // C# UART extending UARTBase — works with Renode Terminal Tester
 uart0: UART.ESP32C3_UART @ sysbus 0x60000000
 
-// === STUB PERIPHERALS ===
-// Python catch-all peripherals for unimplemented register ranges.
-// These return 0 on read, absorb writes, and log all accesses.
-// As real peripherals are implemented, they replace these stubs.
+// === PLACEHOLDER PERIPHERALS ===
+// Python peripherals for unimplemented register ranges.
+// Return 0 on read, absorb writes. Replaced with C# as implemented.
 
 // SPI1 (flash controller) at 0x60002000
 // C# peripheral: minimal SPI MEM for flash init (RDID, JEDEC ID)
