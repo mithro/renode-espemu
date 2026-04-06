@@ -38,6 +38,10 @@ sysbus LoadBinary @/home/tim/github/mithro/renode-espemu/platforms/rom_func_stub
 # rom_phyFuns → stub (PHY functions access unimplemented wireless HW)
 # cache_table_ptr → stub (ROM cache table at 0x3FF1E434 has broken function refs)
 # spiflash_legacy → original ROM pointer (works with SPI MEM peripheral)
+# Patch ROM function table pointers after firmware BSS clear.
+# rom_phyFuns → stub (PHY functions access unimplemented wireless HW)
+# cache_table_ptr → stub (ROM cache table at 0x3FF1E434 has broken function refs)
+# spiflash_legacy → original ROM pointer (works with SPI MEM peripheral)
 cpu AddHook 0x40380338 "machine.SystemBus.WriteDoubleWord(0x3FCDF5B8, 0x50001D00); machine.SystemBus.WriteDoubleWord(0x3FCDFFD4, 0x50001D00); machine.SystemBus.WriteDoubleWord(0x3FCDFFF0, 0x3FCDF5C0)"
 
 # Cycle counter CSR 0x802: returns cpu.ExecutedInstructions for delay functions
