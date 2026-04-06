@@ -33,14 +33,17 @@ sysbus LoadELF $firmware_elf
 sysbus LoadBinary @/home/tim/github/mithro/renode-espemu/hello_world/firmware/flash_header_128k.bin 0x3C000000
 sysbus LoadBinary $firmware_bin 0x3C020000
 sysbus LoadBinary @/home/tim/github/mithro/renode-espemu/platforms/rom_data_segment.bin 0x3FF00000
-cpu SP 0x3FCDE710
 sysbus LoadBinary @/home/tim/github/mithro/renode-espemu/platforms/rom_iram_data.bin 0x40059590
 sysbus LoadBinary @/home/tim/github/mithro/renode-espemu/platforms/rom_func_stubs.bin 0x50001D00
 
-# Initialize ROM DRAM pointers (static, no hooks needed with correct SP)
-sysbus WriteDoubleWord 0x3FCDF5B8 0x50001D00
-sysbus WriteDoubleWord 0x3FCDFFD4 0x50001D00
-sysbus WriteDoubleWord 0x3FCDFFF0 0x3FCDF5C0
+# Start at ROM _init — CRT0 initializes DRAM naturally
+cpu PC 0x40001E90
+set skip_rom_main
+"""
+from Antmicro.Renode.Peripherals.CPU import RegisterValue
+cpu.PC = RegisterValue.Create(0x403802DC, 32)
+"""
+cpu AddHook 0x40047E3C $skip_rom_main
 
 # Cycle counter CSR 0x802: returns cpu.ExecutedInstructions for delay functions
 set cycle_counter_handler

@@ -23,19 +23,23 @@ sysbus LoadELF @/home/tim/github/mithro/renode-espemu/hello_world/firmware/hello
 sysbus LoadBinary @/home/tim/github/mithro/renode-espemu/hello_world/firmware/flash_header_128k.bin 0x3C000000
 sysbus LoadBinary @/home/tim/github/mithro/renode-espemu/hello_world/firmware/hello_world.bin 0x3C020000
 sysbus LoadBinary @/home/tim/github/mithro/renode-espemu/platforms/rom_data_segment.bin 0x3FF00000
-cpu SP 0x3FCDE710
+# ROM CRT0 data-copy sources (IRAM gap not in LOAD segments).
+# Patched: phyFuns → 0x50001D00 (stub), cache_table → 0x50001D00 (stub).
+# See tools/extract_rom_iram_data.py and tools/patch_rom_iram_data.py.
 sysbus LoadBinary @/home/tim/github/mithro/renode-espemu/platforms/rom_iram_data.bin 0x40059590
 sysbus LoadBinary @/home/tim/github/mithro/renode-espemu/platforms/rom_func_stubs.bin 0x50001D00
 
-# Initialize ROM DRAM pointers directly (no hooks needed).
-# The firmware BSS clear doesn't touch 0x3FCD range, and SP=0x3FCDE710
-# (set by ROM _init on real HW) keeps the stack below these addresses.
-# rom_phyFuns: stub (ROM PHY functions crash accessing wireless HW)
-sysbus WriteDoubleWord 0x3FCDF5B8 0x50001D00
-# rom_cache_internal_table_ptr: stub (ROM cache table causes firmware reboot)
-sysbus WriteDoubleWord 0x3FCDFFD4 0x50001D00
-# rom_spiflash_legacy_data: original ROM pointer (works with SPI MEM)
-sysbus WriteDoubleWord 0x3FCDFFF0 0x3FCDF5C0
+# Start CPU at ROM _init — matches real hardware reset vector.
+# ROM CRT0 runs: HW init, unpackloop (DRAM data copy), clearloop (BSS zero).
+# At the jump to ROM main (flash boot), redirect to firmware entry since
+# we load firmware directly rather than booting from flash.
+cpu PC 0x40001E90
+set skip_rom_main
+"""
+from Antmicro.Renode.Peripherals.CPU import RegisterValue
+cpu.PC = RegisterValue.Create(0x403802DC, 32)
+"""
+cpu AddHook 0x40047E3C $skip_rom_main
 
 # Cycle counter CSR 0x802: returns cpu.ExecutedInstructions for delay functions
 set cycle_counter_handler
