@@ -339,11 +339,14 @@ namespace Antmicro.Renode.Peripherals.Miscellaneous
 
             // ICACHE_FREEZE_REG: 0xCC
             // bit 0 = FREEZE_ENA, bit 1 = FREEZE_MODE, bit 2 = FREEZE_DONE (RO)
+            // ROM Cache_Freeze_ICache_Enable spins on FREEZE_DONE after setting ENA.
             Registers.ICacheFreeze.Define(this)
-                .WithFlag(0, name: "ICACHE_FREEZE_ENA")
+                .WithFlag(0, name: "ICACHE_FREEZE_ENA",
+                    writeCallback: (_, val) => icacheFreezeEna = val,
+                    valueProviderCallback: _ => icacheFreezeEna)
                 .WithFlag(1, name: "ICACHE_FREEZE_MODE")
                 .WithFlag(2, mode: FieldMode.Read, name: "ICACHE_FREEZE_DONE",
-                    valueProviderCallback: _ => false)
+                    valueProviderCallback: _ => icacheFreezeEna)
                 .WithReservedBits(3, 29);
 
             // ICACHE_ATOMIC_OPERATE_ENA_REG: 0xD0
@@ -492,5 +495,7 @@ namespace Antmicro.Renode.Peripherals.Miscellaneous
             ClockGate = 0x100,
             Date = 0x3FC,
         }
+
+        private bool icacheFreezeEna;
     }
 }

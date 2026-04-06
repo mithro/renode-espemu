@@ -23,7 +23,7 @@ IRAM_BASE = 0x40059590
 PATCHES = [
     # (name, iram_addr, new_value)
     ("rom_phyFuns",                 0x40059A94, 0x50001D00),  # PHY stubs (ROM PHY functions crash)
-    ("rom_cache_internal_table_ptr", 0x4005964C, 0x50001D00),  # cache stubs (ROM table causes reboot)
+    # cache_table_ptr keeps original ROM value (0x3FF1E434) — works with FREEZE_DONE fix
     # spiflash_legacy keeps original ROM value (0x3FCDF5C0) — works with SPI MEM
 ]
 
