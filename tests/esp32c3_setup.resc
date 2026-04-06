@@ -34,7 +34,7 @@ sysbus LoadBinary @/home/tim/github/mithro/renode-espemu/hello_world/firmware/fl
 sysbus LoadBinary $firmware_bin 0x3C020000
 sysbus LoadBinary @/home/tim/github/mithro/renode-espemu/platforms/rom_data_segment.bin 0x3FF00000
 sysbus LoadBinary @/home/tim/github/mithro/renode-espemu/platforms/rom_iram_data.bin 0x40059590
-sysbus LoadBinary @/home/tim/github/mithro/renode-espemu/platforms/rom_func_stubs.bin 0x50001D00
+
 
 # Start at ROM _init — CRT0 initializes DRAM naturally
 cpu PC 0x40001E90
@@ -52,6 +52,3 @@ if request.IsRead:
     request.Value = cpu.ExecutedInstructions
 """
 cpu RegisterCSRHandlerFromString 0x802 $cycle_counter_handler
-
-# Re-patch rom_cache_internal_table_ptr after memprot init overwrites it
-cpu AddHook 0x403804E4 "machine.SystemBus.WriteDoubleWord(0x3FCDFFD4, 0x50001D00)"

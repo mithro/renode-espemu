@@ -1,14 +1,14 @@
 #!/usr/bin/env python3
 """Patch rom_iram_data.bin to redirect ROM function pointers to stubs.
 
-The ROM CRT0 copies initialization data from IRAM to DRAM. By patching
-the IRAM source values, the CRT0 naturally initializes DRAM with our
-stub addresses — no runtime hooks needed.
+Currently: NO patches needed. All ROM function tables work with the
+existing peripheral implementations:
+- rom_phyFuns: ROM PHY functions work with Python stubs for FE/FE2/NRX/BB
+- rom_cache_internal_table_ptr: ROM cache functions work with FREEZE_DONE fix
+- rom_spiflash_legacy_data: original ROM spiflash data works with SPI MEM
 
-Three pointers need redirection:
-1. rom_phyFuns (0x3FCDF5B8) → 0x50001D00 (PHY stubs)
-2. rom_cache_internal_table_ptr (0x3FCDFFD4) → 0x50001D00 (cache stubs)
-3. rom_spiflash_legacy_data[0] (0x3FCDFFF0) → 0x50001E00 (spiflash data)
+This script exists for reference and can be used if future changes
+require redirecting specific ROM function pointers to stubs.
 """
 
 import struct
@@ -18,17 +18,15 @@ REPO_ROOT = Path(__file__).resolve().parent.parent
 BINARY = REPO_ROOT / "platforms" / "rom_iram_data.bin"
 IRAM_BASE = 0x40059590
 
-# Mapping from copy table analysis:
-# DRAM addr → IRAM source addr → binary offset
-PATCHES = [
-    # (name, iram_addr, new_value)
-    ("rom_phyFuns",                 0x40059A94, 0x50001D00),  # PHY stubs (ROM PHY functions crash)
-    # cache_table_ptr keeps original ROM value (0x3FF1E434) — works with FREEZE_DONE fix
-    # spiflash_legacy keeps original ROM value (0x3FCDF5C0) — works with SPI MEM
-]
+# No patches needed — all ROM function tables work as-is
+PATCHES = []
 
 
 def main():
+    if not PATCHES:
+        print("No patches needed — rom_iram_data.bin uses pure ROM data")
+        return
+
     data = bytearray(BINARY.read_bytes())
 
     for name, iram_addr, new_val in PATCHES:

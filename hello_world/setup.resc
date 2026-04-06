@@ -28,7 +28,7 @@ sysbus LoadBinary @/home/tim/github/mithro/renode-espemu/hello_world/firmware/fl
 sysbus LoadBinary @/home/tim/github/mithro/renode-espemu/hello_world/firmware/hello_world.bin 0x3C020000
 sysbus LoadBinary @/home/tim/github/mithro/renode-espemu/platforms/rom_data_segment.bin 0x3FF00000
 sysbus LoadBinary @/home/tim/github/mithro/renode-espemu/platforms/rom_iram_data.bin 0x40059590
-sysbus LoadBinary @/home/tim/github/mithro/renode-espemu/platforms/rom_func_stubs.bin 0x50001D00
+
 
 # Start at ROM _init — CRT0 initializes DRAM naturally
 cpu PC 0x40001E90

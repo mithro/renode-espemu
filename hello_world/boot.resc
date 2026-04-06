@@ -27,7 +27,7 @@ sysbus LoadBinary @/home/tim/github/mithro/renode-espemu/platforms/rom_data_segm
 # Patched: phyFuns → 0x50001D00 (stub), cache_table → 0x50001D00 (stub).
 # See tools/extract_rom_iram_data.py and tools/patch_rom_iram_data.py.
 sysbus LoadBinary @/home/tim/github/mithro/renode-espemu/platforms/rom_iram_data.bin 0x40059590
-sysbus LoadBinary @/home/tim/github/mithro/renode-espemu/platforms/rom_func_stubs.bin 0x50001D00
+
 
 # Start CPU at ROM _init — matches real hardware reset vector.
 # ROM CRT0 runs: HW init, unpackloop (DRAM data copy), clearloop (BSS zero).
@@ -48,12 +48,6 @@ if request.IsRead:
     request.Value = cpu.ExecutedInstructions
 """
 cpu RegisterCSRHandlerFromString 0x802 $cycle_counter_handler
-
-# Re-patch rom_cache_internal_table_ptr after memprot init overwrites it.
-# The memprot code (0x403804B2–0x403804E4) runs the PMS configuration which
-# also writes to DRAM, overwriting the ROM table stub installed at 0x40380338.
-# This hook fires immediately after memprot returns and restores the pointer.
-cpu AddHook 0x403804E4 "machine.SystemBus.WriteDoubleWord(0x3FCDFFD4, 0x50001D00)"
 
 # Boot with CLIC present but unconfigured
 start
