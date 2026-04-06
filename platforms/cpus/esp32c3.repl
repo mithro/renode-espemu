@@ -36,12 +36,6 @@ clic: IRQControllers.CoreLocalInterruptController @ {
     supervisorLevelBits: 0
     modeBits: 0
 
-// Low address guard: prevents CPU abort on null-pointer dereferences.
-// ROM PHY init (rom_i2c_writeReg_Mask) may read through stale pointers
-// during early startup before all function tables are fully initialised.
-null_guard: Memory.MappedMemory @ sysbus 0x0
-    size: 0x2000
-
 // === MEMORY REGIONS ===
 
 // Internal SRAM (used as both IRAM and DRAM)
