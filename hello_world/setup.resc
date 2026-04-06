@@ -34,16 +34,11 @@ cpu SP 0x3FCDE710
 sysbus LoadBinary @/home/tim/github/mithro/renode-espemu/platforms/rom_func_stubs.bin 0x50001D00
 
 # Patch rom function tables and spiflash data after BSS clear
-cpu AddHook 0x40380338 "machine.SystemBus.WriteDoubleWord(0x3FCDF5B8, 0x50001D00); machine.SystemBus.WriteDoubleWord(0x3FCDFFD4, 0x50001D00); machine.SystemBus.WriteDoubleWord(0x3FCDFFF0, 0x50001E00)"
-
-# Pre-populate rom_spiflash_legacy_data at 0x50001E00
-sysbus WriteDoubleWord 0x50001E00 0x001640EF
-sysbus WriteDoubleWord 0x50001E04 0x00400000
-sysbus WriteDoubleWord 0x50001E08 0x00010000
-sysbus WriteDoubleWord 0x50001E0C 0x00001000
-sysbus WriteDoubleWord 0x50001E10 0x00000100
-sysbus WriteDoubleWord 0x50001E14 0x0000FFFF
-sysbus WriteDoubleWord 0x50001E18 0x00000000
+# Patch ROM function table pointers after firmware BSS clear.
+# rom_phyFuns → stub (PHY functions access unimplemented wireless HW)
+# cache_table_ptr → stub (ROM cache table at 0x3FF1E434 has broken function refs)
+# spiflash_legacy → original ROM pointer (works with SPI MEM peripheral)
+cpu AddHook 0x40380338 "machine.SystemBus.WriteDoubleWord(0x3FCDF5B8, 0x50001D00); machine.SystemBus.WriteDoubleWord(0x3FCDFFD4, 0x50001D00); machine.SystemBus.WriteDoubleWord(0x3FCDFFF0, 0x3FCDF5C0)"
 
 # Cycle counter CSR 0x802: returns cpu.ExecutedInstructions for delay functions
 set cycle_counter_handler
