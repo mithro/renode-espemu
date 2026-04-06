@@ -1,11 +1,12 @@
 #!/usr/bin/env python3
-"""Run all Robot Framework tests in Renode and capture structured output.
+"""Run all Robot Framework tests in Renode.
 
 Usage:
-    uv run tools/run_renode_tests.py [--capture]
+    uv run tools/run_renode_tests.py
 
-With --capture, also saves the full UART output from each test to
-peripherals/<name>/baselines/renode.log for comparison with hardware.
+Environment variables:
+    RENODE_ESPEMU_BASE  - repo root (auto-detected if not set)
+    ROM_ELF             - path to esp32c3_rev3_rom.elf
 """
 
 import os
@@ -15,6 +16,9 @@ from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 RENODE_TEST_VENV = Path.home() / ".venvs" / "renode-test"
+
+# Default ROM ELF location
+DEFAULT_ROM_ELF = Path.home() / "esp" / "esp-rom-elfs" / "esp32c3_rev3_rom.elf"
 
 # All Robot test files
 ROBOT_TESTS = [
@@ -33,16 +37,30 @@ def run_all_tests() -> int:
     env = os.environ.copy()
     env["PATH"] = f"{RENODE_TEST_VENV / 'bin'}:{env['PATH']}"
 
+    # Auto-detect paths
+    base = os.environ.get("RENODE_ESPEMU_BASE", str(REPO_ROOT))
+    rom_elf = os.environ.get("ROM_ELF", str(DEFAULT_ROM_ELF))
+
+    if not Path(rom_elf).exists():
+        print(f"ERROR: ROM ELF not found: {rom_elf}")
+        print("Set ROM_ELF environment variable to the correct path")
+        return 1
+
     test_args = [str(t) for t in ROBOT_TESTS if t.exists()]
     if not test_args:
         print("ERROR: No Robot test files found")
         return 1
 
     print(f"Running {len(test_args)} test suites...")
+    print(f"  Base: {base}")
+    print(f"  ROM ELF: {rom_elf}")
     print()
 
     result = subprocess.run(
-        ["renode-test"] + test_args,
+        ["renode-test",
+         "--variable", f"BASE:{base}",
+         "--variable", f"ROM_ELF:{rom_elf}",
+         ] + test_args,
         cwd=str(REPO_ROOT),
         env=env,
     )

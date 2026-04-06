@@ -2,32 +2,35 @@
 ## Loads firmware and configures workarounds; does NOT start emulation.
 ## The Boot And Kick keyword in test.robot handles CLIC setup and boot phases.
 
-using sysbus
-include @/home/tim/github/mithro/renode-espemu/peripherals/interrupt-matrix/ESP32C3_InterruptMatrix.cs
-include @/home/tim/github/mithro/renode-espemu/peripherals/efuse/ESP32C3_eFuse.cs
-include @/home/tim/github/mithro/renode-espemu/peripherals/rtc/ESP32C3_RTC.cs
-include @/home/tim/github/mithro/renode-espemu/peripherals/systimer/ESP32C3_SysTimer.cs
-include @/home/tim/github/mithro/renode-espemu/peripherals/timer-group/ESP32C3_TimerGroup.cs
-include @/home/tim/github/mithro/renode-espemu/peripherals/system/ESP32C3_System.cs
-include @/home/tim/github/mithro/renode-espemu/peripherals/rng/ESP32C3_RNG.cs
-include @/home/tim/github/mithro/renode-espemu/peripherals/gpio/ESP32C3_GPIO.cs
-include @/home/tim/github/mithro/renode-espemu/peripherals/extmem/ESP32C3_ExtMem.cs
-include @/home/tim/github/mithro/renode-espemu/peripherals/uart/ESP32C3_UART.cs
-include @/home/tim/github/mithro/renode-espemu/peripherals/iomux/ESP32C3_IOMUX.cs
-include @/home/tim/github/mithro/renode-espemu/peripherals/spi-flash/ESP32C3_SpiMem.cs
-include @/home/tim/github/mithro/renode-espemu/peripherals/sensitive/ESP32C3_Sensitive.cs
-include @/home/tim/github/mithro/renode-espemu/peripherals/gdma/ESP32C3_GDMA.cs
-include @/home/tim/github/mithro/renode-espemu/peripherals/assist-debug/ESP32C3_AssistDebug.cs
-include @/home/tim/github/mithro/renode-espemu/peripherals/mmu/ESP32C3_MMU.cs
-mach create "esp32c3"
-machine LoadPlatformDescription @/home/tim/github/mithro/renode-espemu/platforms/cpus/esp32c3.repl
+$base?="/home/tim/github/mithro/renode-espemu"
+$rom_elf?="/home/tim/esp/esp-rom-elfs/esp32c3_rev3_rom.elf"
 
-sysbus LoadELF @/home/tim/esp/esp-rom-elfs/esp32c3_rev3_rom.elf
-sysbus LoadELF @/home/tim/github/mithro/renode-espemu/hello_world/firmware/hello_world.elf
-sysbus LoadBinary @/home/tim/github/mithro/renode-espemu/hello_world/firmware/flash_header_128k.bin 0x3C000000
-sysbus LoadBinary @/home/tim/github/mithro/renode-espemu/hello_world/firmware/hello_world.bin 0x3C020000
-sysbus LoadBinary @/home/tim/github/mithro/renode-espemu/platforms/rom_data_segment.bin 0x3FF00000
-sysbus LoadBinary @/home/tim/github/mithro/renode-espemu/platforms/rom_iram_data.bin 0x40059590
+using sysbus
+include $base/peripherals/interrupt-matrix/ESP32C3_InterruptMatrix.cs
+include $base/peripherals/efuse/ESP32C3_eFuse.cs
+include $base/peripherals/rtc/ESP32C3_RTC.cs
+include $base/peripherals/systimer/ESP32C3_SysTimer.cs
+include $base/peripherals/timer-group/ESP32C3_TimerGroup.cs
+include $base/peripherals/system/ESP32C3_System.cs
+include $base/peripherals/rng/ESP32C3_RNG.cs
+include $base/peripherals/gpio/ESP32C3_GPIO.cs
+include $base/peripherals/extmem/ESP32C3_ExtMem.cs
+include $base/peripherals/uart/ESP32C3_UART.cs
+include $base/peripherals/iomux/ESP32C3_IOMUX.cs
+include $base/peripherals/spi-flash/ESP32C3_SpiMem.cs
+include $base/peripherals/sensitive/ESP32C3_Sensitive.cs
+include $base/peripherals/gdma/ESP32C3_GDMA.cs
+include $base/peripherals/assist-debug/ESP32C3_AssistDebug.cs
+include $base/peripherals/mmu/ESP32C3_MMU.cs
+mach create "esp32c3"
+machine LoadPlatformDescription $base/platforms/cpus/esp32c3.repl
+
+sysbus LoadELF $rom_elf
+sysbus LoadELF $base/hello_world/firmware/hello_world.elf
+sysbus LoadBinary $base/hello_world/firmware/flash_header_128k.bin 0x3C000000
+sysbus LoadBinary $base/hello_world/firmware/hello_world.bin 0x3C020000
+sysbus LoadBinary $base/platforms/rom_data_segment.bin 0x3FF00000
+sysbus LoadBinary $base/platforms/rom_iram_data.bin 0x40059590
 
 
 # Start at ROM _init — CRT0 initializes DRAM naturally

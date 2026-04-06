@@ -1,0 +1,56 @@
+name: Renode Tests
+
+on:
+  push:
+    branches: ['**']
+  pull_request:
+    branches: ['**']
+
+jobs:
+  renode-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Renode
+        run: |
+          wget -qO- https://builds.renode.io/renode-latest.linux-portable.tar.gz | tar xz
+          RENODE_DIR=$(ls -d renode_* | head -1)
+          echo "$PWD/$RENODE_DIR" >> $GITHUB_PATH
+
+      - name: Install test dependencies
+        run: pip install robotframework==6.1 psutil pyyaml netifaces
+
+      - name: Download ESP32-C3 ROM ELF
+        run: |
+          ROM_DIR=$HOME/esp/esp-rom-elfs
+          mkdir -p "$ROM_DIR"
+          # Download from espressif/esp-rom-elfs GitHub releases
+          RELEASE_TAG=20240305
+          wget -q -O /tmp/esp-rom-elfs.tar.gz \
+            "https://github.com/espressif/esp-rom-elfs/releases/download/${RELEASE_TAG}/esp-rom-elfs-${RELEASE_TAG}.tar.gz"
+          tar xzf /tmp/esp-rom-elfs.tar.gz -C "$ROM_DIR" --strip-components=0
+          ls -la "$ROM_DIR/esp32c3_rev3_rom.elf"
+          echo "ROM_ELF=$ROM_DIR/esp32c3_rev3_rom.elf" >> $GITHUB_ENV
+
+      - name: Run hello_world tests
+        run: |
+          renode-test \
+            --variable "BASE:$PWD" \
+            --variable "ROM_ELF:$ROM_ELF" \
+            hello_world/test.robot
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: renode-test-results
+          path: |
+            robot_output.xml
+            log.html
+            report.html
+            logs/
+          retention-days: 14

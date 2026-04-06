@@ -1,10 +1,14 @@
 *** Variables ***
-${SETUP}                    ${CURDIR}/setup.resc
-${CLIC_SETUP}               ${CURDIR}/../tests/clic_setup.resc
+${BASE}                     /home/tim/github/mithro/renode-espemu
+${ROM_ELF}                  /home/tim/esp/esp-rom-elfs/esp32c3_rev3_rom.elf
+${SETUP}                    ${BASE}/hello_world/setup.resc
+${CLIC_SETUP}               ${BASE}/tests/clic_setup.resc
 ${UART}                     sysbus.uart0
 
 *** Keywords ***
 Setup ESP32C3
+    Execute Command             \$base = @${BASE}
+    Execute Command             \$rom_elf = @${ROM_ELF}
     Execute Script              ${SETUP}
     Create Terminal Tester      ${UART}
 
@@ -13,10 +17,9 @@ Boot And Kick
     Start Emulation
     Execute Command             sleep 1
     Execute Command             pause
-    # Phase 2: Configure CLIC interrupt delivery (from .resc file —
-    # multi-line Python hooks don't work via Execute Command)
+    # Phase 2: Configure CLIC interrupt delivery
     Execute Script              ${CLIC_SETUP}
-    # Phase 3: CLIC delivers systimer interrupts naturally — no manual kick needed
+    # Phase 3: CLIC delivers systimer interrupts naturally
     Start Emulation
 
 *** Test Cases ***
