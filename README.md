@@ -9,13 +9,14 @@ register-level accuracy validated against real hardware.
 
 | Metric | Value |
 |---|---|
-| Boot progress | **Full** -- ROM init through FreeRTOS `app_main()` |
-| C# peripherals | 16 of 39 |
-| Per-feature test firmware | 120 (93 functional + 27 stub reset-value) |
-| HW vs Renode register match | 49/81 (60%, excluding expected diffs) |
-| Robot Framework tests | 12 tests, all passing |
-| GitHub Actions CI | Passing (hello_world suite on all branches + PRs) |
 | Boot | Hardware-like -- CPU starts at ROM `_init`, no patches |
+| C# peripherals | 16 of 39 |
+| Python placeholders | 23 |
+| Test firmware | 120 programs (93 functional + 27 reset-value) |
+| Paired HW/Renode baselines | 93 across 10 peripherals |
+| HW vs Renode register match | 49/81 (60%) |
+| Robot Framework tests | 12 tests, all passing |
+| GitHub Actions CI | hello_world suite on all branches + PRs |
 
 ### Boot sequence
 
@@ -135,6 +136,15 @@ for future C# implementations.
 | Peripheral | RMT, LEDC |
 | Security | World Controller |
 | Debug | USB Serial/JTAG |
+
+## Gaps
+
+5 C# peripherals have no test firmware (Sensitive, SPI MEM, GDMA, Assist
+Debug, MMU). 9 C# peripherals have no Robot test. IO MUX has firmware but
+no baselines. 23 Python placeholders have hardware baselines but no Renode
+baselines for comparison. ~32 register mismatches remain across the 10
+peripherals with paired baselines. See
+[peripheral status](docs/peripheral-status.md) for details.
 
 ## Validation methodology
 
