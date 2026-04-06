@@ -330,35 +330,13 @@ Each gets at minimum a `test_<name>_reset_values` that reads all registers at re
 | I.5 | Per-test Robot tests | One Robot test case per firmware. Verify structured output appears. |
 | I.6 | CI integration | `python3 tools/ci.py` runs all ~137 firmware, compares all, reports zero-diff. |
 
-## Workaround Elimination Roadmap
+## Next Steps
 
-| # | Workaround | Eliminated By | Tests |
-|---|---|---|---|
-| W.1 | Patch init_flash | SPI Flash peripheral (12.5 test_spimem_flash_id) | Flash ID + status |
-| W.2 | Skip delay functions | Cycle counter CSR emulation | Counter increment test |
-| W.3 | Skip memprot | Sensitive/PMS peripheral (35) | PMS register tests |
-| W.4 | Skip brownout ISR | RTC brownout model | test_rtc_brownout |
-| W.5 | Force MIE/MSTATUS | CLIC interrupt model | Interrupt delivery tests |
-| W.6 | Manual interrupt kick | SYSTIMER auto-fire fix | test_systimer_target_periodic |
-| W.7 | mcause override hook | Custom mcause in Renode | test_intmtx_pending_clear |
-| W.8 | ROM function table stubs | Proper ROM function init | ROM function call tests |
+**Improve register accuracy** — fix remaining HW vs Renode mismatches
+in existing C# peripherals (49/81 match currently).
 
-## Execution Order
+**New C# peripherals** — promote high-impact Python placeholders to
+full C# implementations with test firmware and HW baselines.
 
-**Phase 1 — Fix existing C# peripherals (unfixed review bugs)**
-Complete implementations for the 10 existing peripherals. Fix all known bugs.
-
-**Phase 2 — Comprehensive test firmware for existing peripherals**
-Write all ~93 test firmware for the 10 implemented peripherals. Build and run on hardware.
-
-**Phase 3 — Zero-diff verification**
-Run all tests in Renode. Compare against hardware. Fix every discrepancy.
-
-**Phase 4 — New peripherals (IO MUX, SPI Flash)**
-Implement C# peripherals for IO MUX and SPI Flash. Create test firmware. Achieve zero-diff.
-
-**Phase 5 — Stub peripherals (reset value baselines)**
-Create reset-value test firmware for all 22 remaining stubs. Capture hardware baselines. These become the spec for future C# implementations.
-
-**Phase 6 — Workaround elimination**
-Use the test results to systematically remove boot script workarounds.
+**Zero-diff verification** — run all tests in both Renode and on
+real hardware, fix every discrepancy.
