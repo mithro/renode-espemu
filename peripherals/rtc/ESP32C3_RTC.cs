@@ -171,7 +171,9 @@ namespace Antmicro.Renode.Peripherals.Miscellaneous
                 .WithValueField(0, 32, name: "SDIO_CONF");
 
             // BIAS_CONF: 0x7C
-            Registers.BiasConf.Define(this, 0xA0010800)
+            // Hardware reset value is 0x00010800. The previous default 0xA0010800
+            // had bits 31:29 set, which ESP-IDF clears during boot initialization.
+            Registers.BiasConf.Define(this, 0x00010800)
                 .WithValueField(0, 32, name: "BIAS_CONF");
 
             // PWC: 0x84 (no register at 0x80 per header)
