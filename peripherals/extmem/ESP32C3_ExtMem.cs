@@ -110,8 +110,8 @@ namespace Antmicro.Renode.Peripherals.Miscellaneous
                 .WithReservedBits(16, 16);
 
             // ICACHE_SYNC_CTRL_REG: 0x28
-            // bit 0 = INVALIDATE_ENA (default 1), bit 1 = SYNC_DONE (RO, default 0, returns 1 = always done)
-            Registers.ICacheSyncCtrl.Define(this, 0x00000001)
+            // bit 0 = INVALIDATE_ENA (default 1), bit 1 = SYNC_DONE (RO, default 1 = no sync in progress)
+            Registers.ICacheSyncCtrl.Define(this, 0x00000003)
                 .WithFlag(0, name: "ICACHE_INVALIDATE_ENA",
                     writeCallback: (_, value) =>
                     {
@@ -174,7 +174,8 @@ namespace Antmicro.Renode.Peripherals.Miscellaneous
 
             // ICACHE_AUTOLOAD_SCT0_SIZE_REG: 0x48
             Registers.ICacheAutoloadSct0Size.Define(this)
-                .WithValueField(0, 32, name: "ICACHE_AUTOLOAD_SCT0_SIZE");
+                .WithValueField(0, 27, name: "ICACHE_AUTOLOAD_SCT0_SIZE")
+                .WithReservedBits(27, 5);
 
             // ICACHE_AUTOLOAD_SCT1_ADDR_REG: 0x4C
             Registers.ICacheAutoloadSct1Addr.Define(this)
@@ -182,7 +183,8 @@ namespace Antmicro.Renode.Peripherals.Miscellaneous
 
             // ICACHE_AUTOLOAD_SCT1_SIZE_REG: 0x50
             Registers.ICacheAutoloadSct1Size.Define(this)
-                .WithValueField(0, 32, name: "ICACHE_AUTOLOAD_SCT1_SIZE");
+                .WithValueField(0, 27, name: "ICACHE_AUTOLOAD_SCT1_SIZE")
+                .WithReservedBits(27, 5);
 
             // IBUS_TO_FLASH_START_VADDR_REG: 0x54
             Registers.IBusToFlashStartVaddr.Define(this)
