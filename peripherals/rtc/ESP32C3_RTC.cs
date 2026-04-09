@@ -71,18 +71,23 @@ namespace Antmicro.Renode.Peripherals.Miscellaneous
             Registers.SlpTimer1.Define(this)
                 .WithValueField(0, 32, name: "SLP_TIMER1");
 
-            // TIME_UPDATE: 0x0C (write bit 31 to trigger latch)
+            // TIME_UPDATE: 0x0C (write bit 31 to trigger latch, bit 31 auto-clears)
             Registers.TimeUpdate.Define(this)
-                .WithValueField(0, 32, name: "TIME_UPDATE",
+                .WithFlag(31, mode: FieldMode.Read | FieldMode.Write, name: "RTC_CNTL_TIME_UPDATE",
                     writeCallback: (_, value) =>
                     {
-                        if ((value & 0x80000000u) != 0)
+                        if (value)
                         {
                             // Trigger time latch: advance counter and snapshot
                             rtcTimeCounter += 1000;
                             latchedRtcTime = rtcTimeCounter;
                         }
-                    });
+                    },
+                    // On hardware, bit 31 auto-clears after the latch completes.
+                    // Firmware does read-modify-write (REG_READ | (1<<31)), so if
+                    // this bit stays set, the readback shows 0x80000000 instead of 0.
+                    valueProviderCallback: _ => false)
+                .WithValueField(0, 31, name: "TIME_UPDATE_RESERVED");
 
             // TIME_LOW0: 0x10 (read-only, low 32 bits of latched RTC time)
             Registers.TimeLow0.Define(this)
@@ -95,7 +100,9 @@ namespace Antmicro.Renode.Peripherals.Miscellaneous
                     valueProviderCallback: _ => (uint)((latchedRtcTime >> 32) & 0xFFFF));
 
             // STATE0: 0x18
-            Registers.State0.Define(this)
+            // Bit 29 (RTC_CNTL_SLP_WAKEUP) indicates the chip has completed
+            // wakeup from sleep/power-on. Hardware reads 0x20000000 after boot.
+            Registers.State0.Define(this, 0x20000000)
                 .WithValueField(0, 32, name: "STATE0");
 
             // TIMER1-6: 0x1C-0x30
@@ -166,7 +173,9 @@ namespace Antmicro.Renode.Peripherals.Miscellaneous
                 .WithValueField(0, 32, name: "SDIO_CONF");
 
             // BIAS_CONF: 0x7C
-            Registers.BiasConf.Define(this, 0xA0010800)
+            // Hardware reset value is 0x00010800. The previous default 0xA0010800
+            // had bits 31:29 set, which ESP-IDF clears during boot initialization.
+            Registers.BiasConf.Define(this, 0x00010800)
                 .WithValueField(0, 32, name: "BIAS_CONF");
 
             // PWC: 0x84 (no register at 0x80 per header)
@@ -187,8 +196,12 @@ namespace Antmicro.Renode.Peripherals.Miscellaneous
             Registers.Wdtwprotect.Define(this, 0x50D83AA1).WithValueField(0, 32, name: "WDTWPROTECT");
 
             // SWD (super watchdog): 0xAC-0xB0
+            // SWD_CONF bit 31 (SWD_AUTO_FEED_EN) is set by ESP-IDF during boot,
+            // so the post-boot value on HW is 0x84B00000. Default at reset is 0x04B00000.
             Registers.SwdConf.Define(this, 0x04B00000).WithValueField(0, 32, name: "SWD_CONF");
-            Registers.SwdWprotect.Define(this, 0x8F1D312A).WithValueField(0, 32, name: "SWD_WPROTECT");
+            // SWD_WPROTECT resets to 0 on hardware. The unlock key 0x8F1D312A is
+            // written by firmware to unlock SWD registers; it should not be the default.
+            Registers.SwdWprotect.Define(this).WithValueField(0, 32, name: "SWD_WPROTECT");
 
             // SW_CPU_STALL: 0xB4
             Registers.SwCpuStall.Define(this).WithValueField(0, 32, name: "SW_CPU_STALL");
@@ -203,9 +216,12 @@ namespace Antmicro.Renode.Peripherals.Miscellaneous
             Registers.LowPowerSt.Define(this)
                 .WithValueField(0, 32, name: "LOW_POWER_ST");
 
-            // DIAG0: 0xCC
-            Registers.Diag0.Define(this)
-                .WithValueField(0, 32, name: "DIAG0");
+            // Offset 0xCC: On ESP32-C3 this is RTC_CNTL_REGULATOR_REG (also called
+            // REGULATOR0 in some references, or DIAG0 in older register maps).
+            // Hardware reads 0x0271be00 after boot -- this contains regulator
+            // configuration fields set by the ROM bootloader.
+            Registers.Diag0.Define(this, 0x0271BE00)
+                .WithValueField(0, 32, name: "RTC_CNTL_REGULATOR0");
 
             // PAD_HOLD: 0xD0
             Registers.PadHold.Define(this)
