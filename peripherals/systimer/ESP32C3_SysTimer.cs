@@ -109,7 +109,7 @@ namespace Antmicro.Renode.Peripherals.Timers
             {
                 if (IsUnitWorkEnabled(unit))
                 {
-                    unitCounter[unit] += (ulong)TimerTickInterval;
+                    unitCounter[unit] += TimerTickInterval;
                     // Wrap at 52 bits
                     unitCounter[unit] &= CounterMask;
                 }
@@ -498,7 +498,7 @@ namespace Antmicro.Renode.Peripherals.Timers
         private const ulong CounterMask = (1UL << 52) - 1;   // 52-bit counter
         // Timer fires every 1600 counter ticks = 100 us at 16 MHz.
         // This gives reasonable alarm resolution without excessive overhead.
-        private const long TimerTickInterval = 1600;
+        private const ulong TimerTickInterval = 1600;
         // Default CONF: bit 30 (UNIT0_WORK_EN) = 1
         // Note: stall-enable bits 25-28 reset to 0 per TRM; ROM code sets some of
         // them during boot (e.g. bit 25 UNIT1_CORE1_STALL_EN on real hardware)
