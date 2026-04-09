@@ -17,5 +17,8 @@ __pycache__/
 # Claude Code
 .claude/
 
+# Git worktrees
+.worktrees/
+
 # Local temporary files
 tmp/
