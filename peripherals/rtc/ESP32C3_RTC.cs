@@ -192,8 +192,12 @@ namespace Antmicro.Renode.Peripherals.Miscellaneous
             Registers.Wdtwprotect.Define(this, 0x50D83AA1).WithValueField(0, 32, name: "WDTWPROTECT");
 
             // SWD (super watchdog): 0xAC-0xB0
+            // SWD_CONF bit 31 (SWD_AUTO_FEED_EN) is set by ESP-IDF during boot,
+            // so the post-boot value on HW is 0x84B00000. Default at reset is 0x04B00000.
             Registers.SwdConf.Define(this, 0x04B00000).WithValueField(0, 32, name: "SWD_CONF");
-            Registers.SwdWprotect.Define(this, 0x8F1D312A).WithValueField(0, 32, name: "SWD_WPROTECT");
+            // SWD_WPROTECT resets to 0 on hardware. The unlock key 0x8F1D312A is
+            // written by firmware to unlock SWD registers; it should not be the default.
+            Registers.SwdWprotect.Define(this).WithValueField(0, 32, name: "SWD_WPROTECT");
 
             // SW_CPU_STALL: 0xB4
             Registers.SwCpuStall.Define(this).WithValueField(0, 32, name: "SW_CPU_STALL");
