@@ -80,8 +80,9 @@ namespace Antmicro.Renode.Peripherals.Miscellaneous
                 .WithValueField(0, 32, name: "PERIP_CLK_EN0");
 
             // 0x14: PERIP_CLK_EN1_REG
-            // Default: all 0 (crypto/DMA not clocked by default)
-            Registers.PeripClkEn1.Define(this, 0x00000000)
+            // TRM reset: 0x000.  ROM bootloader enables crypto clocks (bit 9)
+            // during initialization before firmware entry.
+            Registers.PeripClkEn1.Define(this, 0x00000200)
                 .WithValueField(0, 32, name: "PERIP_CLK_EN1");
 
             // 0x18: PERIP_RST_EN0_REG
@@ -90,8 +91,9 @@ namespace Antmicro.Renode.Peripherals.Miscellaneous
                 .WithValueField(0, 32, name: "PERIP_RST_EN0");
 
             // 0x1C: PERIP_RST_EN1_REG
-            // Default: crypto/DMA in reset (bits 1-8 = 1)
-            Registers.PeripRstEn1.Define(this, 0x000001FE)
+            // TRM reset: 0x1FE (crypto/DMA in reset).  ROM bootloader takes
+            // specific peripherals out of reset (clears bits 4,5) → 0x1CE.
+            Registers.PeripRstEn1.Define(this, 0x000001CE)
                 .WithValueField(0, 32, name: "PERIP_RST_EN1");
 
             // 0x20: BT_LPCK_DIV_INT_REG
@@ -175,14 +177,16 @@ namespace Antmicro.Renode.Peripherals.Miscellaneous
                 .WithValueField(0, 32, name: "CLOCK_GATE");
 
             // 0x58: SYSCLK_CONF_REG
-            // [19] CLK_DIV_EN (RO, 0), [18:12] CLK_XTAL_FREQ (RO, 40 = 0x28),
-            // [11:10] SOC_CLK_SEL (R/W, 0 = XTAL), [9:0] PRE_DIV_CNT (R/W, default 1)
-            Registers.SysclkConf.Define(this, 0x00028001)
+            // ROM bootloader switches to PLL clock (SOC_CLK_SEL=1, CLK_DIV_EN=1,
+            // PRE_DIV_CNT=0) before jumping to firmware.  Default reflects this
+            // post-ROM state so firmware sees PLL already selected.
+            Registers.SysclkConf.Define(this, 0x000A8400)
                 .WithValueField(0, 10, name: "PRE_DIV_CNT")
                 .WithValueField(10, 2, name: "SOC_CLK_SEL")
                 .WithValueField(12, 7, mode: FieldMode.Read, name: "CLK_XTAL_FREQ",
                     valueProviderCallback: _ => 40) // 40 MHz, read-only
-                .WithFlag(19, mode: FieldMode.Read, name: "CLK_DIV_EN")
+                .WithFlag(19, mode: FieldMode.Read, name: "CLK_DIV_EN",
+                    valueProviderCallback: _ => true)
                 .WithReservedBits(20, 12);
 
             // 0x5C: MEM_PVT_REG
