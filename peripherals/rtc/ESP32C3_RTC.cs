@@ -71,18 +71,23 @@ namespace Antmicro.Renode.Peripherals.Miscellaneous
             Registers.SlpTimer1.Define(this)
                 .WithValueField(0, 32, name: "SLP_TIMER1");
 
-            // TIME_UPDATE: 0x0C (write bit 31 to trigger latch)
+            // TIME_UPDATE: 0x0C (write bit 31 to trigger latch, bit 31 auto-clears)
             Registers.TimeUpdate.Define(this)
-                .WithValueField(0, 32, name: "TIME_UPDATE",
+                .WithFlag(31, mode: FieldMode.Read | FieldMode.Write, name: "RTC_CNTL_TIME_UPDATE",
                     writeCallback: (_, value) =>
                     {
-                        if ((value & 0x80000000u) != 0)
+                        if (value)
                         {
                             // Trigger time latch: advance counter and snapshot
                             rtcTimeCounter += 1000;
                             latchedRtcTime = rtcTimeCounter;
                         }
-                    });
+                    },
+                    // On hardware, bit 31 auto-clears after the latch completes.
+                    // Firmware does read-modify-write (REG_READ | (1<<31)), so if
+                    // this bit stays set, the readback shows 0x80000000 instead of 0.
+                    valueProviderCallback: _ => false)
+                .WithValueField(0, 31, name: "TIME_UPDATE_RESERVED");
 
             // TIME_LOW0: 0x10 (read-only, low 32 bits of latched RTC time)
             Registers.TimeLow0.Define(this)
