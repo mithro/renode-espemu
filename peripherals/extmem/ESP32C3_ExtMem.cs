@@ -174,7 +174,8 @@ namespace Antmicro.Renode.Peripherals.Miscellaneous
 
             // ICACHE_AUTOLOAD_SCT0_SIZE_REG: 0x48
             Registers.ICacheAutoloadSct0Size.Define(this)
-                .WithValueField(0, 32, name: "ICACHE_AUTOLOAD_SCT0_SIZE");
+                .WithValueField(0, 27, name: "ICACHE_AUTOLOAD_SCT0_SIZE")
+                .WithReservedBits(27, 5);
 
             // ICACHE_AUTOLOAD_SCT1_ADDR_REG: 0x4C
             Registers.ICacheAutoloadSct1Addr.Define(this)
@@ -182,7 +183,8 @@ namespace Antmicro.Renode.Peripherals.Miscellaneous
 
             // ICACHE_AUTOLOAD_SCT1_SIZE_REG: 0x50
             Registers.ICacheAutoloadSct1Size.Define(this)
-                .WithValueField(0, 32, name: "ICACHE_AUTOLOAD_SCT1_SIZE");
+                .WithValueField(0, 27, name: "ICACHE_AUTOLOAD_SCT1_SIZE")
+                .WithReservedBits(27, 5);
 
             // IBUS_TO_FLASH_START_VADDR_REG: 0x54
             Registers.IBusToFlashStartVaddr.Define(this)
