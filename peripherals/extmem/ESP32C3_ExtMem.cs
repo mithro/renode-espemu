@@ -110,8 +110,8 @@ namespace Antmicro.Renode.Peripherals.Miscellaneous
                 .WithReservedBits(16, 16);
 
             // ICACHE_SYNC_CTRL_REG: 0x28
-            // bit 0 = INVALIDATE_ENA (default 1), bit 1 = SYNC_DONE (RO, default 0, returns 1 = always done)
-            Registers.ICacheSyncCtrl.Define(this, 0x00000001)
+            // bit 0 = INVALIDATE_ENA (default 1), bit 1 = SYNC_DONE (RO, default 1 = no sync in progress)
+            Registers.ICacheSyncCtrl.Define(this, 0x00000003)
                 .WithFlag(0, name: "ICACHE_INVALIDATE_ENA",
                     writeCallback: (_, value) =>
                     {
