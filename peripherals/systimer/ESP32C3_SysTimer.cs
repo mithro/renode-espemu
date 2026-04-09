@@ -499,10 +499,12 @@ namespace Antmicro.Renode.Peripherals.Timers
         // Timer fires every 1600 counter ticks = 100 us at 16 MHz.
         // This gives reasonable alarm resolution without excessive overhead.
         private const ulong TimerTickInterval = 1600;
-        // Default CONF: bit 30 (UNIT0_WORK_EN) = 1
-        // Note: stall-enable bits 25-28 reset to 0 per TRM; ROM code sets some of
-        // them during boot (e.g. bit 25 UNIT1_CORE1_STALL_EN on real hardware)
-        private const uint DefaultConfReg = 0x40000000;
+        // Default CONF: TRM reset = 0x40000000 (bit 30 UNIT0_WORK_EN only).
+        // ROM bootloader sets bit 25 (UNIT1_CORE1_STALL_EN) before jumping to
+        // firmware.  Renode's ROM execution diverges and doesn't set it, so
+        // include it in the default.  ESP-IDF firmware adds bits 31,29,28,26,24
+        // during systimer_hal_init(), reaching the final 0xF7000000.
+        private const uint DefaultConfReg = 0x42000000;
 
         private enum Registers : long
         {
