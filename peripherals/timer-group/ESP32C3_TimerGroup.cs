@@ -50,8 +50,11 @@ namespace Antmicro.Renode.Peripherals.Timers
             intEna = 0;
             intRaw = 0;
             wdtWriteProtect = 0x50D83AA1;
-            // START_CYCLING=1 in default 0x00013000, so calibration is running at reset
-            rtcCaliStarted = true;
+            // Default RTCCALICFG (0x00013000) has START_CYCLING=1 (bit 12),
+            // meaning continuous calibration is active from reset.  RDY must
+            // reflect this: firmware reads RDY before ever writing START.
+            startCyclingEnabled = true;  // matches bit 12 of default 0x00013000
+            rtcCaliOneShot = false;
             UpdateInterrupt();
         }
 
@@ -237,23 +240,28 @@ namespace Antmicro.Renode.Peripherals.Timers
 
             // --- RTC Calibration registers ---
 
+            // RTC calibration has two modes:
+            //   - Continuous (START_CYCLING=1): calibration runs automatically, RDY=1 always
+            //   - One-shot (START=1): single measurement, RDY=1 when complete
+            // Default 0x00013000 has START_CYCLING=1 → calibration active from reset.
             Registers.RtcCaliCfg.Define(this, 0x00013000)
                 .WithValueField(0, 12, name: "RTCCALICFG_RESERVED_0_11")
                 .WithFlag(12, name: "RTC_CALI_START_CYCLING",
-                    writeCallback: (_, val) => { if (val) rtcCaliStarted = true; })
+                    writeCallback: (_, val) => startCyclingEnabled = val,
+                    valueProviderCallback: _ => startCyclingEnabled)
                 .WithValueField(13, 2, name: "RTC_CALI_CLK_SEL")
                 .WithFlag(15, mode: FieldMode.Read, name: "RTC_CALI_RDY",
-                    valueProviderCallback: _ => rtcCaliStarted)
+                    valueProviderCallback: _ => startCyclingEnabled || rtcCaliOneShot)
                 .WithValueField(16, 15, name: "RTC_CALI_MAX")
                 .WithFlag(31, name: "RTC_CALI_START",
-                    writeCallback: (_, val) => { if (val) rtcCaliStarted = true; });
+                    writeCallback: (_, val) => { if (val) rtcCaliOneShot = true; });
 
             Registers.RtcCaliCfg1.Define(this)
                 .WithFlag(0, mode: FieldMode.Read, name: "RTC_CALI_CYCLING_DATA_VLD",
-                    valueProviderCallback: _ => rtcCaliStarted)
+                    valueProviderCallback: _ => startCyclingEnabled || rtcCaliOneShot)
                 .WithValueField(1, 6, name: "RTCCALICFG1_RESERVED_1_6")
                 .WithValueField(7, 25, mode: FieldMode.Read, name: "RTC_CALI_VALUE",
-                    valueProviderCallback: _ => rtcCaliStarted ? 0x20000u : 0u);
+                    valueProviderCallback: _ => (startCyclingEnabled || rtcCaliOneShot) ? 0x20000u : 0u);
 
             // --- Interrupt registers ---
 
@@ -316,7 +324,8 @@ namespace Antmicro.Renode.Peripherals.Timers
         private uint wdtWriteProtect;
 
         // RTC calibration state
-        private bool rtcCaliStarted;
+        private bool startCyclingEnabled;  // continuous calibration mode active
+        private bool rtcCaliOneShot;       // one-shot calibration completed
 
         private const ulong CounterMask = (1UL << 54) - 1; // 54-bit counter
         // APB ticks advanced per register access (T0UPDATE write or INT_RAW read).
