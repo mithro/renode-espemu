@@ -158,10 +158,12 @@ namespace Antmicro.Renode.Peripherals.GPIOPort
                 .WithValueField(0, 16, mode: FieldMode.Read, name: "STRAPPING");
 
             // GPIO_IN_REG: 0x3C (read-only, input level)
-            // For emulation: returns output data (loopback, independent of enable)
+            // Real hardware returns the electrical state of each pin.
+            // For emulation: loopback output through IN only when output-enable
+            // is set.  Pins with enable=0 read as 0 (undriven).
             Registers.In.Define(this)
                 .WithValueField(0, 26, mode: FieldMode.Read, name: "IN_DATA",
-                    valueProviderCallback: _ => outData);
+                    valueProviderCallback: _ => outData & enableData);
 
             // GPIO_IN1_REG: 0x40 (stub, ESP32-C3 has no pins >25)
             Registers.In1.Define(this)
