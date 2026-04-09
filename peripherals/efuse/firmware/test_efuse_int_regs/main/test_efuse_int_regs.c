@@ -24,11 +24,11 @@ void app_main(void)
 {
     printf("[EFUSE] === test_efuse_int_regs ===\n");
 
-    #define DR_REG_EFUSE_BASE 0x60008800
-    #define EFUSE_INT_RAW_ADDR (DR_REG_EFUSE_BASE + 0x1EC)
-    #define EFUSE_INT_ST_ADDR  (DR_REG_EFUSE_BASE + 0x1F0)
-    #define EFUSE_INT_ENA_ADDR (DR_REG_EFUSE_BASE + 0x1F4)
-    #define EFUSE_INT_CLR_ADDR (DR_REG_EFUSE_BASE + 0x1F8)
+    /* Use correct offsets from ESP-IDF efuse_reg.h (soc/esp32c3) */
+    #define EFUSE_INT_RAW_ADDR EFUSE_INT_RAW_REG   /* 0x60008800 + 0x1D8 */
+    #define EFUSE_INT_ST_ADDR  EFUSE_INT_ST_REG    /* 0x60008800 + 0x1DC */
+    #define EFUSE_INT_ENA_ADDR EFUSE_INT_ENA_REG   /* 0x60008800 + 0x1E0 */
+    #define EFUSE_INT_CLR_ADDR EFUSE_INT_CLR_REG   /* 0x60008800 + 0x1E4 */
 
     /* Step 1: Read all interrupt registers at reset -- expect 0 */
     print_reg("EFUSE_INT_RAW (reset)", EFUSE_INT_RAW_ADDR);
