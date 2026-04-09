@@ -214,9 +214,12 @@ namespace Antmicro.Renode.Peripherals.Miscellaneous
             Registers.LowPowerSt.Define(this)
                 .WithValueField(0, 32, name: "LOW_POWER_ST");
 
-            // DIAG0: 0xCC
-            Registers.Diag0.Define(this)
-                .WithValueField(0, 32, name: "DIAG0");
+            // Offset 0xCC: On ESP32-C3 this is RTC_CNTL_REGULATOR_REG (also called
+            // REGULATOR0 in some references, or DIAG0 in older register maps).
+            // Hardware reads 0x0271be00 after boot -- this contains regulator
+            // configuration fields set by the ROM bootloader.
+            Registers.Diag0.Define(this, 0x0271BE00)
+                .WithValueField(0, 32, name: "RTC_CNTL_REGULATOR0");
 
             // PAD_HOLD: 0xD0
             Registers.PadHold.Define(this)
