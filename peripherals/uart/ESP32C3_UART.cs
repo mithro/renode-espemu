@@ -57,6 +57,7 @@ namespace Antmicro.Renode.Peripherals.UART
             base.Reset();
             intEna = 0;
             intRaw = 0;
+            txFsmState = 0; // TX idle
             RegistersCollection.Reset();
         }
 
@@ -91,7 +92,9 @@ namespace Antmicro.Renode.Peripherals.UART
                     .WithValueField(0, 8,
                         writeCallback: (_, value) =>
                         {
+                            txFsmState = 2; // TX active (data phase)
                             TransmitCharacter((byte)value);
+                            txFsmState = 0; // TX complete → idle
                         },
                         valueProviderCallback: _ =>
                         {
@@ -269,11 +272,17 @@ namespace Antmicro.Renode.Peripherals.UART
                 },
 
                 // UART_FSM_STATUS_REG: 0x6C (read-only FSM state)
-                // Note: HW returns 0x20 (TX FSM idle state=2), but changing from 0
-                // may affect firmware behavior. Left as 0 for boot compatibility.
+                // Bits [3:0] = ST_URX_OUT (RX FSM), Bits [7:4] = ST_UTX_OUT (TX FSM)
+                // State 0 = IDLE. Firmware polls (st_utx_out == 0) for TX idle.
+                // Renode TX is instant (TransmitCharacter returns immediately), so
+                // the TX FSM is always idle when read.  HW baseline shows 0x20
+                // (TX state=2) because real UART is mid-transmission during the test.
                 {(long)Registers.FsmStatus, new DoubleWordRegister(this)
-                    .WithValueField(0, 32, FieldMode.Read, name: "FSM_STATUS",
-                        valueProviderCallback: _ => 0u) // idle
+                    .WithValueField(0, 4, FieldMode.Read, name: "ST_URX_OUT",
+                        valueProviderCallback: _ => 0u)  // RX idle
+                    .WithValueField(4, 4, FieldMode.Read, name: "ST_UTX_OUT",
+                        valueProviderCallback: _ => txFsmState)
+                    .WithReservedBits(8, 24)
                 },
 
                 // UART_POSPULSE_REG: 0x70 (RO, baud detection)
@@ -305,6 +314,7 @@ namespace Antmicro.Renode.Peripherals.UART
 
         private uint intEna;
         private uint intRaw;
+        private uint txFsmState; // TX FSM: 0=idle, 2=transmitting
 
         private const uint IntRxFifoFull = 1u << 0;
 
