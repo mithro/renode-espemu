@@ -100,7 +100,9 @@ namespace Antmicro.Renode.Peripherals.Miscellaneous
                     valueProviderCallback: _ => (uint)((latchedRtcTime >> 32) & 0xFFFF));
 
             // STATE0: 0x18
-            Registers.State0.Define(this)
+            // Bit 29 (RTC_CNTL_SLP_WAKEUP) indicates the chip has completed
+            // wakeup from sleep/power-on. Hardware reads 0x20000000 after boot.
+            Registers.State0.Define(this, 0x20000000)
                 .WithValueField(0, 32, name: "STATE0");
 
             // TIMER1-6: 0x1C-0x30
