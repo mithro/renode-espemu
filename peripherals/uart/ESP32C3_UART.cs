@@ -269,12 +269,11 @@ namespace Antmicro.Renode.Peripherals.UART
                 },
 
                 // UART_FSM_STATUS_REG: 0x6C (read-only FSM state)
-                // Bits [3:0] = ST_URX_OUT (RX FSM state)
-                // Bits [7:4] = ST_UTX_OUT (TX FSM state)
-                // TX FSM idle state = 2, so bits [7:4] = 0x2 → register = 0x20
+                // Note: HW returns 0x20 (TX FSM idle state=2), but changing from 0
+                // may affect firmware behavior. Left as 0 for boot compatibility.
                 {(long)Registers.FsmStatus, new DoubleWordRegister(this)
                     .WithValueField(0, 32, FieldMode.Read, name: "FSM_STATUS",
-                        valueProviderCallback: _ => 0x20u) // TX idle=2, RX idle=0
+                        valueProviderCallback: _ => 0u) // idle
                 },
 
                 // UART_POSPULSE_REG: 0x70 (RO, baud detection)

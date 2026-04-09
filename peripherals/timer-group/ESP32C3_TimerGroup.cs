@@ -50,9 +50,8 @@ namespace Antmicro.Renode.Peripherals.Timers
             intEna = 0;
             intRaw = 0;
             wdtWriteProtect = 0x50D83AA1;
-            // On real hardware, RTC_CALI_RDY=0 after reset until firmware explicitly
-            // starts a calibration cycle via RTC_CALI_START or RTC_CALI_START_CYCLING.
-            rtcCaliStarted = false;
+            // START_CYCLING=1 in default 0x00013000, so calibration is running at reset
+            rtcCaliStarted = true;
             UpdateInterrupt();
         }
 
