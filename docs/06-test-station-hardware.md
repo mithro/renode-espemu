@@ -177,8 +177,8 @@ Two esptool installs exist on the station:
 # Monitor UART output
 ~/.venvs/esptool/bin/python3 -m serial.tools.miniterm /dev/ttyESP32C3 115200
 
-# Or, with ESP-IDF on the station
-idf.py -p /dev/ttyESP32C3 flash monitor
+# (ESP-IDF is not installed on the station: build on your dev machine and copy
+#  the binaries over, which is what tools/capture_hardware_baseline.py does)
 ```
 
 OpenOCD (`/usr/bin/openocd`) is installed for the ESP32-C3's built-in JTAG — see [Development Methodology §1](04-development-methodology.md#1-jtag-capabilities-on-rpi4-esp-hardware).
