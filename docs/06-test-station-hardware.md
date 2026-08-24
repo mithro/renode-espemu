@@ -5,7 +5,7 @@ Physical ESP/Nordic hardware on the rpi4-esp test station, per-board emulation c
 > **See also:**
 > - [Development Methodology](04-development-methodology.md) — how to use this hardware for emulation validation
 > - [Emulation Platform Status](02-emulation-platform-status.md) — what each emulator supports
-> - [Full test station documentation](../../local/rpi4-esp.md) — network config, USB topology, udev rules, power management
+> - [Accessing the Test Station](#5-accessing-the-test-station) (below) — SSH host, serial device names, flashing, USB power cycling
 > - [Document Index](README.md)
 
 ---
@@ -131,3 +131,78 @@ Based on the emulation research, these additions to the rpi4-esp station would m
 | **nRF52840 dongle**        | **Yes** (extensive support + BLE + 802.15.4) | Partial                                             | No                               |
 
 **The nRF52840 is the only board on the test station that works in Renode today.** The ESP32-C3 is the closest to working -- it only needs peripheral models, not CPU architecture work.
+
+
+---
+
+## 5. Accessing the Test Station
+
+The station is a Raspberry Pi 4 (`rpi4-esp`) on the Welland IoT VLAN. It is reachable only from that network (or via VPN into it); the hostname below is the same one `tools/capture_hardware_baseline.py` and `tools/ci.py` use by default.
+
+```bash
+ssh eth0.rpi4-esp.iot.welland.mithis.com
+```
+
+### Serial devices
+
+udev rules on the station (`/etc/udev/rules.d/`) give each board a stable symlink, so scripts do not depend on enumeration order. All ports are `MODE=0666`, so no `sudo` is needed for serial access.
+
+| Symlink            | Kernel device  | USB path  | Board                 | Bridge                     |
+| ------------------ | -------------- | --------- | --------------------- | -------------------------- |
+| `/dev/ttyESP32C3`  | `/dev/ttyACM1` | `1-1.2.4` | ESP32-C3              | Built-in USB-Serial/JTAG   |
+| `/dev/ttyESP32CAM` | `/dev/ttyUSB1` | `1-1.2.3` | ESP32-CAM-MB          | CH340                      |
+| `/dev/ttyESP32DEV` | `/dev/ttyUSB0` | `1-1.4`   | ESP32 DevKit          | CP2102                     |
+| `/dev/ttyNRF52840` | `/dev/ttyACM0` | `1-1.2.2` | nRF52840 dongle       | Native USB (DFU bootloader)|
+
+Prefer the symlinks. `tools/capture_hardware_baseline.py` currently defaults to the raw `/dev/ttyACM1`; pass `--port /dev/ttyESP32C3` to be enumeration-safe.
+
+### Flashing and monitoring the ESP32-C3
+
+Two esptool installs exist on the station:
+
+| Path                              | Notes                                                        |
+| --------------------------------- | ------------------------------------------------------------ |
+| `~/.venvs/esptool/bin/esptool`    | Per-user venv — this is what `tools/capture_*_baseline.py` invoke over SSH |
+| `/opt/esptool/bin/esptool`        | System-wide venv (root-owned), also has `nrfutil` for the nRF52840 |
+
+```bash
+# Probe the chip
+~/.venvs/esptool/bin/esptool --port /dev/ttyESP32C3 chip-id
+
+# Flash a full ESP-IDF image (bootloader + partition table + app)
+~/.venvs/esptool/bin/esptool --port /dev/ttyESP32C3 --baud 460800 write_flash \
+    0x0 bootloader.bin 0x8000 partition-table.bin 0x10000 app.bin
+
+# Monitor UART output
+~/.venvs/esptool/bin/python3 -m serial.tools.miniterm /dev/ttyESP32C3 115200
+
+# Or, with ESP-IDF on the station
+idf.py -p /dev/ttyESP32C3 flash monitor
+```
+
+OpenOCD (`/usr/bin/openocd`) is installed for the ESP32-C3's built-in JTAG — see [Development Methodology §1](04-development-methodology.md#1-jtag-capabilities-on-rpi4-esp-hardware).
+
+### USB power cycling (`uhubctl`)
+
+Hung boards can be power-cycled without touching the hardware, but the power topology matters:
+
+| Hub                      | Power switching     | Devices                                   |
+| ------------------------ | ------------------- | ----------------------------------------- |
+| VIA Labs (`1-1`)         | **Per-port**        | CP2102/ESP32 DevKit (port 4), Genesys hub (port 2) |
+| Genesys Logic (`1-1.2`)  | **Ganged**          | wlanE, nRF52840, ESP32-CAM, ESP32-C3      |
+
+Cycling the Genesys hub resets **all four** of its devices at once (including the RTL8188CUS WiFi adapter); only the ESP32 DevKit can be cycled independently. `uhubctl` lives in `/usr/sbin`, so it needs `sudo`.
+
+```bash
+sudo uhubctl                               # show current port power state
+sudo uhubctl -l 1-1 -p 2 -a cycle -d 2     # ESP32-C3 + nRF52840 + ESP32-CAM + wlanE (all together)
+sudo uhubctl -l 1-1 -p 4 -a cycle -d 2     # ESP32 DevKit only
+
+# Softer alternative: rebind a single USB device without cutting power
+echo '1-1.2.4' | sudo tee /sys/bus/usb/drivers/usb/unbind
+echo '1-1.2.4' | sudo tee /sys/bus/usb/drivers/usb/bind
+```
+
+### Full station documentation
+
+Network configuration (IPs, MACs, switch port), the complete USB topology, udev rule details, the RTL8188CUS hostapd/client setup, and LLDP config are documented in Tim's private notes repository at `~/local/netgear/rpi4-esp.md`. That repo is not published, so this section carries everything needed to use the station for the emulation-validation workflow.
