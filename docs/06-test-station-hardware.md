@@ -6,6 +6,7 @@ Physical ESP/Nordic hardware on the rpi4-esp test station, per-board emulation c
 > - [Development Methodology](04-development-methodology.md) — how to use this hardware for emulation validation
 > - [Emulation Platform Status](02-emulation-platform-status.md) — what each emulator supports
 > - [Accessing the Test Station](#5-accessing-the-test-station) (below) — SSH host, serial device names, flashing, USB power cycling
+> - [rpi4-esp Test Station](07-rpi4-esp-test-station.md) — full station documentation: network config, USB topology, udev rules, WiFi adapter, power management
 > - [Document Index](README.md)
 
 ---
@@ -205,4 +206,4 @@ echo '1-1.2.4' | sudo tee /sys/bus/usb/drivers/usb/bind
 
 ### Full station documentation
 
-Network configuration (IPs, MACs, switch port), the complete USB topology, udev rule details, the RTL8188CUS hostapd/client setup, and LLDP config are documented in Tim's private notes repository at `~/local/netgear/rpi4-esp.md`. That repo is not published, so this section carries everything needed to use the station for the emulation-validation workflow.
+Network configuration (IPs, MACs, switch port), the complete USB topology, per-board details, udev rule details, the RTL8188CUS hostapd/client setup, and LLDP config are in [rpi4-esp Test Station](07-rpi4-esp-test-station.md).

@@ -12,6 +12,7 @@ Research into the current state of ESP chip emulation and a roadmap for enabling
 | 4   | [Development Methodology](04-development-methodology.md)                 | JTAG debugging, execution tracing, AFL-style coverage-guided emulation development |
 | 5   | [Gap Analysis and Roadmap](05-gap-analysis-and-roadmap.md)               | What's missing, wireless emulation strategies, phased implementation plan          |
 | 6   | [Test Station Hardware](06-test-station-hardware.md)                     | rpi4-esp board inventory, per-board emulation status, recommended additions        |
+| 7   | [rpi4-esp Test Station](07-rpi4-esp-test-station.md)                     | Full station reference: network, USB topology, udev rules, flashing, power cycling |
 
 ## Quick Summary
 

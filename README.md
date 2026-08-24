@@ -204,6 +204,7 @@ See [`docs/`](docs/) for detailed documentation:
 - [Development methodology](docs/04-development-methodology.md) -- JTAG debugging, execution tracing
 - [Gap analysis and roadmap](docs/05-gap-analysis-and-roadmap.md) -- missing peripherals, next steps
 - [Test station hardware](docs/06-test-station-hardware.md) -- rpi4-esp board inventory
+- [rpi4-esp test station](docs/07-rpi4-esp-test-station.md) -- SSH access, serial devices, flashing, USB power cycling
 - [Peripheral status](docs/peripheral-status.md) -- detailed per-peripheral implementation state
 - [Peripheral test plan](docs/peripheral-test-plan.md) -- test conventions and per-feature breakdown
 - [RISC-V customization](docs/renode-riscv-customization.md) -- CSR handlers, CLIC, ROM CRT0 analysis
