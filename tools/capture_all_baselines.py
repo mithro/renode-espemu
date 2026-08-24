@@ -17,7 +17,7 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent.parent
 PERIPHERALS_DIR = REPO_ROOT / "peripherals"
 DEFAULT_HOST = "eth0.rpi4-esp.iot.welland.mithis.com"
-DEFAULT_PORT = "/dev/ttyACM1"
+DEFAULT_PORT = "/dev/ttyESP32C3"
 CAPTURE_DURATION = 12
 SERIAL_CAPTURE = REPO_ROOT / "tools" / "serial_capture.py"
 

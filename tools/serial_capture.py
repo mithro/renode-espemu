@@ -13,7 +13,7 @@ import serial
 
 
 def main():
-    port = sys.argv[1] if len(sys.argv) > 1 else "/dev/ttyACM1"
+    port = sys.argv[1] if len(sys.argv) > 1 else "/dev/ttyESP32C3"
     duration = int(sys.argv[2]) if len(sys.argv) > 2 else 10
     do_reset = "--reset" in sys.argv
 
