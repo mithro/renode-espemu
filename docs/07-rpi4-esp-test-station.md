@@ -31,7 +31,7 @@ RPi 4 (rpi4-esp)
 ```
 
 - **RPi 4** (`rpi4-esp`): USB host, firmware flash/test controller, PoE powered
-- **ESP32-C3 board**: ESP32-C3 (QFN32, rev v0.4) with built-in USB-JTAG/serial, 4MB flash (XMC), MAC `44:1b:f6:2e:a9:a4`
+- **ESP32-C3 board**: ESP32-C3 (QFN32, rev v0.4) with built-in USB-JTAG/serial, 4MB flash (XMC), MAC `e8:3d:c1:8c:5c:ac`
 - **ESP32-CAM-MB**: ESP32-D0WD-V3 (rev v3.1), dual-core 240MHz, 4MB flash, MAC `a4:f0:0f:76:46:64`, via CH340
 - **ESP32 DevKit**: ESP32-D0WDQ6 (rev v1.0), dual-core, 4MB flash, MAC `24:0a:c4:11:44:e8`, via CP2102
 - **Nordic nRF52840 dongle** (PCA10059): currently in Open DFU Bootloader mode, FICR ID `DADB34875764`
@@ -84,7 +84,7 @@ DHCP/DNS assignment.
 
 | Device | Chip | WiFi MAC | USB Serial | VID:PID | Driver | Hub Path | Symlink |
 |--------|------|----------|------------|---------|--------|----------|---------|
-| ESP32-C3 board | ESP32-C3 (QFN32) rev v0.4 | `44:1b:f6:2e:a9:a4` | `44:1B:F6:2E:A9:A4` | `303a:1001` | `cdc_acm` | `1-1.2.4` | `/dev/ttyESP32C3` |
+| ESP32-C3 board | ESP32-C3 (QFN32) rev v0.4 | `e8:3d:c1:8c:5c:ac` | `E8:3D:C1:8C:5C:AC` | `303a:1001` | `cdc_acm` | `1-1.2.4` | `/dev/ttyESP32C3` |
 | ESP32-CAM-MB | ESP32-D0WD-V3 rev v3.1 | `a4:f0:0f:76:46:64` | *(none, CH340)* | `1a86:7523` | `ch341` | `1-1.2.3` | `/dev/ttyESP32CAM` |
 | ESP32 DevKit | ESP32-D0WDQ6 rev v1.0 | `24:0a:c4:11:44:e8` | `0001` (CP2102) | `10c4:ea60` | `cp210x` | `1-1.4` | `/dev/ttyESP32DEV` |
 | Nordic nRF52840 dongle | nRF52840 (PCA10059) | — | `DADB34875764` | `1915:521f` | `cdc_acm` | `1-1.2.2` | `/dev/ttyNRF52840` |
@@ -125,10 +125,10 @@ Bus 002 (USB 3.0, xhci_hcd, 5Gbps):
 | Features | Wi-Fi, BT 5 (LE), Single Core, 160MHz |
 | Flash | 4MB embedded (XMC), manufacturer ID `0x46` |
 | Crystal | 40 MHz |
-| WiFi MAC | `44:1b:f6:2e:a9:a4` |
+| WiFi MAC | `e8:3d:c1:8c:5c:ac` |
 | USB mode | USB-Serial/JTAG (built-in) |
 | USB VID:PID | `303a:1001` |
-| USB Serial | `44:1B:F6:2E:A9:A4` |
+| USB Serial | `E8:3D:C1:8C:5C:AC` |
 | USB Speed | Full Speed (12 Mbps) |
 | Power | Self Powered, 500mA max |
 | Interface 0-1 | CDC ACM (serial port) → `/dev/ttyACM1` → `/dev/ttyESP32C3` |

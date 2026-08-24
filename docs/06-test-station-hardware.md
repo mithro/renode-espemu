@@ -33,7 +33,7 @@ The `rpi4-esp` test station has four development boards and a WiFi adapter conne
 | ------------------------ | ------------------------------------- | --------------------- | ----------------------------- | -------- |
 | **CPU (RV32IMC)**        | 160 MHz single-core                   | **ISA supported**     | **Full**                      | **Full** |
 | **UART**                 | USB-Serial/JTAG (built-in)            | **ESP32_UART exists** | **Yes**                       | **Yes**  |
-| **WiFi (b/g/n)**         | 802.11 b/g/n, MAC `44:1b:f6:2e:a9:a4` | No                    | No (OpenCores ETH workaround) | **Yes**  |
+| **WiFi (b/g/n)**         | 802.11 b/g/n, MAC `e8:3d:c1:8c:5c:ac` | No                    | No (OpenCores ETH workaround) | **Yes**  |
 | **BLE 5.0**              | BLE 5.0 LE                            | No                    | No                            | No       |
 | **Flash (4MB XMC)**      | SPI flash, mfg ID `0x46`              | No                    | **Yes** (SPI + MMU)           | **Yes**  |
 | **GPIO strapping**       | Boot mode pins                        | No                    | **Yes**                       | **Yes**  |
@@ -155,7 +155,7 @@ udev rules on the station (`/etc/udev/rules.d/`) give each board a stable symlin
 | `/dev/ttyESP32DEV` | `/dev/ttyUSB0` | `1-1.4`   | ESP32 DevKit          | CP2102                     |
 | `/dev/ttyNRF52840` | `/dev/ttyACM0` | `1-1.2.2` | nRF52840 dongle       | Native USB (DFU bootloader)|
 
-Prefer the symlinks. `tools/capture_hardware_baseline.py` currently defaults to the raw `/dev/ttyACM1`; pass `--port /dev/ttyESP32C3` to be enumeration-safe.
+Prefer the symlinks. `tools/capture_hardware_baseline.py`, `tools/capture_all_baselines.py` and `tools/serial_capture.py` all default to `/dev/ttyESP32C3`, so they are unaffected by USB enumeration order.
 
 ### Flashing and monitoring the ESP32-C3
 
