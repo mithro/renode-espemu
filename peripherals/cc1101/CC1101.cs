@@ -38,13 +38,19 @@ using Antmicro.Renode.Core;
 using Antmicro.Renode.Core.Structure;
 using Antmicro.Renode.Logging;
 using Antmicro.Renode.Peripherals;
+using Antmicro.Renode.Peripherals.Wireless;
 
 namespace Antmicro.Renode.Peripherals.SPI
 {
-    public class CC1101 : ISPIPeripheral, INumberedGPIOOutput
+    public class CC1101 : ISPIPeripheral, INumberedGPIOOutput, IAir433Node
     {
-        public CC1101()
+        // `medium` is an optional shared 433 MHz air medium the radio joins so an
+        // injected/transmitted frame can reach its RX FIFO. Set from the .repl as
+        // `medium: air`; when omitted the model behaves as the register-only
+        // wave-2 model (no RF path).
+        public CC1101(Air433Medium medium = null)
         {
+            this.medium = medium;
             GDO0 = new GPIO();
             GDO1 = new GPIO();
             GDO2 = new GPIO();
@@ -58,6 +64,7 @@ namespace Antmicro.Renode.Peripherals.SPI
             patable = new byte[PatableSize];
             txFifo = new Queue<byte>();
             rxFifo = new Queue<byte>();
+            medium?.RegisterNode(this);
             Reset();
         }
 
@@ -72,6 +79,46 @@ namespace Antmicro.Renode.Peripherals.SPI
             byteIndex = 0;
             marcState = MarcStateIdle;
             chipState = StateIdle;
+            packetReceived = false;
+            UpdateGdoLines();
+        }
+
+        // --- Shared 433 MHz air medium (RF receive path) -------------------------
+
+        // Called by the air medium when a frame arrives. Models an FSK/packet-mode
+        // reception: the payload is pushed into the RX FIFO (so RXBYTES and FIFO
+        // reads see it), the chip returns to IDLE (MCSM1 RXOFF_MODE default 00 =
+        // IDLE after a good packet), and the packet-received event asserts any GDO
+        // configured for it (IOCFG 0x06 sync-word / 0x07 CRC-OK) -> GDO0 IRQ.
+        public void ReceiveAirFrame(byte[] data)
+        {
+            if(data == null || data.Length == 0)
+            {
+                return;
+            }
+            if(chipState != StateRx)
+            {
+                this.Log(LogLevel.Warning,
+                    "CC1101: RF frame of {0} byte(s) dropped -- radio not in RX (state {1})",
+                    data.Length, chipState);
+                return;
+            }
+            foreach(var b in data)
+            {
+                if(rxFifo.Count < FifoSize)
+                {
+                    rxFifo.Enqueue(b);
+                }
+                else
+                {
+                    this.Log(LogLevel.Warning, "CC1101: RX FIFO overflow, byte dropped");
+                }
+            }
+            chipState = StateIdle;
+            marcState = MarcStateIdle;
+            packetReceived = true;
+            this.Log(LogLevel.Info, "CC1101: received RF frame of {0} byte(s), RXBYTES={1}",
+                data.Length, rxFifo.Count);
             UpdateGdoLines();
         }
 
@@ -187,6 +234,13 @@ namespace Antmicro.Renode.Peripherals.SPI
                 case Access.FifoRead:
                 {
                     byte val = rxFifo.Count > 0 ? rxFifo.Dequeue() : (byte)0x00;
+                    // A GDO configured for the packet-received event (0x06/0x07)
+                    // de-asserts once the RX FIFO has been drained.
+                    if(rxFifo.Count == 0 && packetReceived)
+                    {
+                        packetReceived = false;
+                        UpdateGdoLines();
+                    }
                     return val;
                 }
                 case Access.FifoWrite:
@@ -289,6 +343,8 @@ namespace Antmicro.Renode.Peripherals.SPI
                 case StrobeSRX:
                     chipState = StateRx;
                     marcState = MarcStateRx;
+                    // Arming RX opens a new receive window; drop any stale event.
+                    packetReceived = false;
                     break;
                 case StrobeSTX:
                     chipState = StateTx;
@@ -297,6 +353,7 @@ namespace Antmicro.Renode.Peripherals.SPI
                 case StrobeSIDLE:
                     chipState = StateIdle;
                     marcState = MarcStateIdle;
+                    packetReceived = false;
                     break;
                 case StrobeSPWD:
                     chipState = StateIdle;
@@ -304,6 +361,7 @@ namespace Antmicro.Renode.Peripherals.SPI
                     break;
                 case StrobeSFRX:
                     rxFifo.Clear();
+                    packetReceived = false;
                     break;
                 case StrobeSFTX:
                     txFifo.Clear();
@@ -354,14 +412,20 @@ namespace Antmicro.Renode.Peripherals.SPI
         {
             int cfg = iocfg & 0x3F;
             bool inv = (iocfg & 0x40) != 0;
-            if(cfg == GdoCfgConstant) // 0x2F: HW to 0, INV flips to 1
+            bool level;
+            if(cfg == GdoCfgSyncWord || cfg == GdoCfgPktCrcOk)
             {
-                line.Set(inv);
+                // 0x06 (asserts on sync word, de-asserts at end of packet) and
+                // 0x07 (asserts on a good CRC packet, de-asserts when the RX FIFO
+                // is drained) are the two packet-received event sources firmware
+                // wires to a GDO IRQ. Both are driven by packetReceived here.
+                level = packetReceived;
             }
-            else // 0x2E high-Z or an unmodeled data mode -> park low (INV flips)
+            else // 0x2F constant "HW to 0", 0x2E high-Z, or an unmodeled data mode
             {
-                line.Set(inv);
+                level = false;
             }
+            line.Set(level ^ inv);
         }
 
         private enum Access
@@ -390,6 +454,8 @@ namespace Antmicro.Renode.Peripherals.SPI
 
         private byte marcState;
         private int chipState;
+        private bool packetReceived;
+        private readonly Air433Medium medium;
 
         // --- constants ---
         private const int ConfigRegCount = 0x2F;   // 0x00-0x2E
@@ -408,6 +474,8 @@ namespace Antmicro.Renode.Peripherals.SPI
         private const byte RssiValue = 0x80;       // status 0x34 (raw, plausible)
 
         private const byte GdoCfgConstant = 0x2F;
+        private const byte GdoCfgSyncWord = 0x06;  // asserts on sync, deasserts at end of packet
+        private const byte GdoCfgPktCrcOk = 0x07;  // asserts on good-CRC packet received
 
         // Chip STATE field (status byte bits6:4).
         private const int StateIdle = 0x0;

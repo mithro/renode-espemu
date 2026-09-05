@@ -2,6 +2,7 @@
 Resource                    ${CURDIR}/../../tests/esp32c3_keywords.robot
 
 *** Variables ***
+${MEDIUM_CS}              ${BASE}/peripherals/air/Air433Medium.cs
 ${RADIO_CS}                ${BASE}/peripherals/cc1101/CC1101.cs
 ${RADIO_REPL}             ${BASE}/peripherals/cc1101/cc1101.repl
 
@@ -10,6 +11,7 @@ Setup ESP32C3 CC1101 Test
     # Base platform (includes ESP32C3_SPI2.cs, loads firmware), then attach the
     # CC1101 radio model and wire its GDO0/GDO2 lines to GPIO4/GPIO5.
     Setup ESP32C3 Peripheral Test    cc1101
+    Execute Command         include @${MEDIUM_CS}
     Execute Command         include @${RADIO_CS}
     Execute Command         machine LoadPlatformDescription @${RADIO_REPL}
 
