@@ -2,19 +2,23 @@
 // attached as an ISPIPeripheral slave of the ESP32-C3 SPI2 master (wave-2 radio
 // bring-up, building on the wave-1 GP-SPI substrate).
 //
-// SCOPE (wave 2, "foundation"):
+// SCOPE:
 //   * Register-accurate SPI read/write with burst auto-increment.
 //   * RegVersion (0x42) = 0x12 so the firmware's identify() passes.
 //   * RegOpMode (0x01) mode-bit + LongRangeMode (LoRa) transitions, including
 //     the datasheet rule that LongRangeMode is only writable in SLEEP mode.
 //   * A datasheet power-on-reset (POR) default register map (FSK/OOK page).
-//   * DIO0 exposed as INumberedGPIOOutput (numbered output 0) for later waves.
+//   * FSK-packet RF RECEIVE off the shared 433 MHz air medium: an injected /
+//     transmitted frame is loaded into the RX FIFO (a real queue drained via
+//     RegFifo 0x00) and, when the radio is in FSK RX with DIO0 mapped to
+//     PayloadReady, DIO0 (INumberedGPIOOutput output 0) is asserted -> DIO0 IRQ,
+//     de-asserting once the FIFO is drained. See ReceiveAirFrame() below.
 //
-// NOT modeled here (deferred to a later wave with the shared 433 MHz air
-// medium): the RF data path, the FSK/OOK packet engine, the FIFO as a real
-// queue, RSSI/AFC/PLL behaviour, and any DIO0 interrupt generation. RegFifo
-// (0x00) is treated as a plain register byte; DIO0 is exposed but never asserted
-// by this model yet.
+// NOT modeled here: the RF TRANSMIT path (the air medium fan-out is receive-only
+// for this model), the OOK demodulator, packet-engine details beyond payload
+// delivery (address filtering, CRC generation, variable- vs fixed-length
+// framing, FIFO thresholds/interrupts other than PayloadReady), and RSSI/AFC/PLL
+// behaviour. RegFifo backs a receive FIFO only; there is no TX FIFO path.
 //
 // Attach it in a .repl as a child of the SPI2 master and wire DIO0 to a GPIO
 // input pin:
@@ -148,8 +152,19 @@ namespace Antmicro.Renode.Peripherals.SPI
                 rxFifo.Enqueue(b);
             }
             payloadReady = true;
-            DIO0.Set(true);
-            this.Log(LogLevel.Info, "SX1278: received FSK frame of {0} byte(s)", data.Length);
+            // DIO0 carries PayloadReady in FSK packet RX only when RegDioMapping1
+            // (0x40) maps it there: DIO0Mapping = bits[7:6] = 00 (SX127x datasheet
+            // DIO mapping table, packet mode). Assert DIO0 only when so mapped -- the
+            // payload still lands in the FIFO regardless. The reset default maps DIO0
+            // to PayloadReady (RegDioMapping1 = 0x00).
+            var dio0Mapping = (registers[RegDioMapping1] >> 6) & 0x03;
+            if(dio0Mapping == 0)
+            {
+                DIO0.Set(true);
+            }
+            this.Log(LogLevel.Info,
+                "SX1278: received FSK frame of {0} byte(s), DIO0 {1}", data.Length,
+                dio0Mapping == 0 ? "asserted (PayloadReady)" : "left low (DIO0 not mapped to PayloadReady)");
         }
 
         private void WriteRegister(byte addr, byte value)
@@ -218,6 +233,10 @@ namespace Antmicro.Renode.Peripherals.SPI
 
         // RegVersion (0x42), silicon value 0x12 for SX1276/77/78.
         private const byte RegVersion = 0x42;
+
+        // RegDioMapping1 (0x40): DIO0Mapping is bits[7:6]; 00 = PayloadReady in
+        // FSK packet RX (SX127x datasheet DIO mapping table).
+        private const byte RegDioMapping1 = 0x40;
 
         private static readonly Dictionary<byte, byte> ResetMap = new Dictionary<byte, byte>
         {
