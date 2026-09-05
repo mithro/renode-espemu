@@ -1,0 +1,3 @@
+idf_component_register(SRCS "test_cc1101.c"
+                       INCLUDE_DIRS "."
+                       REQUIRES driver esp_driver_spi esp_driver_gpio)
