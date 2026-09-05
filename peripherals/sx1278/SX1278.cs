@@ -33,15 +33,23 @@ using Antmicro.Renode.Core;
 using Antmicro.Renode.Core.Structure;
 using Antmicro.Renode.Logging;
 using Antmicro.Renode.Peripherals;
+using Antmicro.Renode.Peripherals.Wireless;
 
 namespace Antmicro.Renode.Peripherals.SPI
 {
-    public class SX1278 : ISPIPeripheral, INumberedGPIOOutput
+    public class SX1278 : ISPIPeripheral, INumberedGPIOOutput, IAir433Node
     {
-        public SX1278()
+        // `medium` is an optional shared 433 MHz air medium the radio joins so an
+        // injected/transmitted frame can reach its RX FIFO. Set from the .repl as
+        // `medium: air`; when omitted the model behaves as the register-only
+        // wave-2 model (no RF path).
+        public SX1278(Air433Medium medium = null)
         {
+            this.medium = medium;
             DIO0 = new GPIO();
             Connections = new Dictionary<int, IGPIO> { { 0, DIO0 } };
+            rxFifo = new Queue<byte>();
+            medium?.RegisterNode(this);
             Reset();
         }
 
@@ -64,6 +72,17 @@ namespace Antmicro.Renode.Peripherals.SPI
                 WriteRegister(address, data);
                 result = 0x00;
             }
+            else if(address == RegFifo && rxFifo.Count > 0)
+            {
+                // Reading RegFifo pops the RX FIFO (a received FSK payload).
+                result = rxFifo.Dequeue();
+                if(rxFifo.Count == 0 && payloadReady)
+                {
+                    // PayloadReady de-asserts once the FIFO has been emptied.
+                    payloadReady = false;
+                    DIO0.Set(false);
+                }
+            }
             else
             {
                 result = registers[address];
@@ -71,8 +90,12 @@ namespace Antmicro.Renode.Peripherals.SPI
             this.Log(LogLevel.Noisy, "SX1278 {0} reg 0x{1:X2} {2}=0x{3:X2}",
                 writeMode ? "write" : "read", address, writeMode ? "<-" : "->",
                 writeMode ? data : result);
-            // Burst mode: the address auto-increments for each subsequent byte.
-            address = (byte)((address + 1) & AddressMask);
+            // Burst mode auto-increments the address, except RegFifo (0x00) which
+            // is a FIFO port: consecutive accesses stay on it (SX127x behaviour).
+            if(address != RegFifo)
+            {
+                address = (byte)((address + 1) & AddressMask);
+            }
             return result;
         }
 
@@ -87,6 +110,8 @@ namespace Antmicro.Renode.Peripherals.SPI
             addressLatched = false;
             writeMode = false;
             address = 0;
+            rxFifo.Clear();
+            payloadReady = false;
             LoadResetDefaults();
             DIO0.Set(false);
         }
@@ -94,6 +119,38 @@ namespace Antmicro.Renode.Peripherals.SPI
         public GPIO DIO0 { get; }
 
         public IReadOnlyDictionary<int, IGPIO> Connections { get; }
+
+        // --- Shared 433 MHz air medium (FSK receive path) ------------------------
+
+        // Called by the air medium when a frame arrives. Models an FSK packet-mode
+        // reception: the radio must be in FSK RX (RegOpMode LongRangeMode=0, mode
+        // = RX 0x05). The payload is pushed into the RX FIFO (readable via RegFifo
+        // 0x00) and DIO0 (PayloadReady in FSK RX) is asserted -> DIO0 IRQ.
+        public void ReceiveAirFrame(byte[] data)
+        {
+            if(data == null || data.Length == 0)
+            {
+                return;
+            }
+            var opmode = registers[RegOpMode];
+            var lora = (opmode & 0x80) != 0;
+            var mode = opmode & ModeMask;
+            if(lora || (mode != ModeFskRx && mode != ModeFskRxSingle))
+            {
+                this.Log(LogLevel.Warning,
+                    "SX1278: FSK frame of {0} byte(s) dropped -- not in FSK RX (RegOpMode 0x{1:X2})",
+                    data.Length, opmode);
+                return;
+            }
+            rxFifo.Clear();
+            foreach(var b in data)
+            {
+                rxFifo.Enqueue(b);
+            }
+            payloadReady = true;
+            DIO0.Set(true);
+            this.Log(LogLevel.Info, "SX1278: received FSK frame of {0} byte(s)", data.Length);
+        }
 
         private void WriteRegister(byte addr, byte value)
         {
@@ -139,17 +196,25 @@ namespace Antmicro.Renode.Peripherals.SPI
         private bool addressLatched;
         private bool writeMode;
         private byte address;
+        private bool payloadReady;
+        private readonly Air433Medium medium;
 
         private readonly byte[] registers = new byte[RegisterCount];
+        private readonly Queue<byte> rxFifo;
 
         private const int RegisterCount = 0x80;      // 7-bit address space
         private const byte WriteBit = 0x80;
         private const byte AddressMask = 0x7F;
 
+        // RegFifo (0x00): the FIFO data port.
+        private const byte RegFifo = 0x00;
+
         // RegOpMode (0x01)
         private const byte RegOpMode = 0x01;
         private const byte ModeMask = 0x07;
         private const byte ModeSleep = 0x00;
+        private const byte ModeFskRx = 0x05;        // FSK/OOK receiver
+        private const byte ModeFskRxSingle = 0x06;  // accepted leniently
 
         // RegVersion (0x42), silicon value 0x12 for SX1276/77/78.
         private const byte RegVersion = 0x42;

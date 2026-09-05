@@ -2,6 +2,7 @@
 Resource                    ${CURDIR}/../../tests/esp32c3_keywords.robot
 
 *** Variables ***
+${MEDIUM_CS}              ${BASE}/peripherals/air/Air433Medium.cs
 ${RADIO_CS}                ${BASE}/peripherals/sx1278/SX1278.cs
 ${RADIO_REPL}             ${BASE}/peripherals/sx1278/sx1278_tester.repl
 
@@ -10,6 +11,7 @@ Setup ESP32C3 SX1278 Test
     # Base platform (includes ESP32C3_SPI2.cs, loads firmware), then attach the
     # SX1278 radio model and wire its DIO0 line to GPIO4.
     Setup ESP32C3 Peripheral Test    sx1278
+    Execute Command         include @${MEDIUM_CS}
     Execute Command         include @${RADIO_CS}
     Execute Command         machine LoadPlatformDescription @${RADIO_REPL}
 
