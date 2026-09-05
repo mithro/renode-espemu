@@ -1,0 +1,7 @@
+// Test overlay: attaches the SX1278 radio model to the SPI2 master and wires
+// its DIO0 output (numbered GPIO output 0) to GPIO input pin 4.
+// Load this AFTER the base esp32c3 platform (which defines spi2 and gpio) and
+// AFTER including SX1278.cs.
+
+radio: SPI.SX1278 @ spi2
+    0 -> gpio@4
