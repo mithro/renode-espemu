@@ -1,0 +1,14 @@
+// Test overlay for the SX1278 FSK RF-receive (air-medium) suite. Attaches a
+// shared Air433Medium and the SX1278 radio (registered on the medium via
+// `medium: air`) as the child of the SPI2 master, with DIO0 wired to GPIO4.
+// Load AFTER the base esp32c3 platform and AFTER including Air433Medium.cs and
+// SX1278.cs.
+//
+//   air (@ 0x60030000)         -- shared 433 MHz medium (address as `air` in the monitor)
+//   radio DIO0 -> GPIO pin 4   -- PayloadReady IRQ
+
+air: Wireless.Air433Medium @ sysbus 0x60030000
+
+radio: SPI.SX1278 @ spi2
+    medium: air
+    0 -> gpio@4
