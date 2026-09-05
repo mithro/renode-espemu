@@ -1,0 +1,16 @@
+// Test overlay for the CC1101 RF-receive (air-medium) suite. Attaches a shared
+// Air433Medium and the CC1101 radio (registered on the medium via `medium: air`)
+// as the child of the SPI2 master, with GDO0/GDO2 wired to GPIO4/GPIO5.
+// Load AFTER the base esp32c3 platform and AFTER including Air433Medium.cs and
+// CC1101.cs.
+//
+//   air (@ 0x60030000)         -- shared 433 MHz medium (address as `air` in the monitor)
+//   radio GDO0 -> GPIO pin 4   -- packet-received IRQ
+//   radio GDO2 -> GPIO pin 5
+
+air: Wireless.Air433Medium @ sysbus 0x60030000
+
+radio: SPI.CC1101 @ spi2
+    medium: air
+    0 -> gpio@4
+    2 -> gpio@5
