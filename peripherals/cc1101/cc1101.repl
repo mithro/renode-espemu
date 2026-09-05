@@ -1,0 +1,11 @@
+// Test-only overlay: attaches the CC1101 radio model as the single child of the
+// SPI2 master and wires its GDO output lines to GPIO input pins. Load this AFTER
+// the base esp32c3 platform (which defines spi2 and gpio) and AFTER including
+// CC1101.cs. Not part of the production platform.
+//
+//   numbered output 0 = GDO0 -> GPIO pin 4
+//   numbered output 2 = GDO2 -> GPIO pin 5
+
+radio: SPI.CC1101 @ spi2
+    0 -> gpio@4
+    2 -> gpio@5
