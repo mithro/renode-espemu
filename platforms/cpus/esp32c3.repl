@@ -131,8 +131,12 @@ stub_bb: Python.PythonPeripheral @ sysbus 0x6001E000
     script: "request.Value = 0x0"
 
 // GPIO at 0x60004000
-// C# peripheral: 22 pins, W1TS/W1TC registers, per-pin config, function mux
+// C# peripheral: 22 pins, W1TS/W1TC registers, per-pin config, function mux.
+// Numbered output 0 = aggregate GPIO interrupt -> interrupt-matrix source 16
+// (ETS_GPIO_INTR_SOURCE on the ESP32-C3). A peripheral IRQ line attaches to a
+// GPIO input pin as e.g. `radio: ... ; 0 -> gpio@4`.
 gpio: GPIOPort.ESP32C3_GPIO @ sysbus 0x60004000
+    0 -> intmatrix@16
 
 // RTC Controller at 0x60008000
 // RTC Controller at 0x60008000
@@ -194,11 +198,11 @@ systimer: Timers.ESP32C3_SysTimer @ sysbus 0x60023000
     1 -> intmatrix@38
     2 -> intmatrix@39
 
-// SPI2 (GP-SPI) at 0x60024000
-stub_spi2: Python.PythonPeripheral @ sysbus 0x60024000
-    size: 0x1000
-    initable: true
-    script: "request.Value = 0x0"
+// SPI2 (GP-SPI / FSPI) at 0x60024000
+// C# SPI master: clocks bytes to a connected ISPIPeripheral slave (attach a
+// slave in a .repl as a child of spi2). Models the ESP-IDF spi_master CPU
+// polling path (CMD/USER/MS_DLEN/W0..W15/DMA_INT_RAW). See peripherals/spi2/.
+spi2: SPI.ESP32C3_SPI2 @ sysbus 0x60024000
 
 // SYSCON at 0x60026000 (includes WDEV_RND_REG at offset 0xB0 for RNG)
 // C# peripheral: xorshift32 PRNG at offset 0xB0, pass-through for other regs

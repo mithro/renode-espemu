@@ -1,0 +1,7 @@
+// Test-only overlay: attaches the SPILoopbackTester slave to the SPI2 master
+// and wires its IRQ output (numbered GPIO output 0) to GPIO input pin 4.
+// Load this AFTER the base esp32c3 platform (which defines spi2 and gpio) and
+// AFTER including SPILoopbackTester.cs. Not part of the production platform.
+
+tester: SPI.SPILoopbackTester @ spi2
+    0 -> gpio@4

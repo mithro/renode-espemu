@@ -30,8 +30,27 @@
 //
 // W1TS/W1TC semantics: writing a 1 sets/clears the corresponding bit in
 // the data register; reads always return 0.
+//
+// === Pin-edge interrupt support (wave-1 GP-SPI bring-up) ===
+// This peripheral is an IGPIOReceiver: an external peripheral (e.g. a radio's
+// GDO/DIO IRQ line) wired to a GPIO input pin in the .repl drives OnGPIO(pin,
+// level). Per-pin edge/level detection against GPIO_PINn_INT_TYPE sets the
+// GPIO_STATUS bit, and the aggregate "GPIO interrupt" (STATUS gated by each
+// pin's INT_ENA) is exposed as numbered GPIO output 0, wired in the .repl to
+// interrupt-matrix source 16 (ETS_GPIO_INTR_SOURCE on the ESP32-C3):
+//
+//     gpio: GPIOPort.ESP32C3_GPIO @ sysbus 0x60004000
+//         0 -> intmatrix@16
+//     radio: SPI.SomeRadio @ spi2
+//         0 -> gpio@4        // radio IRQ output -> GPIO pin 4
+//
+// NOTE: ETS_GPIO_INTR_SOURCE == 16 per ESP-IDF v5.4.1
+// components/soc/esp32c3/include/soc/interrupts.h (the value 14 in some docs is
+// for a different SoC). Level-triggered types are modeled simply (status is set
+// while the level condition holds when the line changes); edge types are exact.
 
 using System;
+using System.Collections.Generic;
 using Antmicro.Renode.Core;
 using Antmicro.Renode.Core.Structure.Registers;
 using Antmicro.Renode.Logging;
@@ -39,7 +58,7 @@ using Antmicro.Renode.Peripherals.Bus;
 
 namespace Antmicro.Renode.Peripherals.GPIOPort
 {
-    public class ESP32C3_GPIO : BasicDoubleWordPeripheral, IKnownSize
+    public class ESP32C3_GPIO : BasicDoubleWordPeripheral, IKnownSize, IGPIOReceiver, INumberedGPIOOutput
     {
         public ESP32C3_GPIO(Machine machine) : base(machine)
         {
@@ -59,6 +78,10 @@ namespace Antmicro.Renode.Peripherals.GPIOPort
                 funcOutSelCfg[i] = 0x80;
             }
 
+            // Numbered GPIO output 0 = aggregate GPIO interrupt to intmatrix@16.
+            gpioInterrupt = new GPIO();
+            Connections = new Dictionary<int, IGPIO> { { 0, gpioInterrupt } };
+
             DefineRegisters();
         }
 
@@ -68,6 +91,7 @@ namespace Antmicro.Renode.Peripherals.GPIOPort
             outData = 0;
             enableData = 0;
             statusInt = 0;
+            inputLevels = 0;
 
             for (int i = 0; i < NumberOfPins; i++)
             {
@@ -80,7 +104,52 @@ namespace Antmicro.Renode.Peripherals.GPIOPort
                 // Default FUNC_IN_SEL = 0x1F (input disconnected), matches hardware
                 funcInSelCfg[i] = 0x1F;
             }
+
+            gpioInterrupt.Set(false);
         }
+
+        // IGPIOReceiver: an external peripheral drives GPIO input pin `number`.
+        public void OnGPIO(int number, bool value)
+        {
+            if (number < 0 || number >= NumberOfPins)
+            {
+                this.Log(LogLevel.Warning, "OnGPIO for out-of-range pin {0}", number);
+                return;
+            }
+
+            uint bit = 1u << number;
+            bool old = (inputLevels & bit) != 0;
+            if (value)
+            {
+                inputLevels |= bit;
+            }
+            else
+            {
+                inputLevels &= ~bit;
+            }
+
+            // GPIO_PINn_INT_TYPE (bits [9:7]): 0=off, 1=rising, 2=falling,
+            // 3=any-edge, 4=low-level, 5=high-level.
+            uint intType = (pinConfig[number] >> 7) & 0x7;
+            bool trigger = false;
+            switch (intType)
+            {
+                case 1: trigger = !old && value; break;
+                case 2: trigger = old && !value; break;
+                case 3: trigger = old != value; break;
+                case 4: trigger = !value; break;
+                case 5: trigger = value; break;
+            }
+
+            if (trigger)
+            {
+                statusInt |= bit & PinMask;
+            }
+            UpdateInterrupt();
+        }
+
+        // INumberedGPIOOutput: output 0 = aggregate GPIO interrupt line.
+        public IReadOnlyDictionary<int, IGPIO> Connections { get; }
 
         public long Size => 0x1000;
 
@@ -163,7 +232,9 @@ namespace Antmicro.Renode.Peripherals.GPIOPort
             // is set.  Pins with enable=0 read as 0 (undriven).
             Registers.In.Define(this)
                 .WithValueField(0, 26, mode: FieldMode.Read, name: "IN_DATA",
-                    valueProviderCallback: _ => outData & enableData);
+                    // Output-enabled pins read back their driven level; pins not
+                    // driven as outputs read the externally-driven input level.
+                    valueProviderCallback: _ => (outData & enableData) | (inputLevels & ~enableData & PinMask));
 
             // GPIO_IN1_REG: 0x40 (stub, ESP32-C3 has no pins >25)
             Registers.In1.Define(this)
@@ -173,18 +244,18 @@ namespace Antmicro.Renode.Peripherals.GPIOPort
             // GPIO_STATUS_REG: 0x44 (interrupt status, bits [25:0])
             Registers.Status.Define(this)
                 .WithValueField(0, 26, name: "STATUS_INT",
-                    writeCallback: (_, value) => statusInt = (uint)value & PinMask,
+                    writeCallback: (_, value) => { statusInt = (uint)value & PinMask; UpdateInterrupt(); },
                     valueProviderCallback: _ => statusInt);
 
             // GPIO_STATUS_W1TS_REG: 0x48
             Registers.StatusW1ts.Define(this)
                 .WithValueField(0, 26, mode: FieldMode.Write, name: "STATUS_W1TS",
-                    writeCallback: (_, value) => statusInt |= (uint)value & PinMask);
+                    writeCallback: (_, value) => { statusInt |= (uint)value & PinMask; UpdateInterrupt(); });
 
             // GPIO_STATUS_W1TC_REG: 0x4C
             Registers.StatusW1tc.Define(this)
                 .WithValueField(0, 26, mode: FieldMode.Write, name: "STATUS_W1TC",
-                    writeCallback: (_, value) => statusInt &= ~((uint)value & PinMask));
+                    writeCallback: (_, value) => { statusInt &= ~((uint)value & PinMask); UpdateInterrupt(); });
 
             // GPIO_STATUS1_REG: 0x50 (stub, ESP32-C3 has no pins >25)
             Registers.Status1.Define(this)
@@ -199,10 +270,11 @@ namespace Antmicro.Renode.Peripherals.GPIOPort
             Registers.Status1W1tc.Define(this)
                 .WithValueField(0, 26, mode: FieldMode.Write, name: "STATUS1_W1TC");
 
-            // PCPU_INT: 0x5C (read-only, pro CPU interrupt status)
+            // PCPU_INT: 0x5C (read-only, pro CPU interrupt status = STATUS gated
+            // by each pin's INT_ENA). This is what the ESP-IDF GPIO ISR reads.
             Registers.PcpuInt.Define(this)
                 .WithValueField(0, 26, mode: FieldMode.Read, name: "PROCPU_INT",
-                    valueProviderCallback: _ => 0u);
+                    valueProviderCallback: _ => statusInt & InterruptEnableMask());
 
             // PCPU_NMI_INT: 0x60 (read-only)
             Registers.PcpuNmiInt.Define(this)
@@ -307,6 +379,7 @@ namespace Antmicro.Renode.Peripherals.GPIOPort
                     writeCallback: (_, value) =>
                     {
                         pinConfig[idx] = (pinConfig[idx] & ~(0x1Fu << 13)) | (((uint)value & 0x1Fu) << 13);
+                        UpdateInterrupt();
                     },
                     valueProviderCallback: _ => (pinConfig[idx] >> 13) & 0x1Fu);
         }
@@ -382,6 +455,26 @@ namespace Antmicro.Renode.Peripherals.GPIOPort
                     valueProviderCallback: _ => (funcOutSelCfg[idx] & (1u << 10)) != 0);
         }
 
+        // Aggregate GPIO interrupt = STATUS bits gated by each pin's INT_ENA.
+        private uint InterruptEnableMask()
+        {
+            uint mask = 0;
+            for (int i = 0; i < NumberOfPins; i++)
+            {
+                if (((pinConfig[i] >> 13) & 0x1F) != 0)
+                {
+                    mask |= 1u << i;
+                }
+            }
+            return mask;
+        }
+
+        private void UpdateInterrupt()
+        {
+            bool active = (statusInt & InterruptEnableMask()) != 0;
+            gpioInterrupt.Set(active);
+        }
+
         private const int NumberOfPins = 26;
         private const int NumberOfInputSignals = 128;
         private const uint PinMask = 0x03FFFFFF; // bits [25:0] for 26 GPIOs
@@ -389,6 +482,8 @@ namespace Antmicro.Renode.Peripherals.GPIOPort
         private uint outData;
         private uint enableData;
         private uint statusInt;
+        private uint inputLevels;
+        private readonly GPIO gpioInterrupt;
         private uint[] pinConfig;
         private uint[] funcInSelCfg;
         private uint[] funcOutSelCfg;
